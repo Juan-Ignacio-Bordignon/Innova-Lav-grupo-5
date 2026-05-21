@@ -6,13 +6,15 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Image } from 'react-native';
-import bell from '../assets/bell.png';
-import newspaper from '../assets/newspaper.png';
-import { Home } from './screens/Home';
-import { Profile } from './screens/Profile';
-import { Settings } from './screens/Settings';
-import { Updates } from './screens/Updates';
-import { NotFound } from './screens/NotFound';
+
+import bell from '../../assets/bell.png';
+import newspaper from '../../assets/newspaper.png';
+
+import { Home } from '../../features/home/screens/HomeScreen';
+import { Updates } from '../../features/progress/screens/UpdatesScreen';
+import { Profile } from '../../features/profile/screens/ProfileScreen';
+import { Settings } from '../../features/profile/screens/SettingsScreen';
+import { NotFound } from './screens/NotFoundScreen';
 
 const HomeTabs = createBottomTabNavigator({
   screens: {
