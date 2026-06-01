@@ -3,6 +3,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
 import moduleRoutes from "./routes/module.routes.js";
+import progressRoutes from "./routes/progress.routes.js";
 
 const app = express();
 
@@ -13,5 +14,6 @@ app.use(express.json());
 // Routes
 app.use("/auth", authRoutes);
 app.use("/module", moduleRoutes);
+app.use("/progress", progressRoutes);
 
 export default app;
