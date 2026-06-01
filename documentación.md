@@ -8,7 +8,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 2. Navegar al directorio del proyecto e instalar las dependencias:
 
 	```bash
-	cd nombre-del-proyecto
+	cd innovalab-grupo5
 	npm install
 	```
 3. Configurar las variables de entorno necesarias (si aplica).
