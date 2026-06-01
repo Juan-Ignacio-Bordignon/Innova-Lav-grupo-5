@@ -11,16 +11,16 @@
 	Body:
   	```json
 	{
-		"nombre": "Juan Pérez",
+		"username": "Juan Pérez",
 		"email": "juan.perez@example.com",
-		"contraseña": "password123"
+		"password": "password123"
 	}
 	```
 	Respuesta:
 	```json
 	{
 		"mensaje": "Usuario creado exitosamente",
-		"usuario_id": 1
+		"userId": 1
 	}
 	```	
 	Error:
@@ -40,14 +40,14 @@
 	```json
 	{
 		"email": "juan.perez@example.com",
-		"contraseña": "password123"
+		"password": "password123"
 	}
 	```
 	Respuesta:
 	```json
 	{
 		"mensaje": "Inicio de sesión exitoso",
-		"usuario_id": 1
+		"userId": 1
 	}
 	```
 	Error:
@@ -67,23 +67,23 @@
 	```json
 	{
 		"usuario": {
-			"id": 1,
-			"nombre": "Juan Pérez",
+			"userId": 1,
+			"username": "Juan Pérez",
 			"email": "juan.perez@example.com"
 		},
 		"progreso": {
 			{
-			"idModulo": 1,
-			"idLeccion": 3
+			"ModuleId": 1,
+			"LessonId": 3
 			},
 			{
-			"idModulo": 2,
-			"idLeccion": 1
+			"ModuleId": 2,
+			"LessonId": 1
 			}
 		},
 		"ultima_leccion": {
-			"idModulo": 1,
-			"idLeccion": 3
+			"ModuleId": 1,
+			"LessonId": 3
 		},
 		"rachaConección": 5
 
@@ -108,12 +108,12 @@
 	{
 		"progreso": {
 			{
-			"idModulo": 1,
-			"idLeccion": 3
+			"ModuleId": 1,
+			"LessonId": 3
 			},
 			{
-			"idModulo": 2,
-			"idLeccion": 1
+			"ModuleId": 2,
+			"LessonId": 1
 			}
 		}
 	}
@@ -134,8 +134,8 @@
 	Body:
 	```json
 	{
-		"idModulo": 1,
-		"idLeccion": 4
+		"ModuleId": 1,
+		"LessonId": 4
 	}
 	```
 	Respuesta:
@@ -247,9 +247,9 @@
 	Body:
 	```json
 	{
-		"idUsuario": 1,
-		"idModulo": 1,
-		"idLeccion": 3,
+		"userId": 1,
+		"ModuleId": 1,
+		"LessonId": 3,
 		"respuesta": "Respuesta del usuario a la lección"
 	}
 	```
@@ -278,9 +278,9 @@
 	Body:
 	```json
 	{
-		"idUsuario": 1,
-		"idModulo": 1,
-		"idLeccion": 3,
+		"userId": 1,
+		"ModuleId": 1,
+		"LessonId": 3,
 		"correcta": true,
 		"puntos": 10
 	}
