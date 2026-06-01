@@ -6,7 +6,7 @@
 
 	Method: POST
 
-	Endpoint: /auth/registrar
+	Endpoint: /auth/register
 	
 	Body:
   	```json
@@ -61,7 +61,7 @@
 
 	Method: GET
 
-	Endpoint: /usuario/{usuario_id}
+	Endpoint: /user/{userId}
 
 	Respuesta:
 	```json
@@ -101,7 +101,7 @@
 
 	Method: GET
 
-	Endpoint: /usuario/{usuario_id}/progreso
+	Endpoint: /user/{userId}/progress
 
 	Respuesta:
 	```json
@@ -129,7 +129,7 @@
 
 	Method: POST
 
-	Endpoint: /usuario/{usuario_id}/progreso
+	Endpoint: /user/{userId}/progress
 
 	Body:
 	```json
@@ -157,7 +157,7 @@
 
 	Method: GET
 
-	Endpoint: /modulos
+	Endpoint: /module
 
 	Respuesta:
 	```json
@@ -187,7 +187,7 @@
 
 	Method: GET
 
-	Endpoint: /modulos/{modulo_id}/lecciones
+	Endpoint: /module/{moduleId}/lessons
 
 	Respuesta:
 	```json
@@ -217,7 +217,7 @@
 
 	Method: GET
 
-	Endpoint: /modulos/{modulo_id}/lecciones/{leccion_id}
+	Endpoint: /module/{moduleId}/lessons/{lessonId}
 
 	Respuesta:
 	```json
