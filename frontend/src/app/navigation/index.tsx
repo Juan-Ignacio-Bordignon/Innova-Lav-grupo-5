@@ -11,7 +11,7 @@ import bell from '../../assets/bell.png';
 import newspaper from '../../assets/newspaper.png';
 
 import { Home } from '../../features/home/screens/HomeScreen';
-import { Updates } from '../../features/progress/screens/UpdatesScreen';
+import { Updates } from '../../features/progress/screens/ProgressScreen';
 import { Profile } from '../../features/profile/screens/ProfileScreen';
 import { Settings } from '../../features/profile/screens/SettingsScreen';
 import { NotFound } from './screens/NotFoundScreen';
