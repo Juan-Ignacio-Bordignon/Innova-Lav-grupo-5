@@ -10,6 +10,6 @@ const router = Router();
 router.get("/:userId", getProgress);
 
 // Update user progress
-router.put("/:userId", updateProgress);
+router.post("/:userId", updateProgress);
 
 export default router;
