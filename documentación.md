@@ -1,5 +1,33 @@
 # Documentación de uso de la API
 
+## Descripción general
+Esta API proporciona endpoints para la gestión de usuarios, progreso del usuario, módulos y lecciones, así como para la validación y almacenamiento de respuestas a las lecciones. A continuación se detallan los endpoints disponibles, los métodos HTTP correspondientes, los cuerpos de las solicitudes y las respuestas esperadas.
+
+## Configuración y uso
+1. Clonar el repositorio del proyecto.
+2. Navegar al directorio del proyecto e instalar las dependencias:
+
+	```bash
+	cd innovalab-grupo5
+	npm install
+	```
+3. Configurar las variables de entorno necesarias (si aplica).
+4. Iniciar el servidor para acceder a los endpoints de la API, usar el siguiente comando para iniciar el servidor:
+
+	```bash
+	npm start
+	```
+	Tambien se puede usar este comando para iniciar el servidor en modo desarrollo:
+	
+	```bash
+	npm run dev
+	```
+
+## Requisitos previos
+- Node.js instalado en el sistema.
+- npm (Node Package Manager) para gestionar las dependencias del proyecto.
+
+# Endpoints de la API
 ## Usuario
 
 - Creación de usuario
@@ -71,7 +99,7 @@
 			"username": "Juan Pérez",
 			"email": "juan.perez@example.com"
 		},
-		"progreso": {
+		"progreso": [
 			{
 			"ModuleId": 1,
 			"LessonId": 3
@@ -80,7 +108,7 @@
 			"ModuleId": 2,
 			"LessonId": 1
 			}
-		},
+		],
 		"ultima_leccion": {
 			"ModuleId": 1,
 			"LessonId": 3
@@ -101,12 +129,12 @@
 
 	Method: GET
 
-	Endpoint: /user/{userId}/progress
+	Endpoint: /progress/{userId}
 
 	Respuesta:
 	```json
 	{
-		"progreso": {
+		"progreso": [
 			{
 			"ModuleId": 1,
 			"LessonId": 3
@@ -115,7 +143,7 @@
 			"ModuleId": 2,
 			"LessonId": 1
 			}
-		}
+		]
 	}
 	```
 	Error:
@@ -129,7 +157,7 @@
 
 	Method: POST
 
-	Endpoint: /user/{userId}/progress
+	Endpoint: /progress/{userId}
 
 	Body:
 	```json
@@ -242,7 +270,7 @@
 
 	Method: POST
 
-	Endpoint: /respuesta/validar
+	Endpoint: /answer/validate
 
 	Body:
 	```json
@@ -273,7 +301,7 @@
 
 	Method: POST
 
-	Endpoint: /respuesta/guardar
+	Endpoint: /answer/save
 
 	Body:
 	```json
