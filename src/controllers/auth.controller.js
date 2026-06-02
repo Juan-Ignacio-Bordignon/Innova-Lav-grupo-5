@@ -9,10 +9,10 @@ export const postRegister = (req, res) => {
 };
 
 export const postLogin = (req, res) => {
-  const { mail, password } = req.body;
+  const { email, password } = req.body;
   res.json({
     message: "Usuario autenticado exitosamente",
-    mail: mail,
+    email: email,
     password: password,
   });
 };
