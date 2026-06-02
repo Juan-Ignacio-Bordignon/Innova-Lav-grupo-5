@@ -101,7 +101,7 @@
 
 	Method: GET
 
-	Endpoint: /progress/{userId}
+	Endpoint: /user/{userId}/progress
 
 	Respuesta:
 	```json
@@ -129,7 +129,7 @@
 
 	Method: POST
 
-	Endpoint: /progress/{userId}
+	Endpoint: /user/{userId}/progress
 
 	Body:
 	```json
