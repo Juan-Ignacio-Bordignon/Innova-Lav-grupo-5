@@ -1,9 +1,9 @@
 export const postRegister = (req, res) => {
-  const { username, mail, password } = req.body;
+  const { username, email, password } = req.body;
   res.json({
     message: "Usuario registrado exitosamente",
     username: username,
-    mail: mail,
+    email: email,
     password: password,
   });
 };
