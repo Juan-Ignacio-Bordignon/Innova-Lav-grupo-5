@@ -1,13 +1,14 @@
 export const getProgress = (req, res) => {
+  const { userId } = req.params;
   res.json({
     progreso: [
       {
         ModuleId: 1,
-        LessonId: 3,
+        LessonId: [1, 2, 3],
       },
       {
         ModuleId: 2,
-        LessonId: 1,
+        LessonId: [4],
       },
     ],
   });
