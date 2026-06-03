@@ -10,6 +10,10 @@ import { Image } from 'react-native';
 import bell from '../../assets/bell.png';
 import newspaper from '../../assets/newspaper.png';
 
+import { LoginScreen } from '../../features/auth/screens/LoginScreen';
+import { RegisterScreen } from '../../features/auth/screens/RegisterScreen';
+import { ROUTES } from '../../constants/routes';
+
 import { Home } from '../../features/home/screens/HomeScreen';
 import { Updates } from '../../features/progress/screens/ProgressScreen';
 import { Profile } from '../../features/profile/screens/ProfileScreen';
@@ -53,7 +57,20 @@ const HomeTabs = createBottomTabNavigator({
 });
 
 const RootStack = createNativeStackNavigator({
+  initialRouteName: ROUTES.LOGIN,
   screens: {
+    Login: {
+      screen: LoginScreen,
+      options: {
+        headerShown: false,
+      },
+    },
+    Register: {
+      screen: RegisterScreen,
+      options: {
+        headerShown: false,
+      },
+    },
     HomeTabs: {
       screen: HomeTabs,
       options: {

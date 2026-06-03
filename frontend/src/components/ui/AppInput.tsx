@@ -1,4 +1,7 @@
+import { useState, type ReactNode } from 'react';
 import {
+  Platform,
+  Pressable,
   StyleSheet,
   TextInput,
   View,
@@ -15,12 +18,15 @@ import { AppText } from './AppText';
 type AppInputProps = TextInputProps & {
   label?: string;
   error?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
   inputContainerStyle?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
 };
+
+const webInputReset =
+  Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null;
 
 export function AppInput({
   label,
@@ -33,8 +39,18 @@ export function AppInput({
   style,
   placeholderTextColor = colors.textSecondary,
   editable = true,
+  secureTextEntry = false,
+  autoCapitalize = 'none',
+  autoCorrect = false,
+  onFocus,
+  onBlur,
   ...props
 }: AppInputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const shouldShowPasswordToggle = secureTextEntry && !rightIcon;
+
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? (
@@ -46,6 +62,7 @@ export function AppInput({
       <View
         style={[
           styles.inputContainer,
+          isFocused && styles.inputContainerFocused,
           error && styles.inputContainerError,
           !editable && styles.inputContainerDisabled,
           inputContainerStyle,
@@ -56,13 +73,38 @@ export function AppInput({
         <TextInput
           placeholderTextColor={placeholderTextColor}
           editable={editable}
-          style={[styles.input, inputStyle, style]}
-          autoCapitalize="none"
-          autoCorrect={false}
+          secureTextEntry={secureTextEntry ? !isPasswordVisible : false}
+          autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
+          onFocus={(event) => {
+            setIsFocused(true);
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setIsFocused(false);
+            onBlur?.(event);
+          }}
+          style={[styles.input, webInputReset, inputStyle, style]}
           {...props}
         />
 
         {rightIcon ? <View style={styles.icon}>{rightIcon}</View> : null}
+
+        {shouldShowPasswordToggle ? (
+          <Pressable
+            onPress={() => setIsPasswordVisible((value) => !value)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'
+            }
+            style={styles.passwordToggle}
+          >
+            <AppText variant="link" style={styles.passwordToggleText}>
+              {isPasswordVisible ? 'Ocultar' : 'Ver'}
+            </AppText>
+          </Pressable>
+        ) : null}
       </View>
 
       {error ? (
@@ -101,6 +143,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  inputContainerFocused: {
+    borderColor: colors.primary,
+    borderWidth: 1.5,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.22,
+    shadowRadius: 4,
+    elevation: 4,
+  },
   inputContainerError: {
     borderColor: colors.error,
   },
@@ -119,6 +169,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  passwordToggle: {
+    marginLeft: 8,
+  },
+  passwordToggleText: {
+    fontSize: 12,
   },
   errorText: {
     marginTop: 6,
