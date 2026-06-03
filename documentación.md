@@ -102,18 +102,30 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"progreso": [
 			{
 			"ModuleId": 1,
-			"LessonId": 3
+			"LessonId": [1, 2, 3]
 			},
 			{
 			"ModuleId": 2,
-			"LessonId": 1
+			"LessonId": [4]
 			}
 		],
-		"ultima_leccion": {
+		"ultimaLeccion": {
 			"ModuleId": 1,
-			"LessonId": 3
+			"LessonId": [3]
 		},
-		"rachaConección": 5
+		"puntos": 50,
+		"logros": [
+			{
+			"id": 1,
+			"nombre": "Logro 1",
+			"descripcion": "Descripción del logro 1"
+			},
+			{
+			"id": 2,
+			"nombre": "Logro 2",
+			"descripcion": "Descripción del logro 2"
+			}
+		]
 
 	}
 	```
@@ -137,11 +149,11 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"progreso": [
 			{
 			"ModuleId": 1,
-			"LessonId": 3
+			"LessonId": [1, 2, 3]
 			},
 			{
 			"ModuleId": 2,
-			"LessonId": 1
+			"LessonId": [4]
 			}
 		]
 	}
@@ -163,7 +175,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	```json
 	{
 		"ModuleId": 1,
-		"LessonId": 4
+		"LessonId": [4]
 	}
 	```
 	Respuesta:
@@ -190,16 +202,36 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Respuesta:
 	```json
 	{
-		"modulos": [
+		"module": [
 		{
 			"id": 1,
 			"nombre": "Módulo 1",
-			"descripcion": "Descripción del módulo 1"
+			"descripcion": "Descripción del módulo 1",
+			"lessons": [
+				{
+					"id": 1,
+					"titulo": "Lección 1",
+				},
+				{
+					"id": 2,
+					"titulo": "Lección 2",
+				}
+			]
 		},
 		{
 			"id": 2,
 			"nombre": "Módulo 2",
-			"descripcion": "Descripción del módulo 2"
+			"descripcion": "Descripción del módulo 2",
+			"lessons": [
+				{
+					"id": 3,
+					"titulo": "Lección 1",
+				},
+				{
+					"id": 4,
+					"titulo": "Lección 2",
+				}
+			]
 		}
 		]
 	}
@@ -220,7 +252,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Respuesta:
 	```json
 	{
-		"lecciones": [
+		"lessons": [
 		{
 			"id": 1,
 			"titulo": "Lección 1",
@@ -250,10 +282,10 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Respuesta:
 	```json
 	{
-		"leccion": {
-		"id": 1,
-		"titulo": "Lección 1",
-		"contenido": "Contenido de la lección 1"
+		"lesson": {
+			"id": 1,
+			"titulo": "Lección 1",
+			"contenido": "Contenido de la lección 1"
 		}
 	}
 	```
@@ -308,7 +340,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	{
 		"userId": 1,
 		"ModuleId": 1,
-		"LessonId": 3,
+		"LessonId": [3],
 		"correcta": true,
 		"puntos": 10
 	}
