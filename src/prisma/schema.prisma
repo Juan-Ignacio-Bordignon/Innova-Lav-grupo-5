@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               Int       @id @default(autoincrement())
+  nombre           String
+  email            String    @unique
+  password         String
+  rachaActual      Int       @default(0)
+  ultimaActividad  DateTime?
+  creadoEn         DateTime  @default(now())
+  progreso         Progreso[]
+}
+
+model Modulo {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  lecciones   Leccion[]
+}
+
+model Leccion {
+  id        Int        @id @default(autoincrement())
+  titulo    String
+  contenido String
+  videoUrl  String?
+  moduloId  Int
+  modulo    Modulo     @relation(fields: [moduloId], references: [id])
+  progreso  Progreso[]
+}
+
+model Progreso {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  moduloId  Int
+  leccionId Int
+  user      User     @relation(fields: [userId], references: [id])
+  leccion   Leccion  @relation(fields: [leccionId], references: [id])
+}
