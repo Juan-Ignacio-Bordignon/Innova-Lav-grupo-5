@@ -1,35 +1,39 @@
+// src/constants/routes.ts
+
 export const ROUTES = {
-  // Rutas existentes del equipo
+  // 🧭 Pantallas de la barra de pestañas (Tabs)
   HOME: 'Home',
   UPDATES: 'Updates',
   PROFILE: 'Profile',
   SETTINGS: 'Settings',
   NOT_FOUND: 'NotFound',
 
-  // 🔐 Flujo de Autenticación (Nuevas)
+  // 🔐 Flujo de Autenticación
   LOGIN: 'Login',
   REGISTER: 'Register',
 
-  // 📚 Flujo de Aprendizaje / Core MVP (Nuevas)
+  // 📚 Flujo de Aprendizaje / Core MVP
   LESSON: 'Lesson',
   EXERCISE: 'Exercise',
   FEEDBACK: 'Feedback',
-} as const; // El "as const" asegura que TypeScript trate estos valores como fijos e inmutables
 
-// 📐 DEFINICIÓN DEL ROOT STACK PARAM LIST (Lo creás vos acá abajo)
+  // 🔀 NUEVA: El contenedor maestro de las pestañas
+  HOME_TABS: 'HomeTabs', 
+} as const;
+
 export type RootStackParamList = {
-  [ROUTES.HOME]: undefined;      // undefined significa que la pantalla no recibe parámetros
+  [ROUTES.HOME]: undefined;
   [ROUTES.UPDATES]: undefined;
   [ROUTES.PROFILE]: undefined;
   [ROUTES.SETTINGS]: undefined;
   [ROUTES.NOT_FOUND]: undefined;
-
-  // 🔐 Autenticación
   [ROUTES.LOGIN]: undefined;
   [ROUTES.REGISTER]: undefined;
+  
+  // Registramos la nueva ruta en la lista de parámetros
+  [ROUTES.HOME_TABS]: undefined; 
 
-  // 📚 Aprendizaje (Aquí sí podemos necesitar parámetros en el futuro)
-  [ROUTES.LESSON]: { lessonId: string };   // Ej: Para saber qué video de LSA cargar
-  [ROUTES.EXERCISE]: { exerciseId: string }; // Ej: Para saber qué pregunta mostrar
-  [ROUTES.FEEDBACK]: { isCorrect: boolean; nextRoute: string }; // Ej: Para mostrar acierto/error
+  [ROUTES.LESSON]: { lessonId: string };
+  [ROUTES.EXERCISE]: { exerciseId: string };
+  [ROUTES.FEEDBACK]: { isCorrect: boolean; nextRoute: string };
 };

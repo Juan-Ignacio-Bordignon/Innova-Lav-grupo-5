@@ -1,19 +1,20 @@
-import React from 'react';
+// src/navigation/AuthNavigator.tsx
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ROUTES, RootStackParamList } from '../../constants/routes';
-import { View, Text } from 'react-native';
+import { ROUTES } from '../constants/routes'; // Ajustá los ../ según tu carpeta exacta
+import { LoginScreen } from '../features/auth/screens/LoginScreen';
+import { RegisterScreen } from '../features/auth/screens/RegisterScreen';
 
-// Cascarones de Auth
-function LoginScreen() { return <View className="flex-1 justify-center items-center"><Text>Login Screen</Text></View>; }
-function RegisterScreen() { return <View className="flex-1 justify-center items-center"><Text>Register Screen</Text></View>; }
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
-export function AuthNavigator() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
-      <Stack.Screen name={ROUTES.REGISTER} component={RegisterScreen} />
-    </Stack.Navigator>
-  );
-}
+// 🌟 Formato Static API (React Navigation 7)
+export const AuthNavigator = createNativeStackNavigator({
+  screenOptions: {
+    headerShown: false,
+  },
+  screens: {
+    [ROUTES.LOGIN]: {
+      screen: LoginScreen,
+    },
+    [ROUTES.REGISTER]: {
+      screen: RegisterScreen,
+    },
+  },
+});
