@@ -1,67 +1,44 @@
-export const getModules = (req, res) => {
-  res.json({
-    module: [
-      {
-        id: 1,
-        nombre: "Módulo 1",
-        descripcion: "Descripción del módulo 1",
-        lessons: [
-          {
-            id: 1,
-            titulo: "Lección 1",
-          },
-          {
-            id: 2,
-            titulo: "Lección 2",
-          },
-        ],
-      },
-      {
-        id: 2,
-        nombre: "Módulo 2",
-        descripcion: "Descripción del módulo 2",
-        lessons: [
-          {
-            id: 3,
-            titulo: "Lección 1",
-          },
-          {
-            id: 4,
-            titulo: "Lección 2",
-          },
-        ],
-      },
-    ],
-  });
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+// GET /module
+export const getModules = async (req, res) => {
+  try {
+    const modulos = await prisma.modulo.findMany({
+      include: { lecciones: true }
+    });
+    res.json({ modules: modulos });
+  } catch (e) {
+    res.status(500).json({ error: "No se pudieron obtener los módulos" });
+  }
 };
 
-export const getLessons = (req, res) => {
-  const { moduleId } = req.params;
-
-  res.json({
-    lessons: [
-      {
-        id: 1,
-        titulo: "Lección 1",
-        contenido: "Contenido de la lección 1",
-      },
-      {
-        id: 2,
-        titulo: "Lección 2",
-        contenido: "Contenido de la lección 2",
-      },
-    ],
-  });
+// GET /module/:moduleId/lessons
+export const getLessons = async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+    const lecciones = await prisma.leccion.findMany({
+      where: { moduloId: parseInt(moduleId) }
+    });
+    res.json({ lessons: lecciones });
+  } catch (e) {
+    res.status(500).json({ error: "No se pudieron obtener las lecciones para el módulo especificado" });
+  }
 };
 
-export const getLesson = (req, res) => {
-  const { moduleId, lessonId } = req.params;
-
-  res.json({
-    lesson: {
-      id: `${lessonId}`,
-      titulo: `Lección ${lessonId}`,
-      contenido: `Contenido de la lección ${lessonId}`,
-    },
-  });
+// GET /module/:moduleId/lessons/:lessonId
+export const getLesson = async (req, res) => {
+  try {
+    const { moduleId, lessonId } = req.params;
+    const leccion = await prisma.leccion.findFirst({
+      where: {
+        id: parseInt(lessonId),
+        moduloId: parseInt(moduleId)
+      }
+    });
+    if (!leccion) return res.status(404).json({ error: "No se pudo obtener la lección especificada" });
+    res.json({ lesson: leccion });
+  } catch (e) {
+    res.status(500).json({ error: "No se pudo obtener la lección especificada" });
+  }
 };
