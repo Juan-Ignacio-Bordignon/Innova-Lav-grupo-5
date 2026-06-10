@@ -18,6 +18,7 @@ model User {
   creadoEn        DateTime   @default(now())
   progreso        Progreso[]
   favoritos       Favorite[]
+  logros          UserLogro[]
 }
 
 model Modulo {
@@ -56,4 +57,23 @@ model Favorite {
   leccion   Leccion  @relation(fields: [leccionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, leccionId])
+}
+
+model Logro {
+  id          Int         @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  icono       String?
+  userLogros  UserLogro[]
+}
+
+model UserLogro {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  logroId         Int
+  fechaObtenido   DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logro           Logro    @relation(fields: [logroId], references: [id])
+
+  @@unique([userId, logroId])
 }
