@@ -432,4 +432,36 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	{
 		"error": "No se pudo guardar el resultado del usuario"
 	}
-	```
+
+## Logros del usuario
+
+- Obtener logros del usuario
+
+	Method: GET
+
+	Endpoint: /user/{userId}/logros
+
+	Respuesta:
+```json
+	{
+		"logros": [
+			{
+				"id": 1,
+				"logroId": 1,
+				"fechaObtenido": "2026-06-10T00:00:00.000Z",
+				"logro": {
+					"id": 1,
+					"nombre": "Sin Errores",
+					"descripcion": "Completaste una lección sin errores",
+					"icono": "🏆"
+				}
+			}
+		]
+	}
+```
+	Error:
+```json
+	{
+		"error": "No se pudieron obtener los logros del usuario"
+	}
+```	```
