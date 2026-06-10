@@ -1,12 +1,12 @@
 // src/navigation/TabNavigator.tsx
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ROUTES } from '../constants/routes'; // Ajustá la cantidad de ../ según tu carpeta real
+import { ROUTES } from '../../constants/routes'; // Ajustá la cantidad de ../ según tu carpeta real
 
 // 🌟 Importamos las pantallas REALES mapeadas por tu equipo
-import { Home } from '../features/home/screens/HomeScreen';
-import { Updates } from '../features/progress/screens/ProgressScreen';
-import { Profile } from '../features/profile/screens/ProfileScreen';
-import { Settings } from '../features/profile/screens/SettingsScreen';
+import { Home } from '../../features/home/screens/HomeScreen';
+import { Updates } from '../../features/progress/screens/ProgressScreen';
+import { Profile } from '../../features/profile/screens/ProfileScreen';
+import { Settings } from '../../features/profile/screens/SettingsScreen';
 
 // 🌟 Formato Static API (React Navigation 7) orientado a objetos
 export const HomeTabs = createBottomTabNavigator({
