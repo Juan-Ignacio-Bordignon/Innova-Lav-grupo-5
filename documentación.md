@@ -1,7 +1,7 @@
 # Documentación de uso de la API
 
 ## Descripción general
-Esta API proporciona endpoints para la gestión de usuarios, progreso del usuario, módulos y lecciones, así como para la validación y almacenamiento de respuestas a las lecciones. A continuación se detallan los endpoints disponibles, los métodos HTTP correspondientes, los cuerpos de las solicitudes y las respuestas esperadas.
+Esta API proporciona endpoints para la gestión de usuarios, progreso del usuario, módulos, lecciones, favoritos y validación de respuestas. A continuación se detallan los endpoints disponibles, los métodos HTTP correspondientes, los cuerpos de las solicitudes y las respuestas esperadas.
 
 ## Configuración y uso
 1. Clonar el repositorio del proyecto.
@@ -11,14 +11,26 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	cd innovalab-grupo5
 	npm install
 	```
-3. Configurar las variables de entorno necesarias (si aplica).
-4. Iniciar el servidor para acceder a los endpoints de la API, usar el siguiente comando para iniciar el servidor:
+3. Configurar las variables de entorno necesarias en el archivo `.env`:
+
+	```
+	DATABASE_URL="postgresql://..."
+	DIRECT_URL="postgresql://..."
+	```
+
+4. Generar el cliente de Prisma:
+
+	```bash
+	npx prisma generate
+	```
+
+5. Iniciar el servidor:
 
 	```bash
 	npm start
 	```
-	Tambien se puede usar este comando para iniciar el servidor en modo desarrollo:
-	
+	O en modo desarrollo:
+
 	```bash
 	npm run dev
 	```
@@ -26,18 +38,20 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 ## Requisitos previos
 - Node.js instalado en el sistema.
 - npm (Node Package Manager) para gestionar las dependencias del proyecto.
+- Credenciales de la base de datos Supabase (solicitarlas al equipo de backend).
 
 # Endpoints de la API
-## Usuario
+
+## Autenticación
 
 - Creación de usuario
 
 	Method: POST
 
 	Endpoint: /auth/register
-	
+
 	Body:
-  	```json
+	```json
 	{
 		"username": "Juan Pérez",
 		"email": "juan.perez@example.com",
@@ -50,7 +64,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"mensaje": "Usuario creado exitosamente",
 		"userId": 1
 	}
-	```	
+	```
 	Error:
 	```json
 	{
@@ -85,7 +99,9 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	}
 	```
 
-- Informacion del usuario
+## Usuario
+
+- Información del usuario
 
 	Method: GET
 
@@ -101,12 +117,12 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		},
 		"progreso": [
 			{
-			"ModuleId": 1,
-			"LessonId": [1, 2, 3]
+				"ModuleId": 1,
+				"LessonId": [1, 2, 3]
 			},
 			{
-			"ModuleId": 2,
-			"LessonId": [4]
+				"ModuleId": 2,
+				"LessonId": [4]
 			}
 		],
 		"ultimaLeccion": {
@@ -116,17 +132,11 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"puntos": 50,
 		"logros": [
 			{
-			"id": 1,
-			"nombre": "Logro 1",
-			"descripcion": "Descripción del logro 1"
-			},
-			{
-			"id": 2,
-			"nombre": "Logro 2",
-			"descripcion": "Descripción del logro 2"
+				"id": 1,
+				"nombre": "Logro 1",
+				"descripcion": "Descripción del logro 1"
 			}
 		]
-
 	}
 	```
 	Error:
@@ -135,9 +145,10 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"error": "No se pudo obtener la información del usuario"
 	}
 	```
+
 ## Progreso del usuario
 
-- Progreso del usuario
+- Obtener progreso
 
 	Method: GET
 
@@ -148,12 +159,12 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	{
 		"progreso": [
 			{
-			"ModuleId": 1,
-			"LessonId": [1, 2, 3]
+				"ModuleId": 1,
+				"LessonId": [1, 2, 3]
 			},
 			{
-			"ModuleId": 2,
-			"LessonId": [4]
+				"ModuleId": 2,
+				"LessonId": [4]
 			}
 		]
 	}
@@ -202,37 +213,22 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Respuesta:
 	```json
 	{
-		"module": [
-		{
-			"id": 1,
-			"nombre": "Módulo 1",
-			"descripcion": "Descripción del módulo 1",
-			"lessons": [
-				{
-					"id": 1,
-					"titulo": "Lección 1",
-				},
-				{
-					"id": 2,
-					"titulo": "Lección 2",
-				}
-			]
-		},
-		{
-			"id": 2,
-			"nombre": "Módulo 2",
-			"descripcion": "Descripción del módulo 2",
-			"lessons": [
-				{
-					"id": 3,
-					"titulo": "Lección 1",
-				},
-				{
-					"id": 4,
-					"titulo": "Lección 2",
-				}
-			]
-		}
+		"modules": [
+			{
+				"id": 1,
+				"nombre": "Palabras",
+				"descripcion": "Aprenderás palabras simples para luego generar conversaciones.",
+				"lecciones": [
+					{
+						"id": 1,
+						"titulo": "Alfabeto"
+					},
+					{
+						"id": 2,
+						"titulo": "Días de la semana"
+					}
+				]
+			}
 		]
 	}
 	```
@@ -253,16 +249,12 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	```json
 	{
 		"lessons": [
-		{
-			"id": 1,
-			"titulo": "Lección 1",
-			"contenido": "Contenido de la lección 1"
-		},
-		{
-			"id": 2,
-			"titulo": "Lección 2",
-			"contenido": "Contenido de la lección 2"
-		}
+			{
+				"id": 1,
+				"titulo": "Alfabeto",
+				"contenido": "Contenido de la lección",
+				"videoUrl": "https://..."
+			}
 		]
 	}
 	```
@@ -284,8 +276,9 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	{
 		"lesson": {
 			"id": 1,
-			"titulo": "Lección 1",
-			"contenido": "Contenido de la lección 1"
+			"titulo": "Alfabeto",
+			"contenido": "Contenido de la lección",
+			"videoUrl": "https://..."
 		}
 	}
 	```
@@ -296,9 +289,94 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	}
 	```
 
+## Favoritos
+
+- Agregar favorito
+
+	Method: POST
+
+	Endpoint: /favorites
+
+	Body:
+	```json
+	{
+		"userId": 1,
+		"leccionId": 3
+	}
+	```
+	Respuesta:
+	```json
+	{
+		"mensaje": "Lección agregada a favoritos",
+		"favorite": {
+			"id": 1,
+			"userId": 1,
+			"leccionId": 3,
+			"createdAt": "2026-06-09T00:00:00.000Z"
+		}
+	}
+	```
+	Error:
+	```json
+	{
+		"error": "Esta lección ya está en favoritos"
+	}
+	```
+
+- Obtener favoritos del usuario
+
+	Method: GET
+
+	Endpoint: /favorites/{userId}
+
+	Respuesta:
+	```json
+	{
+		"favorites": [
+			{
+				"id": 1,
+				"userId": 1,
+				"leccionId": 3,
+				"createdAt": "2026-06-09T00:00:00.000Z",
+				"leccion": {
+					"id": 3,
+					"titulo": "Días de la semana",
+					"contenido": "...",
+					"videoUrl": "https://..."
+				}
+			}
+		]
+	}
+	```
+	Error:
+	```json
+	{
+		"error": "No se pudieron obtener los favoritos"
+	}
+	```
+
+- Eliminar favorito
+
+	Method: DELETE
+
+	Endpoint: /favorites/{id}
+
+	Respuesta:
+	```json
+	{
+		"mensaje": "Lección eliminada de favoritos"
+	}
+	```
+	Error:
+	```json
+	{
+		"error": "No se pudo eliminar de favoritos"
+	}
+	```
+
 ## Respuesta del usuario a una lección
 
-- Recibir respuesta
+- Validar respuesta
 
 	Method: POST
 
@@ -310,10 +388,9 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"userId": 1,
 		"ModuleId": 1,
 		"LessonId": 3,
-		"respuesta": "Respuesta del usuario a la lección"
+		"respuesta": "Respuesta del usuario"
 	}
 	```
-
 	Respuesta:
 	```json
 	{
@@ -321,7 +398,6 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"puntos": 10
 	}
 	```
-
 	Error:
 	```json
 	{
@@ -345,14 +421,12 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"puntos": 10
 	}
 	```
-
 	Respuesta:
 	```json
 	{
 		"mensaje": "Resultado guardado exitosamente"
 	}
 	```
-
 	Error:
 	```json
 	{
