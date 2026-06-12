@@ -9,14 +9,16 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  nombre           String
-  email            String    @unique
-  password         String
-  rachaActual      Int       @default(0)
-  ultimaActividad  DateTime?
-  creadoEn         DateTime  @default(now())
-  progreso         Progreso[]
+  id              Int        @id @default(autoincrement())
+  nombre          String
+  email           String     @unique
+  password        String
+  rachaActual     Int        @default(0)
+  ultimaActividad DateTime?
+  creadoEn        DateTime   @default(now())
+  progreso        Progreso[]
+  favoritos       Favorite[]
+  logros          UserLogro[]
 }
 
 model Modulo {
@@ -34,13 +36,44 @@ model Leccion {
   moduloId  Int
   modulo    Modulo     @relation(fields: [moduloId], references: [id])
   progreso  Progreso[]
+  favoritos Favorite[]
 }
 
 model Progreso {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   userId    Int
   moduloId  Int
   leccionId Int
-  user      User     @relation(fields: [userId], references: [id])
-  leccion   Leccion  @relation(fields: [leccionId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+  leccion   Leccion @relation(fields: [leccionId], references: [id])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  leccionId Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leccion   Leccion  @relation(fields: [leccionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leccionId])
+}
+
+model Logro {
+  id          Int         @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  icono       String?
+  userLogros  UserLogro[]
+}
+
+model UserLogro {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  logroId         Int
+  fechaObtenido   DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logro           Logro    @relation(fields: [logroId], references: [id])
+
+  @@unique([userId, logroId])
 }
