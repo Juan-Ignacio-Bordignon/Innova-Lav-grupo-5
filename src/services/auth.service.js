@@ -64,6 +64,11 @@ export const login = async (userData) => {
     if (!passwordMatch) {
       throw new Error("Credenciales inválidas");
     } else {
+      // Actualizar la última actividad del usuario
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { ultimaActividad: new Date() },
+      });
       // Generar token JWT
       const token = generateToken(user.id);
       return { token };
