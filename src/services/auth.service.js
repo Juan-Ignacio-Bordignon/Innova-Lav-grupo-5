@@ -32,6 +32,7 @@ export const register = async (userData) => {
       email,
       password: hashedPassword,
       nombre,
+      ultimaActividad: new Date(),
     },
   });
 
