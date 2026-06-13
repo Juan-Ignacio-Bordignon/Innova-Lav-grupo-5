@@ -53,7 +53,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Body:
 	```json
 	{
-		"username": "Juan Pérez",
+		"nombre": "Juan Pérez",
 		"email": "juan.perez@example.com",
 		"password": "password123"
 	}
@@ -61,17 +61,44 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Respuesta:
 	```json
 	{
-		"mensaje": "Usuario creado exitosamente",
-		"userId": 1
+		"message": "Usuario creado exitosamente",
+		"token": "eyJhbGciOiJIUzI1NiIsIn..."
 	}
 	```
 	Error:
 	```json
 	{
-		"error": "El correo electrónico ya está en uso"
+		"message": "El correo electrónico ya está en uso"
 	}
 	```
-
+	O en caso de algunos campos faltantes o inválidos:
+	```json
+	{
+  		"errors": [
+		{
+		"type": "field",
+		"value": "",
+		"msg": "El nombre es obligatorio",
+		"path": "nombre",
+		"location": "body"
+		},
+		{
+		"type": "field",
+		"value": "",
+		"msg": "Debe ingresar un email válido",
+		"path": "email",
+		"location": "body"
+		},
+		{
+		"type": "field",
+		"value": "",
+		"msg": "La contraseña debe tener al menos 6 caracteres",
+		"path": "password",
+		"location": "body"
+		}
+	]
+	}
+	```
 - Inicio de sesión
 
 	Method: POST
@@ -89,13 +116,13 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	```json
 	{
 		"mensaje": "Inicio de sesión exitoso",
-		"userId": 1
+		"token": "eyJhbGciOiJIUzI1NiIsIn..."
 	}
 	```
 	Error:
 	```json
 	{
-		"error": "Correo electrónico o contraseña incorrectos"
+		"message": "Credenciales inválidas"
 	}
 	```
 
