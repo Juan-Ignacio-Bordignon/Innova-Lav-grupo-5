@@ -63,3 +63,85 @@ The `ios` and `android` folder are gitignored in the project by default as they 
 ---
 
 Demo assets are from [lucide.dev](https://lucide.dev/)
+
+# 📱 Proyecto Innova — Aplicación de Aprendizaje de Lengua de Señas Argentina (LSA)
+
+Bienvenido al repositorio del equipo de Frontend (Grupo 5). Esta aplicación está construida utilizando **React Native**, **Expo** (compatible con Expo Go), **TypeScript** y **NativeWind (Tailwind CSS)**.
+
+---
+
+## 🚀 Cómo correr la aplicación localmente
+
+1. Instalar las dependencias del proyecto:
+```sh
+   npm install
+
+2. Iniciar el servidor de desarrollo de Expo:
+
+Bash
+   npm start
+
+
+3. Escanear el código QR desde la aplicación Expo Go en tu dispositivo móvil (asegúrate de tener la app actualizada a la última versión desde la Play Store/App Store).
+
+🔀 1. Flujo de Git y Ramas (GitFlow)
+Siguiendo las especificaciones globales del proyecto, el flujo de ramificación para nuestro rol se organiza de la siguiente manera:
+
+Plaintext
+develop (Integración general de todos los roles)
+  ↑ (Mediante Pull Request revisado por el equipo)
+frontend (Rama madre de nuestro rol)
+  ↑ (Merge interno cuando la tarea esté lista)
+feature/frontend-[nombre-tarea] (Nuestras ramas individuales)
+
+
+🛠️ Comandos obligatorios para trabajar:
+1. Sincronizar rama madre: Antes de crear cualquier rama local, trae los últimos cambios del servidor:
+
+Bash
+   git checkout frontend
+   git pull origin frontend
+
+2. Crear rama de tarea: Usa obligatoriamente el prefijo feature/frontend-:
+
+Bash
+    git checkout -b feature/frontend-routing-base
+
+3. Subir cambios: Al finalizar, sube tu rama a GitHub:
+
+Bash
+   git push origin feature/frontend-tu-tarea
+
+
+⚠️ Regla de Oro: Queda estrictamente prohibido hacer commits directos sobre las ramas frontend, develop o main. Los pasos a la rama madre se integran tras revisión interna.
+
+📋 2. Reglas del Tablero Kanban (GitHub Project)
+El seguimiento se realiza en el GitHub Project oficial.
+
+-Cada Issue o Tarea creada por el equipo debe llevar asignada obligatoriamente la etiqueta "frontend".
+
+-Ningún integrante puede comenzar a programar una tarea sin antes mover el Issue correspondiente a la columna "In Progress" y autoasignarse la tarjeta.
+
+🏗️ 3. Criterios de Arquitectura por Funcionalidades (Features)
+El proyecto se organiza bajo el patrón de Desarrollo Guiado por Características. Cada módulo del MVP es independiente dentro de src/features/.
+
+Anatomía de una Feature:
+/screens: Pantallas completas que se conectan de forma directa al sistema de navegación (ej: LoginScreen.tsx).
+
+/components: Componentes de interfaz exclusivos de esta funcionalidad (ej: LoginForm.tsx).
+
+/hooks: Lógica de React y estados específicos de esta funcionalidad.
+
+Criterio de Reutilización (Código Compartido):
+
+Si un componente visual se utiliza en dos o más features distintas (ej: botones principales, contenedores), se debe programar dentro de la carpeta global de elementos atómicos: src/components/ui/.
+
+Si un servicio conecta con APIs globales, se almacena en src/services/api/.
+
+🎨 4. Estilos con Tailwind (NativeWind) y TypeScript
+Estilos Consistentes: Para paddings, márgenes y layouts, utilizar múltiplos de 4 de Tailwind (p-4, p-6, m-2) para mantener la simetría de la interfaz.
+
+Colores de la App: No se permite usar valores de colores hardcodeados (ej: text-[#2563eb]). Se deben emplear las clases de color definidas en el tema global o en src/constants/colors.ts.
+
+Desarrollo Orientado a Especificaciones (Mocks): Antes de programar interfaces dinámicas, se deben tipar los contratos de datos en src/types/common.types.ts. Los archivos de src/data/mocks/ deben imitar fielmente estas estructuras de datos.
+
