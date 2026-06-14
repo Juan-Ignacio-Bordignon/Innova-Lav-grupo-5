@@ -4,30 +4,72 @@ import { useNavigation } from '@react-navigation/native';
 import { ROUTES } from '../../../constants/routes';
 import { AuthForm } from '../components/AuthForm';
 
+type LoginErrors = {
+  email?: string;
+  password?: string;
+  general?: string;
+};
+
 export function LoginScreen() {
   const navigation = useNavigation<any>();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<LoginErrors>({});
+
+  const submitDisabled =
+    !email.trim() ||
+    !password.trim() ||
+    Boolean(errors.email) ||
+    Boolean(errors.password);
+
+  function handleEmailChange(value: string) {
+    setEmail(value);
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      email: undefined,
+      general: undefined,
+    }));
+  }
+
+  function handlePasswordChange(value: string) {
+    setPassword(value);
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      password: undefined,
+      general: undefined,
+    }));
+  }
 
   function handleLogin() {
-    setError('');
+    const nextErrors: LoginErrors = {};
 
-    if (!email.trim() || !password.trim()) {
-      setError('Completá tu email y contraseña.');
+    if (!email.trim()) {
+      nextErrors.email = 'Ingresá tu email.';
+    } else if (!isValidEmail(email)) {
+      nextErrors.email = 'Ingresá un email válido.';
+    }
+
+    if (!password.trim()) {
+      nextErrors.password = 'Ingresá tu contraseña.';
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
 
     navigation.reset({
-        index: 0,
-        routes: [{ name: ROUTES.HOME_TABS }],
-});
+      index: 0,
+      routes: [{ name: ROUTES.HOME_TABS }],
+    });
   }
 
   function handleForgotPassword() {
-    setError('La recuperación de contraseña se conectará más adelante.');
+    setErrors({
+      general: 'La recuperación de contraseña se conectará más adelante.',
+    });
   }
 
   return (
@@ -36,13 +78,20 @@ export function LoginScreen() {
       email={email}
       password={password}
       remember={remember}
-      error={error}
-      onEmailChange={setEmail}
-      onPasswordChange={setPassword}
+      submitDisabled={submitDisabled}
+      emailError={errors.email}
+      passwordError={errors.password}
+      error={errors.general}
+      onEmailChange={handleEmailChange}
+      onPasswordChange={handlePasswordChange}
       onRememberChange={setRemember}
       onSubmit={handleLogin}
       onForgotPassword={handleForgotPassword}
       onSecondaryAction={() => navigation.navigate(ROUTES.REGISTER)}
     />
   );
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }

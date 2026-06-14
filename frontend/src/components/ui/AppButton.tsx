@@ -45,6 +45,7 @@ export function AppButton({
         styles.base,
         styles[variant],
         fullWidth && styles.fullWidth,
+        hasShadow(variant) && styles.shadow,
         pressed && !isDisabled && styles.pressed,
         isDisabled && styles.disabled,
         style,
@@ -52,9 +53,9 @@ export function AppButton({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={getLoadingColor(variant)} />
+        <ActivityIndicator color={getLoadingColor(variant, isDisabled)} />
       ) : (
-        <AppText variant="button" style={getTextStyle(variant)}>
+        <AppText variant="button" style={getTextStyle(variant, isDisabled)}>
           {title}
         </AppText>
       )}
@@ -62,7 +63,15 @@ export function AppButton({
   );
 }
 
-function getLoadingColor(variant: AppButtonVariant) {
+function hasShadow(variant: AppButtonVariant) {
+  return variant !== 'ghost';
+}
+
+function getLoadingColor(variant: AppButtonVariant, disabled?: boolean) {
+  if (disabled) {
+    return colors.white;
+  }
+
   if (
     variant === 'outline' ||
     variant === 'secondaryDarkText' ||
@@ -74,7 +83,11 @@ function getLoadingColor(variant: AppButtonVariant) {
   return colors.textLight;
 }
 
-function getTextStyle(variant: AppButtonVariant) {
+function getTextStyle(variant: AppButtonVariant, disabled?: boolean) {
+  if (disabled) {
+    return styles.disabledText;
+  }
+
   if (
     variant === 'outline' ||
     variant === 'secondaryDarkText' ||
@@ -88,8 +101,8 @@ function getTextStyle(variant: AppButtonVariant) {
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 52,
-    borderRadius: 18,
+    minHeight: 50,
+    borderRadius: 24,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
@@ -107,18 +120,28 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary,
   },
   outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
+    backgroundColor: colors.surface,
+    borderWidth: 1.3,
     borderColor: colors.primary,
   },
   success: {
     backgroundColor: colors.success,
   },
   danger: {
-    backgroundColor: colors.error,
+    backgroundColor: colors.danger,
   },
   ghost: {
     backgroundColor: 'transparent',
+  },
+  shadow: {
+    shadowColor: colors.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 4,
   },
   lightText: {
     color: colors.textLight,
@@ -126,11 +149,15 @@ const styles = StyleSheet.create({
   darkText: {
     color: colors.primary,
   },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.99 }],
-  },
   disabled: {
-    opacity: 0.5,
+    backgroundColor: colors.disabled,
+    borderColor: colors.disabled,
+  },
+  disabledText: {
+    color: colors.white,
+  },
+  pressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.985 }],
   },
 });
