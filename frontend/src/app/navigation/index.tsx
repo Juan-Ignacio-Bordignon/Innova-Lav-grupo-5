@@ -63,7 +63,7 @@ const RootStack = createNativeStackNavigator({
   screens: {
     // 🔐 Flujo de Autenticación
     [ROUTES.LOGIN]: {
-      screen: ModuleDetailScreen, // Temporalmente te conecta directo al detalle del módulo para pruebas (Issue #4)
+      screen: LoginScreen, // Temporalmente te conecta directo al detalle del módulo para pruebas (Issue #4)
       options: { headerShown: false },
     },
     [ROUTES.REGISTER]: {
