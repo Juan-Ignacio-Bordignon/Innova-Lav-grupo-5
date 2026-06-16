@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { ROUTES } from '../../../constants/routes';
 import { AuthForm } from '../components/AuthForm';
+import { register } from '../services/authService';
 
 type RegisterErrors = {
   name?: string;
@@ -19,9 +20,11 @@ export function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<RegisterErrors>({});
 
   const submitDisabled =
+    loading ||
     !name.trim() ||
     !email.trim() ||
     !password.trim() ||
@@ -59,7 +62,7 @@ export function RegisterScreen() {
     }));
   }
 
-  function handleRegister() {
+  async function handleRegister() {
     const nextErrors: RegisterErrors = {};
 
     if (!name.trim()) {
@@ -89,10 +92,30 @@ export function RegisterScreen() {
       return;
     }
 
-    navigation.reset({
-      index: 0,
-      routes: [{ name: ROUTES.HOME_TABS }],
-    });
+    try {
+      setLoading(true);
+      setErrors({});
+
+      await register({
+        nombre: name.trim(),
+        email: email.trim(),
+        password,
+      });
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: ROUTES.HOME_TABS }],
+      });
+    } catch (error) {
+      setErrors({
+        general:
+          error instanceof Error
+            ? error.message
+            : 'No se pudo crear la cuenta.',
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -102,6 +125,7 @@ export function RegisterScreen() {
       email={email}
       password={password}
       confirmPassword={confirmPassword}
+      loading={loading}
       submitDisabled={submitDisabled}
       nameError={errors.name}
       emailError={errors.email}

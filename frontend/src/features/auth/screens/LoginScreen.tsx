@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { ROUTES } from '../../../constants/routes';
 import { AuthForm } from '../components/AuthForm';
+import { login } from '../services/authService';
 
 type LoginErrors = {
   email?: string;
@@ -16,9 +17,11 @@ export function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
 
   const submitDisabled =
+    loading ||
     !email.trim() ||
     !password.trim() ||
     Boolean(errors.email) ||
@@ -42,7 +45,7 @@ export function LoginScreen() {
     }));
   }
 
-  function handleLogin() {
+  async function handleLogin() {
     const nextErrors: LoginErrors = {};
 
     if (!email.trim()) {
@@ -60,10 +63,29 @@ export function LoginScreen() {
       return;
     }
 
-    navigation.reset({
-      index: 0,
-      routes: [{ name: ROUTES.HOME_TABS }],
-    });
+    try {
+      setLoading(true);
+      setErrors({});
+
+      await login({
+        email: email.trim(),
+        password,
+      });
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: ROUTES.HOME_TABS }],
+      });
+    } catch (error) {
+      setErrors({
+        general:
+          error instanceof Error
+            ? error.message
+            : 'No se pudo iniciar sesión.',
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleForgotPassword() {
@@ -78,6 +100,7 @@ export function LoginScreen() {
       email={email}
       password={password}
       remember={remember}
+      loading={loading}
       submitDisabled={submitDisabled}
       emailError={errors.email}
       passwordError={errors.password}
