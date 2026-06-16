@@ -10,7 +10,8 @@ type AppTextVariant =
   | 'caption'
   | 'button'
   | 'link'
-  | 'error';
+  | 'error'
+  | 'small';
 
 type AppTextProps = TextProps & {
   variant?: AppTextVariant;
@@ -45,6 +46,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     color: colors.textSecondary,
   },
+  small: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    lineHeight: 16,
+    color: colors.textSecondary,
+  },
   button: {
     fontFamily: fonts.bold,
     fontSize: 15,
@@ -60,8 +67,8 @@ const styles = StyleSheet.create({
   },
   error: {
     fontFamily: fonts.medium,
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 11,
+    lineHeight: 16,
     color: colors.error,
   },
 });

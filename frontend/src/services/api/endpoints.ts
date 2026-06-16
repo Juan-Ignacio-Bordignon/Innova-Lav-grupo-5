@@ -3,6 +3,7 @@ export const ENDPOINTS = {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
   },
+  USER: '/user',
   MODULES: '/modules',
   LESSONS: '/lessons',
   EXERCISES: '/exercises',
