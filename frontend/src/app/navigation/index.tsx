@@ -1,3 +1,4 @@
+import { ModuleDetailScreen}  from '../../features/modules/screens/ModuleDetailScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HeaderButton, Text } from '@react-navigation/elements';
 import {
@@ -62,7 +63,7 @@ const RootStack = createNativeStackNavigator({
   screens: {
     // 🔐 Flujo de Autenticación
     [ROUTES.LOGIN]: {
-      screen: LoginScreen,
+      screen: ModuleDetailScreen, // Temporalmente te conecta directo al detalle del módulo para pruebas (Issue #4)
       options: { headerShown: false },
     },
     [ROUTES.REGISTER]: {

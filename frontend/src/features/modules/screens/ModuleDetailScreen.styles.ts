@@ -96,11 +96,12 @@ export const styles = StyleSheet.create({
   iconPlaceholder: { 
     width: 45, 
     height: 45, 
-    borderRadius: 12, 
+    borderRadius: 82.25, // 🆕 Cambiado según la especificación de UX
     borderWidth: 1, 
     borderColor: colors.primary, 
     justifyContent: 'center', 
-    alignItems: 'center' 
+    alignItems: 'center',
+    backgroundColor: '#F0F4F5', // Un fondo clarito sutil para la cápsula del icono
   },
   iconText: { 
     color: colors.primary 
