@@ -1,5 +1,6 @@
 // src/features/modules/screens/ModuleDetailScreen.tsx
 import React from 'react';
+import { IconPalabras } from '../../../assets/icons/IconPalabras'; // Importación nombrada del ícono específico
 import { View, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'; 
 import { useNavigation } from '@react-navigation/native';
@@ -68,9 +69,12 @@ export const ModuleDetailScreen = () => {
         </View>
       </View>
 
-      {/* Tarjeta Informativa Principal */}
+     {/* Tarjeta Informativa Principal */}
       <View style={styles.mainCard}>
-        <View style={styles.mainCardIconPlaceholder} />
+        {/* Reemplazamos el Placeholder por el componente SVG real */}
+        <View style={styles.mainCardIconContainer}> 
+          <IconPalabras width={80} height={80} /> 
+        </View>
         <View style={styles.mainCardTextContainer}>
           <AppText style={styles.mainCardTitle}>{title}</AppText>
           <AppText style={styles.mainCardDescription}>{description}</AppText>

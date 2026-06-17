@@ -48,11 +48,15 @@ export const styles = StyleSheet.create({
     borderWidth: 1, 
     borderColor: colors.border 
   },
-  mainCardIconPlaceholder: { 
-    width: 60, 
-    height: 60, 
-    borderRadius: 15, 
-    backgroundColor: colors.primary 
+ // En ModuleDetailScreen.styles.ts
+  mainCardIconContainer: {
+    width: 80,
+    height: 80,
+    marginRight: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    //backgroundColor: '#D9D9D9', 
+    
   },
   mainCardTextContainer: { 
     flex: 1, 
