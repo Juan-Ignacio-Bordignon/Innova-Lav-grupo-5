@@ -20,6 +20,8 @@ type AppInputProps = TextInputProps & {
   error?: string;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+  passwordVisibleIcon?: ReactNode;
+  passwordHiddenIcon?: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
   inputContainerStyle?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
@@ -33,11 +35,13 @@ export function AppInput({
   error,
   leftIcon,
   rightIcon,
+  passwordVisibleIcon,
+  passwordHiddenIcon,
   containerStyle,
   inputContainerStyle,
   inputStyle,
   style,
-  placeholderTextColor = colors.textSecondary,
+  placeholderTextColor = colors.placeholder,
   editable = true,
   secureTextEntry = false,
   autoCapitalize = 'none',
@@ -50,6 +54,8 @@ export function AppInput({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const shouldShowPasswordToggle = secureTextEntry && !rightIcon;
+  const isActive = isFocused || Boolean(props.value);
+  const hasError = Boolean(error);
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -62,13 +68,13 @@ export function AppInput({
       <View
         style={[
           styles.inputContainer,
-          isFocused && styles.inputContainerFocused,
-          error && styles.inputContainerError,
+          isActive && styles.inputContainerActive,
+          hasError && styles.inputContainerError,
           !editable && styles.inputContainerDisabled,
           inputContainerStyle,
         ]}
       >
-        {leftIcon ? <View style={styles.icon}>{leftIcon}</View> : null}
+        {leftIcon ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
 
         <TextInput
           placeholderTextColor={placeholderTextColor}
@@ -88,21 +94,27 @@ export function AppInput({
           {...props}
         />
 
-        {rightIcon ? <View style={styles.icon}>{rightIcon}</View> : null}
+        {rightIcon ? <View style={styles.rightIcon}>{rightIcon}</View> : null}
 
         {shouldShowPasswordToggle ? (
           <Pressable
             onPress={() => setIsPasswordVisible((value) => !value)}
-            hitSlop={8}
+            hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel={
               isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'
             }
             style={styles.passwordToggle}
           >
-            <AppText variant="link" style={styles.passwordToggleText}>
-              {isPasswordVisible ? 'Ocultar' : 'Ver'}
-            </AppText>
+            {isPasswordVisible && passwordVisibleIcon ? (
+              passwordVisibleIcon
+            ) : !isPasswordVisible && passwordHiddenIcon ? (
+              passwordHiddenIcon
+            ) : (
+              <AppText variant="link" style={styles.passwordToggleText}>
+                {isPasswordVisible ? 'Ocultar' : 'Ver'}
+              </AppText>
+            )}
           </Pressable>
         ) : null}
       </View>
@@ -125,58 +137,64 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '100%',
-    minHeight: 48,
+    minHeight: 50,
     borderRadius: 24,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.white,
-    paddingHorizontal: 16,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
 
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 3,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  inputContainerFocused: {
-    borderColor: colors.primary,
-    borderWidth: 1.5,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.18,
     shadowRadius: 4,
     elevation: 4,
   },
+  inputContainerActive: {
+    borderColor: colors.inputBorder,
+  },
   inputContainerError: {
     borderColor: colors.error,
+    shadowColor: colors.error,
+    shadowOpacity: 0.2,
   },
   inputContainerDisabled: {
     opacity: 0.6,
   },
   input: {
     flex: 1,
-    minHeight: 48,
+    minHeight: 50,
     fontFamily: fonts.medium,
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textPrimary,
     paddingVertical: 0,
+    paddingHorizontal: 10,
   },
-  icon: {
-    marginHorizontal: 6,
+  leftIcon: {
+    width: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rightIcon: {
+    width: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
   passwordToggle: {
-    marginLeft: 8,
+    minWidth: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   passwordToggleText: {
-    fontSize: 12,
+    fontSize: 11,
   },
   errorText: {
-    marginTop: 6,
+    marginTop: 5,
+    textAlign: 'center',
   },
 });
