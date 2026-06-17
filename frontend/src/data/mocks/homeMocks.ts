@@ -1,24 +1,24 @@
-export interface FeedItem {
+export interface SubCategoryItem {
   id: string;
   title: string;
-  description: string;
-  category: string;
-  date: string;
+  status: 'Pendiente' | 'Completado';
+  iconName: string;
 }
 
-export const MOCK_FEED_ITEMS: FeedItem[] = [
-  {
-    id: 'feed-1',
-    title: '¡Bienvenido a InnovaLab!',
-    description: 'Comenzá tu recorrido explorando los módulos de aprendizaje interactivos que tenemos preparados para vos.',
-    category: 'General',
-    date: '10/06/2026',
-  },
-  {
-    id: 'feed-2',
-    title: 'Nuevo Desafío Técnico Disponible',
-    description: 'Ya podés acceder al laboratorio de algoritmos de la semana 4. Poné a prueba tus habilidades de lógica.',
-    category: 'Desafíos',
-    date: '09/06/2026',
-  }
-];
+export interface CategoryDetail {
+  title: string;
+  description: string;
+  items: SubCategoryItem[];
+}
+
+// Datos exactos de la captura del Figma
+export const MOCK_PALABRAS_DETAIL: CategoryDetail = {
+  title: 'Palabras',
+  description: 'Aprenderás palabras simples para luego poder conversar.',
+  items: [
+    { id: 'sub-1', title: 'Alfabeto', status: 'Pendiente', iconName: 'font' },
+    { id: 'sub-2', title: 'Días de la semana', status: 'Pendiente', iconName: 'calendar' },
+    { id: 'sub-3', title: 'Números', status: 'Pendiente', iconName: 'numeric' },
+    { id: 'sub-4', title: 'Sentimientos', status: 'Pendiente', iconName: 'shield-heart' },
+  ]
+};
