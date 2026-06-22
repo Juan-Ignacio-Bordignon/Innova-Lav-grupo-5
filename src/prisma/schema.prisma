@@ -9,16 +9,17 @@ datasource db {
 }
 
 model User {
-  id              Int        @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
   nombre          String
-  email           String     @unique
+  email           String      @unique
   password        String
-  rachaActual     Int        @default(0)
+  rachaActual     Int         @default(0)
   ultimaActividad DateTime?
-  creadoEn        DateTime   @default(now())
+  creadoEn        DateTime    @default(now())
   progreso        Progreso[]
   favoritos       Favorite[]
   logros          UserLogro[]
+  eventos         EventoLog[]  
 }
 
 model Modulo {
@@ -29,23 +30,26 @@ model Modulo {
 }
 
 model Leccion {
-  id        Int        @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   titulo    String
   contenido String
   videoUrl  String?
   moduloId  Int
-  modulo    Modulo     @relation(fields: [moduloId], references: [id])
+  modulo    Modulo      @relation(fields: [moduloId], references: [id])
   progreso  Progreso[]
   favoritos Favorite[]
+  logros    Logro[]     
 }
 
 model Progreso {
-  id        Int     @id @default(autoincrement())
-  userId    Int
-  moduloId  Int
-  leccionId Int
-  user      User    @relation(fields: [userId], references: [id])
-  leccion   Leccion @relation(fields: [leccionId], references: [id])
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  moduloId      Int
+  leccionId     Int
+  primerIntento Boolean  @default(true)   // ← nuevo
+  completadoEn  DateTime @default(now())  // ← nuevo
+  user          User     @relation(fields: [userId], references: [id])
+  leccion       Leccion  @relation(fields: [leccionId], references: [id])
 }
 
 model Favorite {
@@ -55,7 +59,6 @@ model Favorite {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   leccion   Leccion  @relation(fields: [leccionId], references: [id], onDelete: Cascade)
-
   @@unique([userId, leccionId])
 }
 
@@ -64,16 +67,27 @@ model Logro {
   nombre      String
   descripcion String
   icono       String?
+  leccionId   Int?                                               // ← nuevo
+  leccion     Leccion?    @relation(fields: [leccionId], references: [id])  // ← nuevo
   userLogros  UserLogro[]
 }
 
 model UserLogro {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  logroId         Int
-  fechaObtenido   DateTime @default(now())
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  logro           Logro    @relation(fields: [logroId], references: [id])
-
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  logroId       Int
+  fechaObtenido DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logro         Logro    @relation(fields: [logroId], references: [id])
   @@unique([userId, logroId])
+}
+
+
+model EventoLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  evento     String
+  properties Json?
+  timestamp  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
 }
