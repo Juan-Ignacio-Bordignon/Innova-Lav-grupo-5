@@ -46,8 +46,8 @@ model Progreso {
   userId        Int
   moduloId      Int
   leccionId     Int
-  primerIntento DateTime?
-  completadoEn  DateTime @default(now())  
+  primerIntento DateTime  @default(now())
+  completadoEn  DateTime?
   user          User     @relation(fields: [userId], references: [id])
   leccion       Leccion  @relation(fields: [leccionId], references: [id])
 }
