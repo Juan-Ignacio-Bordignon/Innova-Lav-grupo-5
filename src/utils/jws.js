@@ -7,5 +7,7 @@ export const generateToken = (userId) => {
 
 // Función para verificar un token JWT y extraer su contenido
 export const verifyToken = (token) => {
-  return jwt.verify(token, process.env.JWT_SECRET);
+  //quiero devolver el id del usuario que esta en el token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  return decoded.id;
 };
