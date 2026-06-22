@@ -46,8 +46,8 @@ model Progreso {
   userId        Int
   moduloId      Int
   leccionId     Int
-  primerIntento Boolean  @default(true)   // ← nuevo
-  completadoEn  DateTime @default(now())  // ← nuevo
+  primerIntento DateTime?
+  completadoEn  DateTime @default(now())  
   user          User     @relation(fields: [userId], references: [id])
   leccion       Leccion  @relation(fields: [leccionId], references: [id])
 }
@@ -67,8 +67,8 @@ model Logro {
   nombre      String
   descripcion String
   icono       String?
-  leccionId   Int?                                               // ← nuevo
-  leccion     Leccion?    @relation(fields: [leccionId], references: [id])  // ← nuevo
+  leccionId   Int?                                               
+  leccion     Leccion?    @relation(fields: [leccionId], references: [id])  
   userLogros  UserLogro[]
 }
 
