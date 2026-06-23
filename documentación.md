@@ -162,7 +162,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		// Hay que modificar esto para que traiga la última lección (completada o no) del usuario, actualmente está hardcodeado
 		"ultimaLeccion": {
 			"ModuleId": 1,
-			"LessonId": [3]
+			"LessonId": 3
 		},
 		"puntos": 50,
 		"racha": 5,
