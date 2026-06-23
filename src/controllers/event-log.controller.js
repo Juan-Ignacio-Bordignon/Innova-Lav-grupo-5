@@ -19,8 +19,12 @@ export const postEventLog = async (req, res) => {
       });
     }
     const token = authorization.split(" ")[1];
-    console.log(token);
     const { evento, properties } = req.body;
+    if (!evento || !properties) {
+      throw new Error(
+        "Faltan campos requeridos - evento y properties son obligatorios",
+      );
+    }
     const userId = verifyToken(token);
     const createdEvent = await logEvent(userId, evento, properties);
     res.status(201).json({ createdEvent });
