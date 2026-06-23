@@ -571,3 +571,17 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
         "properties":{},
 	}
 	```
+
+	Respuesta:
+	```json
+	{
+		"createdEvent": {
+		"id": 1,
+		"userId": 1,
+		"evento": "Nombre de evento",
+		"properties": {},
+    	"timestamp": "2026-06-23T21:01:42.649Z"
+  		}
+	}
+	```
+	El contenido de "properties" varia dependiendo del evento registrado
