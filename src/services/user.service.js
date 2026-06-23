@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getUserInfo = async (userId) => {
-  const user = await prisma.usuario.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
       // Los campos que queremos devolver del usuario

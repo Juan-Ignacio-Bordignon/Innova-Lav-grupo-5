@@ -1,9 +1,10 @@
 import { getUserInfo } from "../services/user.service.js";
+import { verifyToken } from "../utils/jws.js";
 
 export const getUser = async (req, res) => {
   try {
     // Extraer el token de autorización del encabezado de la solicitud
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.headers.authorization.split(" ")[1];
     const userId = verifyToken(token);
 
     // Obtener la información del usuario desde la base de datos
