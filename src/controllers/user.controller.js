@@ -25,7 +25,7 @@ export const getUser = async (req, res) => {
         ModuleName: progreso.leccion.modulo.nombre,
         completadoEn: progreso.completadoEn,
       })),
-      // Hay que modificar esto para que traiga la última lección completada del usuario, actualmente está hardcodeado
+      // Hay que modificar esto para que traiga la última lección (completada o no) del usuario, actualmente está hardcodeado
       ultimaLeccion: {
         ModuleId: 1,
         LessonId: [3],
