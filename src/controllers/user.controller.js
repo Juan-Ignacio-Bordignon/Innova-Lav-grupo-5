@@ -29,7 +29,9 @@ export const getUser = async (req, res) => {
       // Hay que modificar esto para que traiga la última lección (completada o no) del usuario, actualmente está hardcodeado
       ultimaLeccion: {
         ModuleId: 1,
-        LessonId: [3],
+        ModuleName: "Nombre del módulo",
+        LessonId: 3,
+        LessonName: "Nombre de la lección",
       },
       puntos: user.puntos,
       racha: user.rachaActual,
