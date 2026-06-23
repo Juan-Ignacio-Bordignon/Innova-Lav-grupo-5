@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Progreso" ADD COLUMN     "errores" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "puntos" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "interes" TEXT NOT NULL DEFAULT 'Sin definir',
+ADD COLUMN     "puntos" INTEGER NOT NULL DEFAULT 0;
