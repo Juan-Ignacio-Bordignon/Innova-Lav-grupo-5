@@ -1,4 +1,5 @@
-import { ModuleDetailScreen}  from '../../features/modules/screens/ModuleDetailScreen';
+import { ExerciseScreen } from '../../features/exercises/screens/ExerciseScreen';
+import { ModuleDetailScreen } from '../../features/modules/screens/ModuleDetailScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HeaderButton, Text } from '@react-navigation/elements';
 import {
@@ -23,7 +24,6 @@ import { NotFound } from './screens/NotFoundScreen';
 
 // 🆕 Cascarones temporales para el núcleo de aprendizaje LSA (Semanas 4 y 5)
 function LessonScreen() { return <View className="flex-1 justify-center items-center"><Text>Video de Seña LSA</Text></View>; }
-function ExerciseScreen() { return <View className="flex-1 justify-center items-center"><Text>Ejercicio Interactivo</Text></View>; }
 function FeedbackScreen() { return <View className="flex-1 justify-center items-center"><Text>Resultado del Ejercicio</Text></View>; }
 
 // 1. Contenedor de las pestañas inferiores (TabNavigator)
@@ -63,7 +63,7 @@ const RootStack = createNativeStackNavigator({
   screens: {
     // 🔐 Flujo de Autenticación
     [ROUTES.LOGIN]: {
-      screen: LoginScreen, // Temporalmente te conecta directo al detalle del módulo para pruebas (Issue #4)
+      screen: LoginScreen, //poralmente conecta directo al detalle del módulo para pruebas (Issue #4)
       options: { headerShown: false },
     },
     [ROUTES.REGISTER]: {

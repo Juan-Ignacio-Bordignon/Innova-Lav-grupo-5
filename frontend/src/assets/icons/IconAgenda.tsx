@@ -2,29 +2,40 @@
 import * as React from 'react';
 import Svg, { Path, G, SvgProps } from 'react-native-svg';
 
+// Definimos la interfaz extendiendo las propiedades estándar de SVG
 interface IconAgendaProps extends SvgProps {
   isCompleted?: boolean;
 }
 
-export const IconAgenda = ({ isCompleted = false, ...props }: IconAgendaProps) => {
+export const IconAgenda: React.FC<IconAgendaProps> = ({
+  isCompleted = false,
+  width = 24,
+  height = 24,
+  fill,
+  ...restProps // Extraemos el resto de las props nativas por si pasan estilos o testIDs
+}) => {
+  // Manejo inteligente del visor geométrico (viewBox) según el estado
   const viewBoxWindow = isCompleted ? "16 80 52 52" : "16 16 52 52";
+  
+  // Color por defecto del equipo para el estado pendiente (#194650)
+  const iconColor = fill || '#194650'; 
 
   return (
     <Svg 
-      width={props.width || 24} 
-      height={props.height || 24} 
+      width={width} 
+      height={height} 
       viewBox={viewBoxWindow}
-      {...props}
+      {...restProps} // Pasamos de forma segura las props restantes al contenedor raíz
     >
       {/* --- ESTADO PENDIENTE --- */}
       {!isCompleted && (
         <G>
           <Path 
-            stroke={props.fill || '#194650'} 
+            stroke={iconColor} 
             strokeWidth="3.5" 
             strokeLinecap="round" 
             strokeLinejoin="round"
-            fill="none" // 👈 Forzamos a transparente para matar el bloque oscuro residual
+            fill="none" // Forzamos a transparente para matar el bloque oscuro residual
             d="M53.1875 24.9167V20M31.0625 24.9167V20M20.6146 32.2917H63.6354M20 37.3165C20 32.1171 20 29.5162 21.0718 27.5299C22.041 25.7582 23.5449 24.3377 25.369 23.4712C27.4733 22.4583 30.2267 22.4583 35.7333 22.4583H48.5167C54.0233 22.4583 56.7767 22.4583 58.881 23.4712C60.7321 24.3611 62.2342 25.782 63.1782 27.5274C64.25 29.5187 64.25 32.1196 64.25 37.319V49.3943C64.25 54.5937 64.25 57.1946 63.1782 59.1809C62.209 60.9526 60.7051 62.3731 58.881 63.2396C56.7767 64.25 54.0233 64.25 48.5167 64.25H35.7333C30.2267 64.25 27.4733 64.25 25.369 63.2372C23.5453 62.3712 22.0414 60.9517 21.0718 59.1809C20 57.1897 20 54.5887 20 49.3894V37.3165Z" 
           />
           <Path fill="#DAB16D" stroke="#DAB16D" strokeWidth="1" d="M46.7266 45.6326C49.5679 45.6326 52.3762 45.666 55.2175 45.6326C56.506 45.5992 57.8606 45.3989 57.9597 43.6956C58.0588 41.959 56.7042 41.6584 55.3827 41.6584C49.7331 41.625 44.0505 41.625 38.4009 41.625C37.0793 41.625 35.6586 41.9256 35.6256 43.5286C35.5926 45.4656 37.2445 45.5992 38.6982 45.5992C41.3743 45.666 44.0505 45.6326 46.7266 45.6326Z" />
@@ -50,3 +61,5 @@ export const IconAgenda = ({ isCompleted = false, ...props }: IconAgendaProps) =
     </Svg>
   );
 };
+
+export default IconAgenda;
