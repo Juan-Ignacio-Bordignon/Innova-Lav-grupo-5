@@ -13,6 +13,8 @@ model User {
   nombre          String
   email           String      @unique
   password        String
+  interes         String?     @default("Sin definir")
+  puntos          Int         @default(0)
   rachaActual     Int         @default(0)
   ultimaActividad DateTime?
   creadoEn        DateTime    @default(now())
@@ -46,7 +48,9 @@ model Progreso {
   userId        Int
   moduloId      Int
   leccionId     Int
-  primerIntento DateTime  @default(now())
+  errores       Int      @default(0)
+  puntos        Int      @default(0)
+  primerIntento DateTime @default(now())
   completadoEn  DateTime?
   user          User     @relation(fields: [userId], references: [id])
   leccion       Leccion  @relation(fields: [leccionId], references: [id])

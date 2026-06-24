@@ -1,37 +1,51 @@
-export const userById = (req, res) => {
-  const { userId } = req.params;
-  res.json({
-    usuario: {
-      userId: 1,
-      username: "Juan Pérez",
-      email: "juan.perez@example.com",
-    },
-    progreso: [
-      {
+import { getUserInfo } from "../services/user.service.js";
+import { verifyToken } from "../utils/jws.js";
+
+export const getUser = async (req, res) => {
+  try {
+    // Extraer el token de autorización del encabezado de la solicitud
+    const token = req.headers.authorization.split(" ")[1];
+    const userId = verifyToken(token);
+
+    // Obtener la información del usuario desde la base de datos
+    const user = await getUserInfo(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json({
+      usuario: {
+        username: user.nombre,
+        email: user.email,
+        interes: user.interes,
+      },
+      progreso: user.progreso.map((progreso) => ({
+        LessonId: progreso.leccionId,
+        LessonName: progreso.leccion.titulo,
+        ModuleId: progreso.leccion.modulo.id,
+        ModuleName: progreso.leccion.modulo.nombre,
+        completadoEn: progreso.completadoEn,
+      })),
+      // Hay que modificar esto para que traiga la última lección (completada o no) del usuario, actualmente está hardcodeado
+      ultimaLeccion: {
         ModuleId: 1,
-        LessonId: [1, 2, 3],
+        ModuleName: "Nombre del módulo",
+        LessonId: 3,
+        LessonName: "Nombre de la lección",
       },
-      {
-        ModuleId: 2,
-        LessonId: [4],
-      },
-    ],
-    ultimaLeccion: {
-      ModuleId: 1,
-      LessonId: [3],
-    },
-    puntos: 50,
-    logros: [
-      {
-        id: 1,
-        nombre: "Logro 1",
-        descripcion: "Descripción del logro 1",
-      },
-      {
-        id: 2,
-        nombre: "Logro 2",
-        descripcion: "Descripción del logro 2",
-      },
-    ],
-  });
+      puntos: user.puntos,
+      racha: user.rachaActual,
+      logros: user.logros.map((logro) => ({
+        id: logro.logro.id,
+        nombre: logro.logro.nombre,
+        descripcion: logro.logro.descripcion,
+        icono: logro.logro.icono,
+      })),
+    });
+  } catch (error) {
+    console.error("Error al obtener la información del usuario", error);
+    res
+      .status(500)
+      .json({ error: "No se pudo obtener la información del usuario" });
+  }
 };

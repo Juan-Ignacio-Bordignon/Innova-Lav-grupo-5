@@ -132,41 +132,63 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Method: GET
 
-	Endpoint: /user/{userId}
+	Endpoint: /user
+
+	Header: {Authorization: "Bearer `token`",}
 
 	Respuesta:
 	```json
 	{
 		"usuario": {
-			"userId": 1,
 			"username": "Juan Pérez",
 			"email": "juan.perez@example.com"
 		},
 		"progreso": [
 			{
-				"ModuleId": 1,
-				"LessonId": [1, 2, 3]
+				"LessonId": 1,
+        		"LessonName": "Nombre de la lección",
+        		"ModuleId": 1,
+        		"ModuleName": "Nombre del módulo",
+        		"completadoEn":  "2026-06-23T12:00:00Z",
 			},
 			{
-				"ModuleId": 2,
-				"LessonId": [4]
+				"LessonId": 2,
+        		"LessonName": "Nombre de la lección",
+        		"ModuleId": 1,
+        		"ModuleName": "Nombre del módulo",
+        		"completadoEn":  "2026-06-23T12:00:00Z",
 			}
 		],
+		// Hay que modificar esto para que traiga la última lección (completada o no) del usuario, actualmente está hardcodeado
 		"ultimaLeccion": {
 			"ModuleId": 1,
-			"LessonId": [3]
+			"ModuleName": "Nombre del módulo",
+			"LessonId": 3,
+			"LessonName": "Nombre de la lección"
 		},
 		"puntos": 50,
+		"racha": 5,
 		"logros": [
 			{
 				"id": 1,
 				"nombre": "Logro 1",
-				"descripcion": "Descripción del logro 1"
+				"descripcion": "Descripción del logro 1",
+				"icono": "🏆",
+			},
+			{
+				"id": 2,
+				"nombre": "Logro 2",
+				"descripcion": "Descripción del logro 2",
+				"icono": "🎖️",
 			}
 		]
 	}
 	```
 	Error:
+	```json
+	{ "error": "Usuario no encontrado" }
+	```
+	O
 	```json
 	{
 		"error": "No se pudo obtener la información del usuario"
@@ -179,7 +201,9 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Method: GET
 
-	Endpoint: /progress/{userId}
+	Endpoint: /progress
+
+	Header: {Authorization: "Bearer `token`",}
 
 	Respuesta:
 	```json
@@ -207,7 +231,9 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Method: POST
 
-	Endpoint: /progress/{userId}
+	Endpoint: /progress
+
+	Header: {Authorization: "Bearer `token`",}
 
 	Body:
 	```json
@@ -324,6 +350,8 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Endpoint: /favorites
 
+	Header: {Authorization: "Bearer `token`",}
+
 	Body:
 	```json
 	{
@@ -354,7 +382,9 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Method: GET
 
-	Endpoint: /favorites/{userId}
+	Endpoint: /favorites
+
+	Header: {Authorization: "Bearer `token`",}
 
 	Respuesta:
 	```json
@@ -386,7 +416,9 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Method: DELETE
 
-	Endpoint: /favorites/{id}
+	Endpoint: /favorites
+
+	Header: {Authorization: "Bearer `token`",}
 
 	Respuesta:
 	```json
@@ -438,10 +470,11 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Endpoint: /answer/save
 
+	Header: {Authorization: "Bearer `token`",}
+
 	Body:
 	```json
 	{
-		"userId": 1,
 		"ModuleId": 1,
 		"LessonId": [3],
 		"correcta": true,
@@ -459,17 +492,19 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	{
 		"error": "No se pudo guardar el resultado del usuario"
 	}
-
+	```	
 ## Logros del usuario
 
 - Obtener logros del usuario
 
 	Method: GET
 
-	Endpoint: /user/{userId}/logros
+	Endpoint: /user/logros
+
+	Header: {Authorization: "Bearer `token`",}
 
 	Respuesta:
-```json
+	```json
 	{
 		"logros": [
 			{
@@ -485,10 +520,70 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 			}
 		]
 	}
-```
+	```
+
 	Error:
-```json
+
+	```json
 	{
 		"error": "No se pudieron obtener los logros del usuario"
 	}
-```	```
+	```	
+
+## Log de eventos 
+
+- Obtener toda información en el registro
+
+	Method: GET
+
+	Endpoint:/event-log
+
+	Respuesta:
+	```json
+	[	{
+		"id":"1",
+        "userId":"1",
+        "evento":"Nombre de evento",
+        "properties":{},
+		"timestamp":"2026-06-10T00:00:00.000Z",
+    	},
+		{
+		"id":"2",
+        "userId":"1",
+        "evento":"Nombre de evento",
+        "properties":{},
+		"timestamp":"2026-06-10T00:00:00.000Z",
+    	}
+	]
+	```
+	El contenido de "properties" varia dependiendo del evento registrado
+
+- Guardar toda información en el registro
+
+	Method: POST
+
+	Endpoint:/event-log
+
+	Header: {Authorization: "Bearer `token`",}
+
+	Body:
+	```json
+	{
+		"evento":"Nombre de evento",
+        "properties":{},
+	}
+	```
+
+	Respuesta:
+	```json
+	{
+		"createdEvent": {
+		"id": 1,
+		"userId": 1,
+		"evento": "Nombre de evento",
+		"properties": {},
+    	"timestamp": "2026-06-23T21:01:42.649Z"
+  		}
+	}
+	```
+	El contenido de "properties" varia dependiendo del evento registrado
