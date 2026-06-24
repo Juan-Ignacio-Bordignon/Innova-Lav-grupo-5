@@ -3,7 +3,6 @@ import { useNavigation } from '@react-navigation/native';
 
 import { ROUTES } from '../../../constants/routes';
 import { AuthForm } from '../components/AuthForm';
-import { login } from '../services/authService';
 
 type LoginErrors = {
   email?: string;
@@ -63,29 +62,13 @@ export function LoginScreen() {
       return;
     }
 
-    try {
-      setLoading(true);
-      setErrors({});
+    // TODO: conectar con backend real cuando esté disponible
+    // await login({ email: email.trim(), password });
 
-      await login({
-        email: email.trim(),
-        password,
-      });
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: ROUTES.HOME_TABS }],
-      });
-    } catch (error) {
-      setErrors({
-        general:
-          error instanceof Error
-            ? error.message
-            : 'No se pudo iniciar sesión.',
-      });
-    } finally {
-      setLoading(false);
-    }
+    navigation.reset({
+      index: 0,
+      routes: [{ name: ROUTES.HOME_TABS }],
+    });
   }
 
   function handleForgotPassword() {

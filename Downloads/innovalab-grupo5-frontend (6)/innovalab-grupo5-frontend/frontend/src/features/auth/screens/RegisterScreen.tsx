@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-
 import { ROUTES } from '../../../constants/routes';
 import { AuthForm } from '../components/AuthForm';
 import { register } from '../services/authService';
@@ -15,7 +14,6 @@ type RegisterErrors = {
 
 export function RegisterScreen() {
   const navigation = useNavigation<any>();
-
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,90 +26,32 @@ export function RegisterScreen() {
     !name.trim() ||
     !email.trim() ||
     !password.trim() ||
-    !confirmPassword.trim() ||
-    Boolean(errors.name) ||
-    Boolean(errors.email) ||
-    Boolean(errors.password) ||
-    Boolean(errors.confirmPassword);
-
-  function handleNameChange(value: string) {
-    setName(value);
-    clearError('name');
-  }
-
-  function handleEmailChange(value: string) {
-    setEmail(value);
-    clearError('email');
-  }
-
-  function handlePasswordChange(value: string) {
-    setPassword(value);
-    clearError('password');
-  }
-
-  function handleConfirmPasswordChange(value: string) {
-    setConfirmPassword(value);
-    clearError('confirmPassword');
-  }
-
-  function clearError(field: keyof RegisterErrors) {
-    setErrors((currentErrors) => ({
-      ...currentErrors,
-      [field]: undefined,
-      general: undefined,
-    }));
-  }
+    !confirmPassword.trim();
 
   async function handleRegister() {
     const nextErrors: RegisterErrors = {};
-
-    if (!name.trim()) {
-      nextErrors.name = 'Ingresá tu nombre.';
-    }
-
-    if (!email.trim()) {
-      nextErrors.email = 'Ingresá tu email.';
-    } else if (!isValidEmail(email)) {
+    if (!name.trim()) nextErrors.name = 'Ingresá tu nombre.';
+    if (!email.trim()) nextErrors.email = 'Ingresá tu email.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       nextErrors.email = 'Ingresá un email válido.';
-    }
-
-    if (!password.trim()) {
-      nextErrors.password = 'Ingresá tu contraseña.';
-    } else if (password.length < 6) {
-      nextErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
-    }
-
-    if (!confirmPassword.trim()) {
-      nextErrors.confirmPassword = 'Confirmá tu contraseña.';
-    } else if (password !== confirmPassword) {
+    if (!password.trim()) nextErrors.password = 'Ingresá tu contraseña.';
+    else if (password.length < 6) nextErrors.password = 'Mínimo 6 caracteres.';
+    if (!confirmPassword.trim()) nextErrors.confirmPassword = 'Confirmá tu contraseña.';
+    else if (confirmPassword !== password)
       nextErrors.confirmPassword = 'Las contraseñas no coinciden.';
-    }
-
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
     }
-
     try {
       setLoading(true);
       setErrors({});
-
-      await register({
-        nombre: name.trim(),
-        email: email.trim(),
-        password,
-      });
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: ROUTES.HOME_TABS }],
-      });
+      await register({ name: name.trim(), email: email.trim(), password });
+      navigation.reset({ index: 0, routes: [{ name: ROUTES.HOME_TABS }] });
     } catch (error) {
       setErrors({
         general:
-          error instanceof Error
-            ? error.message
-            : 'No se pudo crear la cuenta.',
+          error instanceof Error ? error.message : 'No se pudo crear la cuenta.',
       });
     } finally {
       setLoading(false);
@@ -132,16 +72,12 @@ export function RegisterScreen() {
       passwordError={errors.password}
       confirmPasswordError={errors.confirmPassword}
       error={errors.general}
-      onNameChange={handleNameChange}
-      onEmailChange={handleEmailChange}
-      onPasswordChange={handlePasswordChange}
-      onConfirmPasswordChange={handleConfirmPasswordChange}
+      onNameChange={setName}
+      onEmailChange={setEmail}
+      onPasswordChange={setPassword}
+      onConfirmPasswordChange={setConfirmPassword}
       onSubmit={handleRegister}
       onSecondaryAction={() => navigation.navigate(ROUTES.LOGIN)}
     />
   );
-}
-
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
