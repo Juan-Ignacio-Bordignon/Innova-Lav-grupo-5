@@ -1,6 +1,8 @@
 import { ModuleDetailScreen}  from '../../features/modules/screens/ModuleDetailScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HeaderButton, Text } from '@react-navigation/elements';
+import { AppBottomTabBar } from './components/AppBottomTabBar';
+import { FavoritesScreen } from '../../features/favorites/screens/FavoritesScreen';
 import {
   createStaticNavigation,
 } from '@react-navigation/native';
@@ -28,30 +30,27 @@ function FeedbackScreen() { return <View className="flex-1 justify-center items-
 
 // 1. Contenedor de las pestañas inferiores (TabNavigator)
 const HomeTabs = createBottomTabNavigator({
+  screenOptions: {
+    headerShown: false,
+  },
+  tabBar: (props) => <AppBottomTabBar {...props} />,
   screens: {
     [ROUTES.HOME]: {
       screen: Home,
       options: {
-        title: 'Feed',
-        tabBarIcon: ({ color, size }) => (
-          <Image
-            source={newspaper}
-            tintColor={color}
-            style={{ width: size, height: size }}
-          />
-        ),
+        title: 'Inicio',
       },
     },
-    [ROUTES.UPDATES]: {
-      screen: Updates,
+    [ROUTES.FAVORITES]: {
+      screen: FavoritesScreen,
       options: {
-        tabBarIcon: ({ color, size }) => (
-          <Image
-            source={bell}
-            tintColor={color}
-            style={{ width: size, height: size }}
-          />
-        ),
+        title: 'Favoritos',
+      },
+    },
+    [ROUTES.PROFILE_TAB]: {
+      screen: Profile,
+      options: {
+        title: 'Perfil',
       },
     },
   },
