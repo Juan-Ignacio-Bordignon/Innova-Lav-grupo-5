@@ -1,30 +1,90 @@
-import { Button } from '@react-navigation/elements';
-import { CommonActions, useNavigation } from '@react-navigation/native';
-import { Text, View } from 'react-native';
-import { AppButton } from '../../../components/ui';
-import { ROUTES } from '../../../constants/routes';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { AppText } from '../../../components/ui';
+import { colors } from '../../../constants/colors';
+import { HOME_MODULES } from '../../../data/mocks/homeMocks';
+import { MOCK_USER_PROFILE } from '../../../data/mocks/userMocks';
+import { ModuleCard } from '../../modules/components/ModuleCard';
+import { HomeHeader } from '../components/HomeHeader';
+import { HomeSearchBar } from '../components/HomeSearchBar';
 
 export function Home() {
+  const [searchValue, setSearchValue] = useState('');
 
+  const filteredModules = HOME_MODULES.filter((module) => {
+    const search = searchValue.trim().toLowerCase();
 
+    if (!search) {
+      return true;
+    }
+
+    return `${module.title} ${module.subtitle}`
+      .toLowerCase()
+      .includes(search);
+  });
 
   return (
-    <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
-      <Text className="text-2xl font-bold text-blue-600">
-        InnovaLab Grupo 5
-      </Text>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.content}
+      >
+        <View style={styles.topSpacer} />
 
-      <Text className="text-center text-base text-gray-600">
-        React Native + Expo + React Navigation + NativeWind funcionando.
-      </Text>
+        <HomeHeader
+          userName={MOCK_USER_PROFILE.name}
+          notificationsCount={1}
+        />
 
-      <Button screen="Profile" params={{ user: 'jane' }}>
-        Go to Profile
-      </Button>
+        <HomeSearchBar
+          value={searchValue}
+          onChangeText={setSearchValue}
+        />
 
-      <Button screen="Settings">
-        Go to Settings
-      </Button>
-    </View>
+        <View style={styles.modulesSection}>
+          <AppText variant="title" style={styles.sectionTitle}>
+            Módulos
+          </AppText>
+
+          {filteredModules.map((module) => (
+            <ModuleCard
+              key={module.id}
+              module={module}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 14,
+    paddingBottom: 28,
+  },
+
+  topSpacer: {
+    height: 14,
+  },
+
+  modulesSection: {
+    marginTop: 34,
+  },
+
+  sectionTitle: {
+    fontSize: 29,
+    lineHeight: 35,
+    marginBottom: 16,
+  },
+});
