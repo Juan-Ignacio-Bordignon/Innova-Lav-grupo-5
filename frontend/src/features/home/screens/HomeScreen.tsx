@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText } from '../../../components/ui';
+import { AnimatedEntry, AppText } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
 import { MOCK_USER_PROFILE } from '../../../data/mocks/userMocks';
 import { ModuleCard } from '../../modules/components/ModuleCard';
@@ -16,6 +17,7 @@ export function Home() {
   const [modules, setModules] = useState<HomeModule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [animationKey, setAnimationKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -52,6 +54,12 @@ export function Home() {
     };
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      setAnimationKey((value) => value + 1);
+    }, [])
+  );
+
   const filteredModules = modules.filter((module) => {
     const search = searchValue.trim().toLowerCase();
 
@@ -71,45 +79,61 @@ export function Home() {
       >
         <View style={styles.topSpacer} />
 
-        <HomeHeader
-          userName={MOCK_USER_PROFILE.name}
-          notificationsCount={1}
-        />
+        <AnimatedEntry delay={80} triggerKey={animationKey}>
+          <HomeHeader
+            userName={MOCK_USER_PROFILE.name}
+            notificationsCount={1}
+          />
+        </AnimatedEntry>
 
-        <HomeSearchBar
-          value={searchValue}
-          onChangeText={setSearchValue}
-        />
+        <AnimatedEntry delay={180} triggerKey={animationKey}>
+          <HomeSearchBar
+            value={searchValue}
+            onChangeText={setSearchValue}
+          />
+        </AnimatedEntry>
 
         <View style={styles.modulesSection}>
-          <AppText variant="title" style={styles.sectionTitle}>
-            Módulos
-          </AppText>
+          <AnimatedEntry delay={280} triggerKey={animationKey}>
+            <AppText variant="title" style={styles.sectionTitle}>
+              Módulos
+            </AppText>
+          </AnimatedEntry>
 
           {isLoading ? (
-            <AppText variant="body" style={styles.feedbackText}>
-              Cargando módulos...
-            </AppText>
+            <AnimatedEntry delay={360} triggerKey={animationKey}>
+              <AppText variant="body" style={styles.feedbackText}>
+                Cargando módulos...
+              </AppText>
+            </AnimatedEntry>
           ) : null}
 
           {!isLoading && errorMessage ? (
-            <AppText variant="error" style={styles.feedbackText}>
-              {errorMessage}
-            </AppText>
+            <AnimatedEntry delay={360} triggerKey={animationKey}>
+              <AppText variant="error" style={styles.feedbackText}>
+                {errorMessage}
+              </AppText>
+            </AnimatedEntry>
           ) : null}
 
           {!isLoading && !errorMessage && filteredModules.length === 0 ? (
-            <AppText variant="body" style={styles.feedbackText}>
-              No encontramos módulos con esa búsqueda.
-            </AppText>
+            <AnimatedEntry delay={360} triggerKey={animationKey}>
+              <AppText variant="body" style={styles.feedbackText}>
+                No encontramos módulos con esa búsqueda.
+              </AppText>
+            </AnimatedEntry>
           ) : null}
 
           {!isLoading && !errorMessage
-            ? filteredModules.map((module) => (
-                <ModuleCard
-                  key={module.id}
-                  module={module}
-                />
+            ? filteredModules.map((module, index) => (
+                <AnimatedEntry
+                  key={`${module.id}-${animationKey}`}
+                  delay={360 + index * 120}
+                  triggerKey={animationKey}
+                  style={styles.cardAnimationWrapper}
+                >
+                  <ModuleCard module={module} />
+                </AnimatedEntry>
               ))
             : null}
         </View>
@@ -132,7 +156,7 @@ const styles = StyleSheet.create({
   },
 
   topSpacer: {
-    height: 54,
+    height: 24,
   },
 
   modulesSection: {
@@ -149,5 +173,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 18,
     color: colors.textSecondary,
+  },
+
+  cardAnimationWrapper: {
+    width: '100%',
   },
 });
