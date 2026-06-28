@@ -20,25 +20,35 @@ export async function getHomeModules(): Promise<HomeModule[]> {
     method: 'GET',
   });
 
-  //console.log('Modules API response:', response);
-
   return response.modules.map(mapApiModuleToHomeModule);
 }
 
 function mapApiModuleToHomeModule(module: ApiModule): HomeModule {
+  const progress = 0;
+
   return {
     id: String(module.id),
     title: 'Módulo',
     subtitle: module.nombre,
-    description: getModuleDescription(module),
-    progress: 0,
+    description: getHomeModuleStatus(module.nombre, progress),
+    progress,
     icon: getModuleIcon(module.nombre),
+    lessons: module.lecciones.map((lesson) => ({
+      id: String(lesson.id),
+      title: lesson.titulo,
+    })),
   };
 }
 
-function getModuleDescription(module: ApiModule) {
-  if (module.nombre.toLowerCase().includes('palabra')) {
-    return 'Tu avance: 0%';
+function getHomeModuleStatus(moduleName: string, progress: number) {
+  const normalizedName = moduleName.toLowerCase();
+
+  if (progress > 0) {
+    return `Tu avance: ${progress}%`;
+  }
+
+  if (normalizedName.includes('palabra')) {
+    return `Tu avance: ${progress}%`;
   }
 
   return '¡Listo para comenzar!';

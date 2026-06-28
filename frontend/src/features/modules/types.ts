@@ -1,5 +1,10 @@
 export type HomeModuleIcon = 'words' | 'phrases';
 
+export type HomeModuleLesson = {
+  id: string;
+  title: string;
+};
+
 export type HomeModule = {
   id: string;
   title: string;
@@ -7,6 +12,7 @@ export type HomeModule = {
   description: string;
   progress: number;
   icon: HomeModuleIcon;
+  lessons: HomeModuleLesson[];
 };
 
 export type ApiLesson = {

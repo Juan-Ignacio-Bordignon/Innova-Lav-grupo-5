@@ -11,10 +11,13 @@ import { getHomeModules } from '../../modules/services/modulesService';
 import type { HomeModule } from '../../modules/types';
 import { HomeHeader } from '../components/HomeHeader';
 import { HomeSearchBar } from '../components/HomeSearchBar';
+import { useNavigation } from '@react-navigation/native';
+import { ROUTES } from '../../../constants/routes';
 
 export function Home() {
   const [searchValue, setSearchValue] = useState('');
   const [modules, setModules] = useState<HomeModule[]>([]);
+  const navigation = useNavigation<any>();
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [animationKey, setAnimationKey] = useState(0);
@@ -132,7 +135,18 @@ export function Home() {
                   triggerKey={animationKey}
                   style={styles.cardAnimationWrapper}
                 >
-                  <ModuleCard module={module} />
+                  <ModuleCard
+                    module={module}
+                    onPress={() =>
+                      navigation.navigate(ROUTES.MODULE_DETAIL, {
+                        moduleId: module.id,
+                        moduleName: module.subtitle,
+                        moduleDescription: module.description,
+                        moduleProgress: module.progress,
+                        lessons: module.lessons,
+                      })
+                    }
+                  />
                 </AnimatedEntry>
               ))
             : null}

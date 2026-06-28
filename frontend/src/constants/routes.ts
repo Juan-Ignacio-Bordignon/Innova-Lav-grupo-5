@@ -17,6 +17,7 @@ export const ROUTES = {
   REGISTER: 'Register',
 
   // 📚 Flujo de Aprendizaje / Core MVP
+  MODULE_DETAIL: 'ModuleDetail',
   LESSON: 'Lesson',
   EXERCISE: 'Exercise',
   FEEDBACK: 'Feedback',
@@ -39,6 +40,17 @@ export type RootStackParamList = {
   [ROUTES.REGISTER]: undefined;
 
   [ROUTES.HOME_TABS]: undefined;
+
+  [ROUTES.MODULE_DETAIL]: {
+    moduleId: string;
+    moduleName: string;
+    moduleDescription: string;
+    moduleProgress: number;
+    lessons: {
+      id: string;
+      title: string;
+    }[];
+  };
 
   [ROUTES.LESSON]: { lessonId: string };
   [ROUTES.EXERCISE]: { exerciseId: string };
