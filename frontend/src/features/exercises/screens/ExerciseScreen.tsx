@@ -1,5 +1,6 @@
 // src/features/exercises/screens/ExerciseScreen.tsx
 import React from 'react';
+import { HeaderLeccion } from '../../../components/layout/HeaderLeccion';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { ChevronLeft, Trophy, Bell, RotateCcw, Heart } from 'lucide-react-native';
 
@@ -15,35 +16,21 @@ import { exerciseProgressMock } from '../../../data/mocks/progressMocks';
 
 export const ExerciseScreen = () => {
   const { moduleName, currentQuestion, progressPercentage } = exerciseProgressMock;
-
+// Función para manejar el botón de atrás
+  const handleBack = () => {
+    console.log("Navegar atrás");
+  };
   return (
     <ScrollView className="flex-1 bg-white px-4 pt-8">
-      
-      {/* Barra superior */}
-      <View className="flex-row items-center justify-between mb-6">
-        <TouchableOpacity className="bg-primary rounded-full p-2">
-          <ChevronLeft color="#FFFFFF" size={24} />
-        </TouchableOpacity>
-        
-        <View className="items-center">
-          <AppText className="text-primary font-bold text-lg">Módulo:</AppText>
-          <AppText className="text-primary font-semibold text-base">{moduleName}</AppText>
-        </View>
-
-        <View className="flex-row gap-x-4">
-          <Trophy color="#194650" size={24} />
-          <Bell color="#194650" size={24} />
-        </View>
-      </View>
-
-      {/* Barra de progreso */}
-      <View className="h-2 w-full bg-gray-200 rounded-full mb-6">
-        <View 
-          className="h-full bg-primary rounded-full" 
-          style={{ width: `${progressPercentage}%` }} 
-        />
-      </View>
-
+      {/* AQUÍ IMPLEMENTAMOS EL HEADER REUTILIZABLE */}
+      <HeaderLeccion 
+        onBack={handleBack} 
+        tituloModulo={moduleName} 
+        categoria="Palabras"
+        progreso={progressPercentage / 100} 
+        disabledBack={true}
+      />
+     
       {/* Número de pregunta */}
       <AppText className="text-center text-primary font-bold text-xl mb-6">
         {currentQuestion}

@@ -1,8 +1,11 @@
 export const colors = {
-  primary: '#194650',      // 🆕 Actualizado con el color oficial de UX
+  primary: '#194650',
   secondary: '#DAB16D',
 
-  background: '#ECF0F1',
+  // 🆕 Agregamos tu color de fondo oficial
+  backgroundApp: '#F8F8F8', 
+  
+  background: '#ECF0F1', // Mantén este si lo usas en otros componentes
   surface: '#FFFFFF',
 
   border: '#BDC3C7',

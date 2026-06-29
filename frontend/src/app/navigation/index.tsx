@@ -5,6 +5,7 @@ import { HeaderButton, Text } from '@react-navigation/elements';
 import {
   createStaticNavigation,
 } from '@react-navigation/native';
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Image, View } from 'react-native';
 
@@ -61,46 +62,40 @@ const HomeTabs = createBottomTabNavigator({
 const RootStack = createNativeStackNavigator({
   initialRouteName: ROUTES.LOGIN,
   screens: {
-    // 🔐 Flujo de Autenticación
     [ROUTES.LOGIN]: {
-      screen: LoginScreen, //poralmente conecta directo al detalle del módulo para pruebas (Issue #4)
+      screen: LoginScreen,
       options: { headerShown: false },
     },
     [ROUTES.REGISTER]: {
       screen: RegisterScreen,
       options: { headerShown: false },
     },
-
-    // 📱 Flujo Principal con barra de pestañas abajo
     [ROUTES.HOME_TABS]: {
       screen: HomeTabs,
-      options: {
-        title: 'Home',
-        headerShown: false,
-      },
+      options: { title: 'Home', headerShown: false },
     },
-
-    // 📚 🆕 Flujo del núcleo de aprendizaje (En pantalla completa, por fuera de las pestañas)
     [ROUTES.LESSON]: {
       screen: LessonScreen,
       options: { title: 'Lección LSA' },
     },
+    // 💡 CORRECCIÓN AQUÍ: Estructura correcta de options
     [ROUTES.EXERCISE]: {
       screen: ExerciseScreen,
-      options: { title: 'Ejercicio' },
+      options: { 
+        title: 'Ejercicio',
+        headerShown: false // Esto quitará el encabezado nativo "Ejercicio"
+      },
     },
     [ROUTES.FEEDBACK]: {
       screen: FeedbackScreen,
       options: { headerShown: false },
     },
-
-    // 👤 Perfil y configuraciones del equipo
     [ROUTES.PROFILE]: {
       screen: Profile,
       linking: {
         path: ':user(@[a-zA-Z0-9-_]+)',
-        parse: { user: (value) => value.replace(/^@/, '') },
-        stringify: { user: (value) => `@${value}` },
+        parse: { user: (value: string) => value.replace(/^@/, '') },
+        stringify: { user: (value: string) => `@${value}` },
       },
     },
     [ROUTES.SETTINGS]: {
@@ -108,7 +103,7 @@ const RootStack = createNativeStackNavigator({
       options: ({ navigation }) => ({
         presentation: 'modal',
         headerRight: () => (
-          <HeaderButton onPress={navigation.goBack}>
+          <HeaderButton onPress={() => navigation.goBack()}>
             <Text>Close</Text>
           </HeaderButton>
         ),
@@ -122,11 +117,4 @@ const RootStack = createNativeStackNavigator({
   },
 });
 
-// Inicialización de la navegación global requerida por Expo
 export const Navigation = createStaticNavigation(RootStack);
-
-type RootStackType = typeof RootStack;
-
-declare module '@react-navigation/core' {
-  interface RootNavigator extends RootStackType {}
-}
