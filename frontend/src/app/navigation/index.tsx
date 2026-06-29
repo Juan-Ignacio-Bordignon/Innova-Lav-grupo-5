@@ -60,7 +60,7 @@ const HomeTabs = createBottomTabNavigator({
 
 // 2. Enrutador Maestro (RootNavigator) usando la API Estática de React Navigation 7
 const RootStack = createNativeStackNavigator({
-  initialRouteName: ROUTES.LOGIN,
+  initialRouteName: ROUTES.LOGIN, // Cambié a EXERCISE para pruebas rápidas
   screens: {
     [ROUTES.LOGIN]: {
       screen: LoginScreen,

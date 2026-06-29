@@ -1,68 +1,51 @@
 // src/features/exercises/screens/ExerciseScreen.tsx
 import React from 'react';
-import { HeaderLeccion } from '../../../components/layout/HeaderLeccion';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
-import { ChevronLeft, Trophy, Bell, RotateCcw, Heart } from 'lucide-react-native';
-
-// Componentes UI globales
+import { HeaderLeccion } from '../../../components/layout/HeaderLeccion';
 import { AppButton, AppText } from '../../../components/ui';
-
-// Componentes locales de la feature (Asegúrate de que existan)
 import { HandSignPointer } from '../components/HandSignPointer';
-import { AnswerOption } from '../components/AnswerOption';
-
-// Mock de datos (Asegúrate de que este archivo exporte 'exerciseProgressMock')
+import { colors } from '../../../constants/colors';
+import { IconRepetir } from '../../../assets/icons/IconRepetir';
+import { IconFavorito } from '../../../assets/icons/IconFavorito';
 import { exerciseProgressMock } from '../../../data/mocks/progressMocks';
 
 export const ExerciseScreen = () => {
   const { moduleName, currentQuestion, progressPercentage } = exerciseProgressMock;
-// Función para manejar el botón de atrás
-  const handleBack = () => {
-    console.log("Navegar atrás");
-  };
+
   return (
-    <ScrollView className="flex-1 bg-white px-4 pt-8">
-      {/* AQUÍ IMPLEMENTAMOS EL HEADER REUTILIZABLE */}
+    <ScrollView className="flex-1 bg-[#F8F8F8] px-4 pt-8">
       <HeaderLeccion 
-        onBack={handleBack} 
+        onBack={() => console.log("Atrás")} 
         tituloModulo={moduleName} 
         categoria="Palabras"
         progreso={progressPercentage / 100} 
         disabledBack={true}
       />
      
-      {/* Número de pregunta */}
-      <AppText className="text-center text-primary font-bold text-xl mb-6">
+      <AppText className="text-center text-primary font-bold text-xl my-6">
         {currentQuestion}
       </AppText>
 
-      {/* Contenedor del SVG (HandSignPointer) */}
-      <View className="items-center justify-center mb-8">
-        <HandSignPointer width={150} height={200} color="#194650" />
+      <View className="bg-white rounded-3xl p-8 items-center justify-center mx-2 shadow-sm border border-gray-100 mb-8">
+        <HandSignPointer width={150} height={200} color={colors.primary} />
       </View>
 
-      {/* Opciones de respuesta */}
-      <View className="w-full mb-8">
-        <AnswerOption optionNumber={1} text="Tristeza" state="default" />
-        <AnswerOption optionNumber={2} text="Enojo" state="default" />
-        <AnswerOption optionNumber={3} text="Cansancio" state="default" />
-      </View>
-
-      {/* Botones secundarios */}
       <View className="flex-row justify-center gap-x-6 mb-8">
-        <TouchableOpacity className="bg-white rounded-full p-4 border border-gray-100">
-          <RotateCcw color="#194650" size={24} />
+        <TouchableOpacity className="bg-white rounded-full p-4 border border-gray-100 shadow-sm">
+          <IconRepetir size={24} iconColor={colors.primary} />
         </TouchableOpacity>
-        <TouchableOpacity className="bg-primary rounded-full p-4">
-          <Heart color="#FFFFFF" size={24} />
+        <TouchableOpacity className="bg-white rounded-full p-4 border border-gray-100 shadow-sm">
+          <IconFavorito size={24} iconColor={colors.primary} />
         </TouchableOpacity>
       </View>
 
-      {/* Botón Principal */}
-      <AppButton 
-        title="Continuar lección" 
-        onPress={() => console.log("Continuar")}
-      />
+      <View className="mb-10">
+        <AppButton 
+          title="Continuar lección" 
+          onPress={() => console.log("Continuar")}
+          variant="primary"
+        />
+      </View>
     </ScrollView>
   );
 };
