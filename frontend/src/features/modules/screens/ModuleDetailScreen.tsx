@@ -1,94 +1,254 @@
 // src/features/modules/screens/ModuleDetailScreen.tsx
-import React from 'react';
-import { IconPalabras } from '../../../assets/icons/IconPalabras'; // Importación nombrada del ícono específico
-import { View, TouchableOpacity, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; 
-import { useNavigation } from '@react-navigation/native';
-import { MOCK_PALABRAS_DETAIL, SubCategoryItem } from '../../../data/mocks/homeMocks';
-import { AppText } from '../../../components/ui/AppText'; 
-import { styles } from './ModuleDetailScreen.styles';
-import { colors } from '../../../constants/colors'; 
 
-// 📥 Importamos de forma nombrada tus 4 componentes de código nativo TSX puros
-import { IconDeletrear } from '../../../assets/icons/IconDeletrear';
-import { IconAgenda } from '../../../assets/icons/IconAgenda';
-import { IconNumeros } from '../../../assets/icons/IconNumeros';
-import { IconSentimientos } from '../../../assets/icons/IconSentimientos';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from '@react-navigation/native';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, Pressable, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import IconModulePhrases from '../../../assets/icons/ux/modules/IconModulePhrases.svg';
+import IconModuleWords from '../../../assets/icons/ux/modules/IconModuleWords.svg';
+import IconStatusCompleted from '../../../assets/icons/ux/status/IconStatusCompleted.svg';
+import IconStatusInProgress from '../../../assets/icons/ux/status/IconStatusInProgress.svg';
+import IconStatusNotStarted from '../../../assets/icons/ux/status/IconStatusNotStarted.svg';
+import { AnimatedEntry, AppText } from '../../../components/ui';
+import { colors } from '../../../constants/colors';
+import { ROUTES, type RootStackParamList } from '../../../constants/routes';
+import { styles } from './ModuleDetailScreen.styles';
+
+type ModuleDetailRouteProp = RouteProp<
+  RootStackParamList,
+  typeof ROUTES.MODULE_DETAIL
+>;
+
+type LessonStatus = 'completed' | 'inProgress' | 'notStarted';
+
+type LessonItem = {
+  id: string;
+  title: string;
+  status: LessonStatus;
+};
 
 export const ModuleDetailScreen = () => {
-  const navigation = useNavigation();
-  const { title, description, items } = MOCK_PALABRAS_DETAIL;
+  const navigation = useNavigation<any>();
+  const route = useRoute<ModuleDetailRouteProp>();
+  const [animationKey, setAnimationKey] = useState(0);
 
-  // Renderizado dinámico y seguro usando los componentes matemáticos de UX
-  const renderIcon = (iconName: string) => {
-    // Los íconos en la lista siempre van con isCompleted={false} o según su estado real
-    const iconProps = { width: 24, height: 24, fill: colors.primary, isCompleted: false };
+  const {
+    moduleId,
+    moduleName,
+    moduleDescription,
+    moduleProgress,
+    lessons,
+  } = route.params;
 
-    switch (iconName) {
-      case 'font':
-        return <IconDeletrear {...iconProps} />;
-      case 'calendar':
-        return <IconAgenda {...iconProps} />;
-      case 'numeric':
-        return <IconNumeros {...iconProps} />; 
-      case 'shield-heart':
-        return <IconSentimientos {...iconProps} />;
+  useFocusEffect(
+    useCallback(() => {
+      setAnimationKey((value) => value + 1);
+    }, [])
+  );
+
+  const safeProgress = Math.max(0, Math.min(moduleProgress, 100));
+  const isWordsModule = moduleName.toLowerCase().includes('palabra');
+
+  const items: LessonItem[] = useMemo(
+    () =>
+      lessons.map((lesson, index) => ({
+        id: lesson.id,
+        title: lesson.title,
+        status: getTemporaryLessonStatus(index),
+      })),
+    [lessons]
+  );
+
+  const renderStatusIcon = (status: LessonStatus) => {
+    switch (status) {
+      case 'completed':
+        return <IconStatusCompleted width={34} height={34} />;
+
+      case 'inProgress':
+        return <IconStatusInProgress width={34} height={34} />;
+
+      case 'notStarted':
       default:
-        return null;
+        return <IconStatusNotStarted width={34} height={34} />;
     }
   };
 
-  const renderSubCategoryItem = ({ item }: { item: SubCategoryItem }) => (
-    <TouchableOpacity 
-      style={styles.itemCard}
-      onPress={() => navigation.navigate('Exercise' as never)} 
+  const renderLessonItem = ({
+    item,
+    index,
+  }: {
+    item: LessonItem;
+    index: number;
+  }) => (
+    <AnimatedEntry
+      delay={360 + index * 120}
+      triggerKey={animationKey}
+      style={styles.categoryAnimationWrapper}
     >
-      <View style={styles.itemLeftContainer}>
-        <View style={styles.iconPlaceholder}>
-          {renderIcon(item.iconName)}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Entrar a ${item.title}`}
+        onPress={() =>
+          navigation.navigate(ROUTES.LESSON, {
+            lessonId: item.id,
+          })
+        }
+        style={({ pressed }) => [
+          styles.categoryCard,
+          pressed && styles.categoryCardPressed,
+        ]}
+      >
+        <View style={styles.categoryLeftContainer}>
+          <View style={styles.categoryIconContainer}>
+            {renderStatusIcon(item.status)}
+          </View>
+
+          <AppText style={styles.categoryTitle}>{item.title}</AppText>
         </View>
-        <View style={styles.itemTextContainer}>
-          <AppText style={styles.itemTitle}>{item.title}</AppText>
-          <AppText style={styles.itemStatus}>{item.status}</AppText>
-        </View>
-      </View>
-      <AppText style={styles.arrow}>›</AppText>
-    </TouchableOpacity>
+
+        <MaterialIcons
+          name="keyboard-arrow-right"
+          size={28}
+          color={colors.textSecondary}
+        />
+      </Pressable>
+    </AnimatedEntry>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Encabezado */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <AppText style={styles.backButtonText}>‹</AppText>
-        </TouchableOpacity>
-        <View style={styles.headerTitleContainer}>
-          <AppText style={styles.headerSubtitle}>Categoría:</AppText>
-          <AppText style={styles.headerTitle}>{title}</AppText>
-        </View>
-      </View>
+    <SafeAreaView edges={['top']} style={styles.container}>
+      <AnimatedEntry delay={80} triggerKey={animationKey}>
+        <View style={styles.header}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Volver"
+            onPress={() => navigation.goBack()}
+            style={({ pressed }) => [
+              styles.headerCircleButton,
+              pressed && styles.pressed,
+            ]}
+          >
+            <MaterialIcons
+              name="keyboard-arrow-left"
+              size={34}
+              color={colors.primary}
+            />
+          </Pressable>
 
-     {/* Tarjeta Informativa Principal */}
-      <View style={styles.mainCard}>
-        {/* Reemplazamos el Placeholder por el componente SVG real */}
-        <View style={styles.mainCardIconContainer}> 
-          <IconPalabras width={80} height={80} /> 
-        </View>
-        <View style={styles.mainCardTextContainer}>
-          <AppText style={styles.mainCardTitle}>{title}</AppText>
-          <AppText style={styles.mainCardDescription}>{description}</AppText>
-        </View>
-      </View>
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ver logros"
+              style={({ pressed }) => [
+                styles.headerIconButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <MaterialIcons
+                name="emoji-events"
+                size={25}
+                color={colors.textLight}
+              />
+            </Pressable>
 
-      {/* Listado de Lecciones */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ver notificaciones"
+              style={({ pressed }) => [
+                styles.headerIconButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <MaterialIcons
+                name="notifications-none"
+                size={25}
+                color={colors.textLight}
+              />
+            </Pressable>
+          </View>
+        </View>
+      </AnimatedEntry>
+
+      <AnimatedEntry delay={180} triggerKey={animationKey}>
+        <View style={styles.mainCard}>
+          <View style={styles.mainIconBox}>
+            {isWordsModule ? (
+              <IconModuleWords width={112} height={92} />
+            ) : (
+              <IconModulePhrases width={110} height={90} />
+            )}
+          </View>
+
+          <View style={styles.mainCardContent}>
+            <AppText style={styles.mainCardTitle}>{moduleName}</AppText>
+
+            <AppText style={styles.mainCardDescription}>
+              {getModuleDetailDescription(moduleName, moduleDescription)}
+            </AppText>
+
+            <AppText style={styles.progressLabel}>
+              Tu avance: {safeProgress}%
+            </AppText>
+
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${safeProgress}%` as any },
+                ]}
+              />
+            </View>
+          </View>
+        </View>
+      </AnimatedEntry>
+
+      <AnimatedEntry delay={280} triggerKey={animationKey}>
+        <AppText style={styles.sectionTitle}>Categorías</AppText>
+      </AnimatedEntry>
+
       <FlatList
         data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={renderSubCategoryItem}
+        keyExtractor={(item) => `${moduleId}-${item.id}`}
+        renderItem={renderLessonItem}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
 };
+
+function getTemporaryLessonStatus(index: number): LessonStatus {
+  if (index === 0 || index === 1) {
+    return 'completed';
+  }
+
+  if (index === 2) {
+    return 'inProgress';
+  }
+
+  return 'notStarted';
+}
+
+function getModuleDetailDescription(
+  moduleName: string,
+  fallbackDescription: string
+) {
+  const normalizedName = moduleName.toLowerCase();
+
+  if (normalizedName.includes('palabra')) {
+    return 'Vocabulario para situaciones diarias.';
+  }
+
+  if (normalizedName.includes('frase')) {
+    return 'Frases útiles para conversaciones diarias.';
+  }
+
+  return fallbackDescription;
+}

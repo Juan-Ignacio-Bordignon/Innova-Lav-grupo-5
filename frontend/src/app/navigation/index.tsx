@@ -78,6 +78,12 @@ const RootStack = createNativeStackNavigator({
         headerShown: false,
       },
     },
+    [ROUTES.MODULE_DETAIL]: {
+      screen: ModuleDetailScreen,
+      options: {
+        headerShown: false,
+      },
+    },
 
     // 📚 🆕 Flujo del núcleo de aprendizaje (En pantalla completa, por fuera de las pestañas)
     [ROUTES.LESSON]: {
