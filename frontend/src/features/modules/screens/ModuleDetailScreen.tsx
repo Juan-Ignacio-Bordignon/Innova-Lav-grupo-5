@@ -7,8 +7,23 @@ import {
   useRoute,
   type RouteProp,
 } from '@react-navigation/native';
-import { useCallback, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { FlatList, Pressable, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import IconModulePhrases from '../../../assets/icons/ux/modules/IconModulePhrases.svg';
@@ -16,7 +31,12 @@ import IconModuleWords from '../../../assets/icons/ux/modules/IconModuleWords.sv
 import IconStatusCompleted from '../../../assets/icons/ux/status/IconStatusCompleted.svg';
 import IconStatusInProgress from '../../../assets/icons/ux/status/IconStatusInProgress.svg';
 import IconStatusNotStarted from '../../../assets/icons/ux/status/IconStatusNotStarted.svg';
-import { AnimatedEntry, AppText } from '../../../components/ui';
+import {
+  AnimatedEntry,
+  AnimatedProgressBar,
+  AppText,
+  AnimatedPop,
+} from '../../../components/ui';
 import { colors } from '../../../constants/colors';
 import { ROUTES, type RootStackParamList } from '../../../constants/routes';
 import { styles } from './ModuleDetailScreen.styles';
@@ -61,7 +81,7 @@ export const ModuleDetailScreen = () => {
       lessons.map((lesson, index) => ({
         id: lesson.id,
         title: lesson.title,
-        status: getTemporaryLessonStatus(index),
+        status: lesson.status ?? getTemporaryLessonStatus(index),
       })),
     [lessons]
   );
@@ -107,7 +127,12 @@ export const ModuleDetailScreen = () => {
       >
         <View style={styles.categoryLeftContainer}>
           <View style={styles.categoryIconContainer}>
-            {renderStatusIcon(item.status)}
+            <AnimatedPop
+              delay={520 + index * 120}
+              triggerKey={animationKey}
+            >
+              {renderStatusIcon(item.status)}
+            </AnimatedPop>
           </View>
 
           <AppText style={styles.categoryTitle}>{item.title}</AppText>
@@ -197,14 +222,14 @@ export const ModuleDetailScreen = () => {
               Tu avance: {safeProgress}%
             </AppText>
 
-            <View style={styles.progressTrack}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${safeProgress}%` as any },
-                ]}
-              />
-            </View>
+            <AnimatedProgressBar
+              progress={safeProgress}
+              triggerKey={animationKey}
+              delay={360}
+              duration={850}
+              trackStyle={styles.progressTrack}
+              fillStyle={styles.progressFill}
+            />
           </View>
         </View>
       </AnimatedEntry>
@@ -223,6 +248,42 @@ export const ModuleDetailScreen = () => {
     </SafeAreaView>
   );
 };
+
+function AnimatedStatusIcon({
+  children,
+  delay,
+  triggerKey,
+}: {
+  children: ReactNode;
+  delay: number;
+  triggerKey: number;
+}) {
+  const scale = useSharedValue(0.75);
+
+  useEffect(() => {
+    scale.value = 0.75;
+
+    scale.value = withDelay(
+      delay,
+      withSequence(
+        withTiming(1.18, {
+          duration: 170,
+          easing: Easing.out(Easing.cubic),
+        }),
+        withSpring(1, {
+          damping: 8,
+          stiffness: 170,
+        })
+      )
+    );
+  }, [delay, scale, triggerKey]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
+}
 
 function getTemporaryLessonStatus(index: number): LessonStatus {
   if (index === 0 || index === 1) {
