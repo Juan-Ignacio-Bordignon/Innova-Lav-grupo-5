@@ -49,6 +49,7 @@ export type RootStackParamList = {
     lessons: {
       id: string;
       title: string;
+      status?: 'completed' | 'inProgress' | 'notStarted';
     }[];
   };
 

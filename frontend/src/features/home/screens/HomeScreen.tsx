@@ -1,26 +1,38 @@
-import { useFocusEffect } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedEntry, AppText } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
-import { MOCK_USER_PROFILE } from '../../../data/mocks/userMocks';
+import { ROUTES } from '../../../constants/routes';
+import { getCurrentUser } from '../../user/services/userService';
 import { ModuleCard } from '../../modules/components/ModuleCard';
 import { getHomeModules } from '../../modules/services/modulesService';
 import type { HomeModule } from '../../modules/types';
 import { HomeHeader } from '../components/HomeHeader';
 import { HomeSearchBar } from '../components/HomeSearchBar';
-import { useNavigation } from '@react-navigation/native';
-import { ROUTES } from '../../../constants/routes';
 
 export function Home() {
   const [searchValue, setSearchValue] = useState('');
   const [modules, setModules] = useState<HomeModule[]>([]);
-  const navigation = useNavigation<any>();
+  const [userName, setUserName] = useState('Usuario');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [animationKey, setAnimationKey] = useState(0);
+
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     let isMounted = true;
@@ -30,10 +42,14 @@ export function Home() {
         setIsLoading(true);
         setErrorMessage('');
 
-        const homeModules = await getHomeModules();
+        const [homeModules, currentUser] = await Promise.all([
+          getHomeModules(),
+          getCurrentUser().catch(() => null),
+        ]);
 
         if (isMounted) {
           setModules(homeModules);
+          setUserName(currentUser?.usuario.username ?? 'Usuario');
         }
       } catch (error) {
         if (isMounted) {
@@ -84,7 +100,7 @@ export function Home() {
 
         <AnimatedEntry delay={80} triggerKey={animationKey}>
           <HomeHeader
-            userName={MOCK_USER_PROFILE.name}
+            userName={userName}
             notificationsCount={1}
           />
         </AnimatedEntry>
@@ -105,9 +121,10 @@ export function Home() {
 
           {isLoading ? (
             <AnimatedEntry delay={360} triggerKey={animationKey}>
-              <AppText variant="body" style={styles.feedbackText}>
-                Cargando módulos...
-              </AppText>
+              <View>
+                <HomeModuleSkeletonCard delay={0} />
+                <HomeModuleSkeletonCard delay={160} />
+              </View>
             </AnimatedEntry>
           ) : null}
 
@@ -137,11 +154,13 @@ export function Home() {
                 >
                   <ModuleCard
                     module={module}
+                    animationKey={animationKey}
                     onPress={() =>
                       navigation.navigate(ROUTES.MODULE_DETAIL, {
                         moduleId: module.id,
                         moduleName: module.subtitle,
-                        moduleDescription: module.description,
+                        moduleDescription:
+                          module.detailDescription ?? module.description,
                         moduleProgress: module.progress,
                         lessons: module.lessons,
                       })
@@ -153,6 +172,41 @@ export function Home() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function HomeModuleSkeletonCard({ delay = 0 }: { delay?: number }) {
+  const opacity = useSharedValue(0.45);
+
+  useEffect(() => {
+    opacity.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(1, {
+          duration: 780,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        -1,
+        true
+      )
+    );
+  }, [delay, opacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.skeletonCard, animatedStyle]}>
+      <View style={styles.skeletonIconBox} />
+
+      <View style={styles.skeletonContent}>
+        <View style={styles.skeletonTitleLine} />
+        <View style={styles.skeletonSubtitleLine} />
+        <View style={styles.skeletonDescriptionLine} />
+        <View style={styles.skeletonProgressTrack} />
+      </View>
+    </Animated.View>
   );
 }
 
@@ -191,5 +245,69 @@ const styles = StyleSheet.create({
 
   cardAnimationWrapper: {
     width: '100%',
+  },
+
+  skeletonCard: {
+    width: '100%',
+    minHeight: 158,
+    borderRadius: 24,
+    backgroundColor: colors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 22,
+
+    shadowColor: colors.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+
+  skeletonIconBox: {
+    width: 132,
+    height: 132,
+    borderRadius: 14,
+    backgroundColor: '#DDE4E6',
+    marginRight: 14,
+  },
+
+  skeletonContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+
+  skeletonTitleLine: {
+    width: '52%',
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#DDE4E6',
+    marginBottom: 10,
+  },
+
+  skeletonSubtitleLine: {
+    width: '72%',
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#DDE4E6',
+    marginBottom: 20,
+  },
+
+  skeletonDescriptionLine: {
+    width: '88%',
+    height: 14,
+    borderRadius: 8,
+    backgroundColor: '#E5EAEC',
+    marginBottom: 14,
+  },
+
+  skeletonProgressTrack: {
+    width: '100%',
+    height: 13,
+    borderRadius: 8,
+    backgroundColor: '#D8D8D8',
   },
 });

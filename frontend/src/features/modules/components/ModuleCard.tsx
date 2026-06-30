@@ -8,6 +8,7 @@ import {
 import { AppText } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
 import type { HomeModule } from '../types';
+import { AnimatedProgressBar } from '../../../components/ui';
 
 import IconModulePhrases from '../../../assets/icons/ux/modules/IconModulePhrases.svg';
 import IconModuleWords from '../../../assets/icons/ux/modules/IconModuleWords.svg';
@@ -15,9 +16,10 @@ import IconModuleWords from '../../../assets/icons/ux/modules/IconModuleWords.sv
 type ModuleCardProps = {
   module: HomeModule;
   onPress?: () => void;
+  animationKey?: number;
 };
 
-export function ModuleCard({ module, onPress }: ModuleCardProps) {
+export function ModuleCard({ module, onPress, animationKey = 0, }: ModuleCardProps) {
   const safeProgress = Math.max(0, Math.min(module.progress, 100));
   const progressWidth = `${safeProgress}%` as DimensionValue;
 
@@ -52,14 +54,14 @@ export function ModuleCard({ module, onPress }: ModuleCardProps) {
           {module.description}
         </AppText>
 
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: progressWidth },
-            ]}
-          />
-        </View>
+        <AnimatedProgressBar
+          progress={module.progress}
+          triggerKey={animationKey}
+          delay={450}
+          duration={850}
+          trackStyle={styles.progressTrack}
+          fillStyle={styles.progressFill}
+        />
       </View>
     </Pressable>
   );
