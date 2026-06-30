@@ -1,4 +1,5 @@
 // src/components/ui/AnimatedPop.tsx
+//animated pop effect for react native using react-native-reanimated
 
 import { useEffect, type ReactNode } from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
