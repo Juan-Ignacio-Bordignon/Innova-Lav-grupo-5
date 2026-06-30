@@ -7,23 +7,8 @@ import {
   useRoute,
   type RouteProp,
 } from '@react-navigation/native';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSequence,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import IconModulePhrases from '../../../assets/icons/ux/modules/IconModulePhrases.svg';
@@ -38,7 +23,11 @@ import {
   AnimatedPop,
 } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
-import { ROUTES, type RootStackParamList } from '../../../constants/routes';
+import {
+  ROUTES,
+  type LearningStatus,
+  type RootStackParamList,
+} from '../../../constants/routes';
 import { styles } from './ModuleDetailScreen.styles';
 
 type ModuleDetailRouteProp = RouteProp<
@@ -46,12 +35,10 @@ type ModuleDetailRouteProp = RouteProp<
   typeof ROUTES.MODULE_DETAIL
 >;
 
-type LessonStatus = 'completed' | 'inProgress' | 'notStarted';
-
 type LessonItem = {
   id: string;
   title: string;
-  status: LessonStatus;
+  status: LearningStatus;
 };
 
 export const ModuleDetailScreen = () => {
@@ -86,7 +73,7 @@ export const ModuleDetailScreen = () => {
     [lessons]
   );
 
-  const renderStatusIcon = (status: LessonStatus) => {
+  const renderStatusIcon = (status: LearningStatus) => {
     switch (status) {
       case 'completed':
         return <IconStatusCompleted width={34} height={34} />;
@@ -117,7 +104,12 @@ export const ModuleDetailScreen = () => {
         accessibilityLabel={`Entrar a ${item.title}`}
         onPress={() =>
           navigation.navigate(ROUTES.LESSON, {
+            moduleId,
+            moduleName,
             lessonId: item.id,
+            lessonTitle: item.title,
+            lessonStatus: item.status,
+            moduleProgress: safeProgress,
           })
         }
         style={({ pressed }) => [
@@ -127,10 +119,7 @@ export const ModuleDetailScreen = () => {
       >
         <View style={styles.categoryLeftContainer}>
           <View style={styles.categoryIconContainer}>
-            <AnimatedPop
-              delay={520 + index * 120}
-              triggerKey={animationKey}
-            >
+            <AnimatedPop delay={520 + index * 120} triggerKey={animationKey}>
               {renderStatusIcon(item.status)}
             </AnimatedPop>
           </View>
@@ -249,43 +238,7 @@ export const ModuleDetailScreen = () => {
   );
 };
 
-function AnimatedStatusIcon({
-  children,
-  delay,
-  triggerKey,
-}: {
-  children: ReactNode;
-  delay: number;
-  triggerKey: number;
-}) {
-  const scale = useSharedValue(0.75);
-
-  useEffect(() => {
-    scale.value = 0.75;
-
-    scale.value = withDelay(
-      delay,
-      withSequence(
-        withTiming(1.18, {
-          duration: 170,
-          easing: Easing.out(Easing.cubic),
-        }),
-        withSpring(1, {
-          damping: 8,
-          stiffness: 170,
-        })
-      )
-    );
-  }, [delay, scale, triggerKey]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
-}
-
-function getTemporaryLessonStatus(index: number): LessonStatus {
+function getTemporaryLessonStatus(index: number): LearningStatus {
   if (index === 0 || index === 1) {
     return 'completed';
   }
