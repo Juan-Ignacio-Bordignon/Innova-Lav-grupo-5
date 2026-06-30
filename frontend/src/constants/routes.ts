@@ -26,6 +26,8 @@ export const ROUTES = {
   HOME_TABS: 'HomeTabs',
 } as const;
 
+export type LearningStatus = 'completed' | 'inProgress' | 'notStarted';
+
 export type RootStackParamList = {
   [ROUTES.HOME]: undefined;
   [ROUTES.FAVORITES]: undefined;
@@ -49,11 +51,28 @@ export type RootStackParamList = {
     lessons: {
       id: string;
       title: string;
-      status?: 'completed' | 'inProgress' | 'notStarted';
+      status?: LearningStatus;
     }[];
   };
 
-  [ROUTES.LESSON]: { lessonId: string };
-  [ROUTES.EXERCISE]: { exerciseId: string };
-  [ROUTES.FEEDBACK]: { isCorrect: boolean; nextRoute: string };
+  [ROUTES.LESSON]: {
+    moduleId: string;
+    moduleName: string;
+    lessonId: string;
+    lessonTitle: string;
+    lessonStatus?: LearningStatus;
+    moduleProgress?: number;
+  };
+
+  [ROUTES.EXERCISE]: {
+    exerciseId: string;
+    moduleId?: string;
+    lessonId?: string;
+    exerciseTitle?: string;
+  };
+
+  [ROUTES.FEEDBACK]: {
+    isCorrect: boolean;
+    nextRoute: string;
+  };
 };
