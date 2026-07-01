@@ -6,7 +6,7 @@ export type HomeModuleLesson = {
 };
 
 export type HomeModule = {
-  id: string;
+  moduleId: string;
   title: string;
   subtitle: string;
   description: string;

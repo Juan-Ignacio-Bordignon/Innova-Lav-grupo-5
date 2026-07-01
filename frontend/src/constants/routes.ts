@@ -1,5 +1,7 @@
 // src/constants/routes.ts
 
+import { HomeModule } from "../features/modules/types";
+
 export const ROUTES = {
   // 🧭 Pantallas de la barra de pestañas (Tabs)
   HOME: 'Home',
@@ -46,6 +48,8 @@ export type RootStackParamList = {
     moduleName: string;
     moduleDescription: string;
     moduleProgress: number;
+    moduleData?: HomeModule;
+  
     lessons: {
       id: string;
       title: string;

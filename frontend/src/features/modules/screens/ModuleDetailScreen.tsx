@@ -1,51 +1,34 @@
 // src/features/modules/screens/ModuleDetailScreen.tsx
-
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-  type RouteProp,
-} from '@react-navigation/native';
-import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ModuleFooter } from '../../../components/layout/ModuleFooter';
+import { HeaderLeccion } from '../../../components/layout/HeaderLeccion';
+import { AnimatedEntry, AppText, LessonButton } from '../../../components/ui';
+import { ROUTES, type RootStackParamList } from '../../../constants/routes';
+import { MOCK_MODULE_DETAILS } from '../../../data/mocks/moduleMocks';
+import { styles } from './ModuleDetailScreen.styles';
 
 import IconModulePhrases from '../../../assets/icons/ux/modules/IconModulePhrases.svg';
 import IconModuleWords from '../../../assets/icons/ux/modules/IconModuleWords.svg';
-import IconStatusCompleted from '../../../assets/icons/ux/status/IconStatusCompleted.svg';
-import IconStatusInProgress from '../../../assets/icons/ux/status/IconStatusInProgress.svg';
-import IconStatusNotStarted from '../../../assets/icons/ux/status/IconStatusNotStarted.svg';
-import { AnimatedEntry, AppText } from '../../../components/ui';
-import { colors } from '../../../constants/colors';
-import { ROUTES, type RootStackParamList } from '../../../constants/routes';
-import { styles } from './ModuleDetailScreen.styles';
 
-type ModuleDetailRouteProp = RouteProp<
-  RootStackParamList,
-  typeof ROUTES.MODULE_DETAIL
->;
-
-type LessonStatus = 'completed' | 'inProgress' | 'notStarted';
-
-type LessonItem = {
-  id: string;
-  title: string;
-  status: LessonStatus;
-};
+type ModuleDetailRouteProp = RouteProp<RootStackParamList, typeof ROUTES.MODULE_DETAIL>;
 
 export const ModuleDetailScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<ModuleDetailRouteProp>();
   const [animationKey, setAnimationKey] = useState(0);
 
-  const {
-    moduleId,
-    moduleName,
-    moduleDescription,
-    moduleProgress,
-    lessons,
-  } = route.params;
+  // Obtenemos los datos con fallback al mock
+  const moduleData = route.params?.moduleData ?? MOCK_MODULE_DETAILS;
+  const { 
+ moduleId: moduleId, // <--- Aquí estás renombrando el 'id' del objeto a 'moduleId'
+  title, 
+  description, 
+  progress, 
+  lessons 
+} = moduleData;
 
   useFocusEffect(
     useCallback(() => {
@@ -53,202 +36,68 @@ export const ModuleDetailScreen = () => {
     }, [])
   );
 
-  const safeProgress = Math.max(0, Math.min(moduleProgress, 100));
-  const isWordsModule = moduleName.toLowerCase().includes('palabra');
+  const safeProgress = Math.max(0, Math.min(progress, 100));
+  const isWordsModule = title.toLowerCase().includes('palabra');
 
-  const items: LessonItem[] = useMemo(
-    () =>
-      lessons.map((lesson, index) => ({
-        id: lesson.id,
-        title: lesson.title,
-        status: getTemporaryLessonStatus(index),
-      })),
-    [lessons]
-  );
-
-  const renderStatusIcon = (status: LessonStatus) => {
-    switch (status) {
-      case 'completed':
-        return <IconStatusCompleted width={34} height={34} />;
-
-      case 'inProgress':
-        return <IconStatusInProgress width={34} height={34} />;
-
-      case 'notStarted':
-      default:
-        return <IconStatusNotStarted width={34} height={34} />;
-    }
-  };
-
-  const renderLessonItem = ({
-    item,
-    index,
-  }: {
-    item: LessonItem;
-    index: number;
-  }) => (
+  const renderLessonItem = ({ item, index }: { item: any, index: number }) => (
     <AnimatedEntry
       delay={360 + index * 120}
       triggerKey={animationKey}
       style={styles.categoryAnimationWrapper}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Entrar a ${item.title}`}
-        onPress={() =>
-          navigation.navigate(ROUTES.LESSON, {
-            lessonId: item.id,
-          })
-        }
-        style={({ pressed }) => [
-          styles.categoryCard,
-          pressed && styles.categoryCardPressed,
-        ]}
-      >
-        <View style={styles.categoryLeftContainer}>
-          <View style={styles.categoryIconContainer}>
-            {renderStatusIcon(item.status)}
-          </View>
-
-          <AppText style={styles.categoryTitle}>{item.title}</AppText>
-        </View>
-
-        <MaterialIcons
-          name="keyboard-arrow-right"
-          size={28}
-          color={colors.textSecondary}
-        />
-      </Pressable>
+      <LessonButton 
+        title={item.title} 
+        status={item.status}
+        onPress={() => navigation.navigate(ROUTES.LESSON, { lessonId: item.id })}
+      />
     </AnimatedEntry>
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
-      <AnimatedEntry delay={80} triggerKey={animationKey}>
-        <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Volver"
-            onPress={() => navigation.goBack()}
-            style={({ pressed }) => [
-              styles.headerCircleButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <MaterialIcons
-              name="keyboard-arrow-left"
-              size={34}
-              color={colors.primary}
-            />
-          </Pressable>
+    <View style={styles.container}>
+      <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+        <FlatList
+          data={lessons}
+          keyExtractor={(item) => `${moduleId}-${item.id}`}
+          renderItem={renderLessonItem}
+          contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <>
+              {/* Header Reutilizable */}
+              <AnimatedEntry delay={100} triggerKey={animationKey}>
+                <HeaderLeccion 
+                  onBack={() => navigation.goBack()}
+                  tituloModulo={title}
+                  categoria={title}
+                  progreso={safeProgress}
+                />
+              </AnimatedEntry>
 
-          <View style={styles.headerActions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver logros"
-              style={({ pressed }) => [
-                styles.headerIconButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <MaterialIcons
-                name="emoji-events"
-                size={25}
-                color={colors.textLight}
-              />
-            </Pressable>
+              {/* Tarjeta Principal */}
+              <AnimatedEntry delay={180} triggerKey={animationKey}>
+                <View style={styles.mainCard}>
+                  <View style={styles.mainIconBox}>
+                    {isWordsModule ? (
+                      <IconModuleWords width={112} height={92} />
+                    ) : (
+                      <IconModulePhrases width={110} height={90} />
+                    )}
+                  </View>
+                  <View style={styles.mainCardContent}>
+                    <AppText style={styles.mainCardTitle}>{title}</AppText>
+                    <AppText style={styles.mainCardDescription}>{description}</AppText>
+                  </View>
+                </View>
+              </AnimatedEntry>
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver notificaciones"
-              style={({ pressed }) => [
-                styles.headerIconButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <MaterialIcons
-                name="notifications-none"
-                size={25}
-                color={colors.textLight}
-              />
-            </Pressable>
-          </View>
-        </View>
-      </AnimatedEntry>
-
-      <AnimatedEntry delay={180} triggerKey={animationKey}>
-        <View style={styles.mainCard}>
-          <View style={styles.mainIconBox}>
-            {isWordsModule ? (
-              <IconModuleWords width={112} height={92} />
-            ) : (
-              <IconModulePhrases width={110} height={90} />
-            )}
-          </View>
-
-          <View style={styles.mainCardContent}>
-            <AppText style={styles.mainCardTitle}>{moduleName}</AppText>
-
-            <AppText style={styles.mainCardDescription}>
-              {getModuleDetailDescription(moduleName, moduleDescription)}
-            </AppText>
-
-            <AppText style={styles.progressLabel}>
-              Tu avance: {safeProgress}%
-            </AppText>
-
-            <View style={styles.progressTrack}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${safeProgress}%` as any },
-                ]}
-              />
-            </View>
-          </View>
-        </View>
-      </AnimatedEntry>
-
-      <AnimatedEntry delay={280} triggerKey={animationKey}>
-        <AppText style={styles.sectionTitle}>Categorías</AppText>
-      </AnimatedEntry>
-
-      <FlatList
-        data={items}
-        keyExtractor={(item) => `${moduleId}-${item.id}`}
-        renderItem={renderLessonItem}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
-    </SafeAreaView>
+              <AppText style={styles.sectionTitle}>Categorías</AppText>
+            </>
+          }
+        />
+      </SafeAreaView>
+      
+     <ModuleFooter /> {/* ¡Ahora sí, renderizado sin errores! */}
+    </View>
   );
 };
-
-function getTemporaryLessonStatus(index: number): LessonStatus {
-  if (index === 0 || index === 1) {
-    return 'completed';
-  }
-
-  if (index === 2) {
-    return 'inProgress';
-  }
-
-  return 'notStarted';
-}
-
-function getModuleDetailDescription(
-  moduleName: string,
-  fallbackDescription: string
-) {
-  const normalizedName = moduleName.toLowerCase();
-
-  if (normalizedName.includes('palabra')) {
-    return 'Vocabulario para situaciones diarias.';
-  }
-
-  if (normalizedName.includes('frase')) {
-    return 'Frases útiles para conversaciones diarias.';
-  }
-
-  return fallbackDescription;
-}
