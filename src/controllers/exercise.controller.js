@@ -7,12 +7,7 @@ const prisma = new PrismaClient();
 export const getExercises = async (req, res) => {
   try {
     const { moduleId, lessonId } = req.params;
-    const LessonExercises = await prisma.ejercicio.findMany({
-      where: {
-        lessonId: parseInt(lessonId),
-      },
-    });
-
+    const LessonExercises = await getExercisesBylessonId(lessonId);
     if (!LessonExercises)
       return res.status(404).json({
         error: "No se pudo obtener los ejercicios de la lección especificada",
@@ -31,3 +26,11 @@ export const getExercises = async (req, res) => {
     });
   }
 };
+
+function getExercisesBylessonId(lessonId) {
+  return prisma.ejercicio.findMany({
+    where: {
+      lessonId: parseInt(lessonId),
+    },
+  });
+}
