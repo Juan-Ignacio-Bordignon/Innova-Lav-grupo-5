@@ -8,7 +8,7 @@ export const getExercises = async (req, res) => {
   try {
     const { moduleId, lessonId } = req.params;
     const LessonExercises = await getExercisesBylessonId(lessonId);
-    if (!LessonExercises)
+    if (LessonExercises.length === 0)
       return res.status(404).json({
         error: "No se pudo obtener los ejercicios de la lección especificada",
       });
