@@ -9,19 +9,19 @@ export const addFavorite = async (req, res) => {
     const token = req.headers.authorization.split(" ")[1];
     const userId = verifyToken(token);
 
-    const { leccionId } = req.body;
+    const { exerciseId } = req.body;
     const favorite = await prisma.favorite.create({
       data: {
         userId: parseInt(userId),
-        leccionId: parseInt(leccionId),
+        ejercicioId: parseInt(exerciseId),
       },
     });
-    res.json({ mensaje: "Lección agregada a favoritos", favorite });
+    res.json({ mensaje: "Ejercicio agregado a favoritos", favorite });
   } catch (e) {
     if (e.code === "P2002") {
       return res
         .status(400)
-        .json({ error: "Esta lección ya está en favoritos" });
+        .json({ error: "Este ejercicio ya está en favoritos" });
     }
     res.status(500).json({ error: "No se pudo agregar a favoritos" });
   }
@@ -35,7 +35,7 @@ export const getFavorites = async (req, res) => {
 
     const favoritos = await prisma.favorite.findMany({
       where: { userId: parseInt(userId) },
-      include: { leccion: true },
+      include: { ejercicio: true },
     });
     res.json({ favorites: favoritos });
   } catch (e) {
@@ -43,15 +43,24 @@ export const getFavorites = async (req, res) => {
   }
 };
 
-// DELETE /favorites/:id → quitar favorito
+// DELETE /favorites/:exerciseId → quitar favorito
 export const deleteFavorite = async (req, res) => {
   try {
-    const { id } = req.params;
+    const token = req.headers.authorization.split(" ")[1];
+    const userId = verifyToken(token);
+    const { exerciseId } = req.params;
+
     await prisma.favorite.delete({
-      where: { id: parseInt(id) },
+      where: {
+        userId_ejercicioId: {
+          userId: parseInt(userId),
+          ejercicioId: parseInt(exerciseId),
+        },
+      },
     });
-    res.json({ mensaje: "Lección eliminada de favoritos" });
+    res.json({ mensaje: "Ejercicio eliminado de favoritos" });
   } catch (e) {
+    console.log(e);
     res.status(500).json({ error: "No se pudo eliminar de favoritos" });
   }
 };
