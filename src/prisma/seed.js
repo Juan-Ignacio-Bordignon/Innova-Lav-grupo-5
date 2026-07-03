@@ -1,86 +1,86 @@
-// src/prisma/seed.js
+
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // ─── MÓDULOS ───────────────────────────────────────────────
+  //  MÓDULOS 
   const palabras = await prisma.modulo.upsert({
     where: { id: 1 },
-    update: {},
+    update: { nombre: "Palabras", descripcion: "Módulo de palabras en LSA" },
     create: { nombre: "Palabras", descripcion: "Módulo de palabras en LSA" },
   });
 
   const frases = await prisma.modulo.upsert({
     where: { id: 2 },
-    update: {},
-    create: { nombre: "Frases Armadas", descripcion: "Módulo de frases en LSA" },
+    update: { nombre: "Frases", descripcion: "Módulo de frases en LSA" },
+    create: { nombre: "Frases", descripcion: "Módulo de frases en LSA" },
   });
 
-  // ─── LECCIONES (Palabras) ───────────────────────────────────
-  const alfabeto = await prisma.leccion.upsert({
+  // LECCIONES (Palabras) 
+  const abecedario = await prisma.leccion.upsert({
     where: { id: 1 },
-    update: {},
-    create: { titulo: "Alfabeto", contenido: "Categoría Alfabeto", moduloId: palabras.id },
+    update: { titulo: "Abecedario", contenido: "Categoría Abecedario" },
+    create: { titulo: "Abecedario", contenido: "Categoría Abecedario", moduloId: palabras.id },
   });
 
   const dias = await prisma.leccion.upsert({
     where: { id: 2 },
-    update: {},
-    create: { titulo: "Días", contenido: "Categoría Días de la semana", moduloId: palabras.id },
+    update: { titulo: "Días de la semana", contenido: "Categoría Días de la semana" },
+    create: { titulo: "Días de la semana", contenido: "Categoría Días de la semana", moduloId: palabras.id },
   });
 
   const numeros = await prisma.leccion.upsert({
     where: { id: 3 },
-    update: {},
+    update: { titulo: "Números", contenido: "Categoría Números" },
     create: { titulo: "Números", contenido: "Categoría Números", moduloId: palabras.id },
   });
 
   const sentimientos = await prisma.leccion.upsert({
     where: { id: 4 },
-    update: {},
+    update: { titulo: "Sentimientos", contenido: "Categoría Sentimientos" },
     create: { titulo: "Sentimientos", contenido: "Categoría Sentimientos", moduloId: palabras.id },
   });
 
-  // ─── LECCIONES (Frases Armadas) ────────────────────────────
+  //  LECCIONES (Frases) 
   const saludos = await prisma.leccion.upsert({
     where: { id: 5 },
-    update: {},
+    update: { titulo: "Saludos", contenido: "Categoría Saludos" },
     create: { titulo: "Saludos", contenido: "Categoría Saludos", moduloId: frases.id },
   });
 
   const presentaciones = await prisma.leccion.upsert({
     where: { id: 6 },
-    update: {},
+    update: { titulo: "Presentaciones", contenido: "Categoría Presentaciones" },
     create: { titulo: "Presentaciones", contenido: "Categoría Presentaciones", moduloId: frases.id },
   });
 
   const entorno = await prisma.leccion.upsert({
     where: { id: 7 },
-    update: {},
-    create: { titulo: "Frases de Entorno", contenido: "Frases de Salud / Escuela", moduloId: frases.id },
+    update: { titulo: "Entorno", contenido: "Categoría Entorno" },
+    create: { titulo: "Entorno", contenido: "Categoría Entorno", moduloId: frases.id },
   });
 
-  const conectores = await prisma.leccion.upsert({
+  const emergencia = await prisma.leccion.upsert({
     where: { id: 8 },
-    update: {},
-    create: { titulo: "Conectores de Emergencia", contenido: "Frases de emergencia", moduloId: frases.id },
+    update: { titulo: "Emergencia", contenido: "Categoría Emergencia" },
+    create: { titulo: "Emergencia", contenido: "Categoría Emergencia", moduloId: frases.id },
   });
 
-  // ─── LOGROS ────────────────────────────────────────────────
+  //  LOGROS 
   const logros = [
     // Módulo Palabras
-    { nombre: "Deletrear",           descripcion: "Completaste la categoría Alfabeto",      icono: "Aa",  leccionId: alfabeto.id },
-    { nombre: "En agenda",           descripcion: "Completaste la categoría Días",           icono: "📅",  leccionId: dias.id },
+    { nombre: "Deletrear",           descripcion: "Completaste la categoría Abecedario",    icono: "Aa",  leccionId: abecedario.id },
+    { nombre: "En agenda",           descripcion: "Completaste la categoría Días de la semana", icono: "📅", leccionId: dias.id },
     { nombre: "En orden",            descripcion: "Completaste la categoría Números",        icono: "123", leccionId: numeros.id },
     { nombre: "Espacio seguro",      descripcion: "Completaste la categoría Sentimientos",   icono: "🛡️", leccionId: sentimientos.id },
-    // Módulo Frases Armadas
-    { nombre: "Primer diálogo",      descripcion: "Completaste Saludos",                     icono: "💬",  leccionId: saludos.id },
-    { nombre: "Con vos",             descripcion: "Completaste Presentaciones",               icono: "🔗",  leccionId: presentaciones.id },
-    { nombre: "Orientados",          descripcion: "Completaste Frases de Entorno",            icono: "📋",  leccionId: entorno.id },
-    { nombre: "Lenguaje compartido", descripcion: "Completaste Conectores de Emergencia",     icono: "🗣️", leccionId: conectores.id },
+    // Módulo Frases
+    { nombre: "Primer diálogo",      descripcion: "Completaste Saludos",                     icono: "💬", leccionId: saludos.id },
+    { nombre: "Con vos",             descripcion: "Completaste Presentaciones",               icono: "🔗", leccionId: presentaciones.id },
+    { nombre: "Orientados",          descripcion: "Completaste Entorno",                      icono: "📋", leccionId: entorno.id },
+    { nombre: "Lenguaje compartido", descripcion: "Completaste Emergencia",                   icono: "🗣️", leccionId: emergencia.id },
     // Globales
-    { nombre: "Sin errores",         descripcion: "Completaste una lección sin errores",     icono: "⭐",  leccionId: null },
-    { nombre: "Aprendizaje completo",descripcion: "Completaste todo el contenido",           icono: "🏆",  leccionId: null },
+    { nombre: "Sin errores",         descripcion: "Completaste una lección sin errores",     icono: "⭐", leccionId: null },
+    { nombre: "Aprendizaje completo",descripcion: "Completaste todo el contenido",           icono: "🏆", leccionId: null },
   ];
 
   for (const logro of logros) {
