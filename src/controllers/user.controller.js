@@ -1,4 +1,4 @@
-import { getUserInfo } from "../services/user.service.js";
+import { getUserInfo, getLastExercise } from "../services/user.service.js";
 import { verifyToken } from "../utils/jws.js";
 
 export const getUser = async (req, res) => {
@@ -12,7 +12,21 @@ export const getUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
-
+    const lastExercise = await getLastExercise(userId);
+    let ultimaLeccion = {};
+    if (lastExercise) {
+      ultimaLeccion = {
+        moduleId: lastExercise.moduloId,
+        moduleName: lastExercise.modulo.nombre,
+        lessonId: lastExercise.leccionId,
+        lessonName: lastExercise.leccion.titulo,
+        exerciseId: lastExercise.ejercicioId,
+        exerciseName: lastExercise.ejercicio.titulo,
+        completadoEn: lastExercise.completadoEn,
+      };
+    } else {
+      ultimaLeccion = null;
+    }
     res.json({
       usuario: {
         username: user.nombre,
@@ -20,19 +34,15 @@ export const getUser = async (req, res) => {
         interes: user.interes,
       },
       progreso: user.progreso.map((progreso) => ({
-        LessonId: progreso.leccionId,
-        LessonName: progreso.leccion.titulo,
-        ModuleId: progreso.leccion.modulo.id,
-        ModuleName: progreso.leccion.modulo.nombre,
+        moduleId: progreso.modulo.id,
+        moduleName: progreso.modulo.nombre,
+        lessonId: progreso.leccionId,
+        lessonName: progreso.leccion.titulo,
+        exerciseId: progreso.ejercicio.id,
+        exerciseName: progreso.ejercicio.titulo,
         completadoEn: progreso.completadoEn,
       })),
-      // Hay que modificar esto para que traiga la última lección (completada o no) del usuario, actualmente está hardcodeado
-      ultimaLeccion: {
-        ModuleId: 1,
-        ModuleName: "Nombre del módulo",
-        LessonId: 3,
-        LessonName: "Nombre de la lección",
-      },
+      ultimaLeccion: ultimaLeccion,
       puntos: user.puntos,
       racha: user.rachaActual,
       logros: user.logros.map((logro) => ({

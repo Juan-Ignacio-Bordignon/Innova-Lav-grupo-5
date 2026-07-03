@@ -7,9 +7,9 @@ import {
 const router = Router();
 
 // Get user progress
-router.get("/:userId", getProgress);
+router.get("/", getProgress);
 
 // Update user progress
-router.post("/:userId", updateProgress);
+router.post("/", updateProgress);
 
 export default router;

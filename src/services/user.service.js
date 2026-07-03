@@ -25,12 +25,18 @@ export const getUserInfo = async (userId) => {
             select: {
               id: true,
               titulo: true,
-              modulo: {
-                select: {
-                  id: true,
-                  nombre: true,
-                },
-              },
+            },
+          },
+          modulo: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
+          ejercicio: {
+            select: {
+              id: true,
+              titulo: true,
             },
           },
         },
@@ -53,3 +59,40 @@ export const getUserInfo = async (userId) => {
   });
   return user;
 };
+
+export async function getLastExercise(userId) {
+  const progreso = await prisma.progreso.findMany({
+    where: { id: userId },
+    select: {
+      moduloId: true,
+      modulo: {
+        select: {
+          nombre: true,
+        },
+      },
+      leccionId: true,
+      leccion: {
+        select: {
+          titulo: true,
+        },
+      },
+      ejercicioId: true,
+      ejercicio: {
+        select: {
+          titulo: true,
+        },
+      },
+      completadoEn: true,
+    },
+  });
+  if (progreso.length === 0) {
+    // Si no hay progreso, devolvemos null
+    return null;
+  } else if (progreso.length === 1) {
+    // si hay uno solo, devolvemos ese
+    return progreso[0];
+  } else {
+    // Si hay más de uno, devolvemos el último, que seria el más reciente
+    return progreso[progreso.length - 1];
+  }
+}

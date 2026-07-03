@@ -29,18 +29,28 @@ model Modulo {
   nombre      String
   descripcion String
   lecciones   Leccion[]
+  progreso    Progreso[]
 }
 
 model Leccion {
   id        Int         @id @default(autoincrement())
   titulo    String
   contenido String
-  videoUrl  String?
   moduloId  Int
   modulo    Modulo      @relation(fields: [moduloId], references: [id])
   progreso  Progreso[]
+  logros    Logro[]   
+  ejercicio Ejercicio[]  
+}
+
+model Ejercicio {
+  id                  Int      @id @default(autoincrement())
+  lessonId            Int
+  titulo              String
+  contenidoMultimedia String
+  leccion             Leccion  @relation(fields: [lessonId], references: [id])
+  progreso  Progreso[]
   favoritos Favorite[]
-  logros    Logro[]     
 }
 
 model Progreso {
@@ -48,22 +58,25 @@ model Progreso {
   userId        Int
   moduloId      Int
   leccionId     Int
+  ejercicioId   Int
   errores       Int      @default(0)
   puntos        Int      @default(0)
   primerIntento DateTime @default(now())
   completadoEn  DateTime?
   user          User     @relation(fields: [userId], references: [id])
+  modulo        Modulo   @relation(fields: [moduloId], references: [id])
   leccion       Leccion  @relation(fields: [leccionId], references: [id])
+  ejercicio     Ejercicio @relation(fields: [ejercicioId], references: [id])
 }
 
 model Favorite {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  leccionId Int
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  leccion   Leccion  @relation(fields: [leccionId], references: [id], onDelete: Cascade)
-  @@unique([userId, leccionId])
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  ejercicioId Int
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ejercicio   Ejercicio @relation(fields: [ejercicioId], references: [id], onDelete: Cascade)
+  @@unique([userId, ejercicioId])
 }
 
 model Logro {
@@ -85,7 +98,6 @@ model UserLogro {
   logro         Logro    @relation(fields: [logroId], references: [id])
   @@unique([userId, logroId])
 }
-
 
 model EventoLog {
   id         Int      @id @default(autoincrement())
