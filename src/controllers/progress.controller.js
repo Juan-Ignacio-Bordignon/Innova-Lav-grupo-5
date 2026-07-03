@@ -1,12 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { calcularNuevaRacha } from "../utils/racha.utils.js";
+import { verifyToken } from "../utils/jws.js";
 
 const prisma = new PrismaClient();
 
-// GET /progress/:userId
+// GET /progress
 export const getProgress = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const token = req.headers.authorization.split(" ")[1];
+    const userId = verifyToken(token);
 
     const progreso = await prisma.progreso.findMany({
       where: { userId: parseInt(userId) },
@@ -15,14 +17,17 @@ export const getProgress = async (req, res) => {
 
     res.json({ progreso });
   } catch (e) {
-    res.status(500).json({ error: "No se pudo obtener el progreso del usuario" });
+    res
+      .status(500)
+      .json({ error: "No se pudo obtener el progreso del usuario" });
   }
 };
 
-// POST /progress/:userId
+// POST /progress
 export const updateProgress = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const token = req.headers.authorization.split(" ")[1];
+    const userId = verifyToken(token);
     const { moduloId, leccionId } = req.body;
 
     const userIdInt = parseInt(userId);
@@ -48,7 +53,7 @@ export const updateProgress = async (req, res) => {
     // 3. Calculamos cómo queda la racha
     const { rachaActual, ultimaActividad } = calcularNuevaRacha(
       user.ultimaActividad,
-      user.rachaActual
+      user.rachaActual,
     );
 
     // 4. Actualizamos al usuario con la nueva racha
@@ -63,6 +68,8 @@ export const updateProgress = async (req, res) => {
       rachaActual: userActualizado.rachaActual,
     });
   } catch (e) {
-    res.status(500).json({ error: "No se pudo actualizar el progreso del usuario" });
+    res
+      .status(500)
+      .json({ error: "No se pudo actualizar el progreso del usuario" });
   }
 };
