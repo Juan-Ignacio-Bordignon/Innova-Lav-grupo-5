@@ -99,6 +99,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	]
 	}
 	```
+
 - Inicio de sesión
 
 	Method: POST
@@ -145,26 +146,33 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		},
 		"progreso": [
 			{
-				"LessonId": 1,
-        		"LessonName": "Nombre de la lección",
-        		"ModuleId": 1,
-        		"ModuleName": "Nombre del módulo",
+				"moduleId": 1,
+        		"moduleName": "Nombre del módulo",
+				"lessonId": 1,
+        		"lessonName": "Nombre de la lección",
+				"exerciseId": 1,
+      			"exerciseName": "Nombre del ejercicio",
         		"completadoEn":  "2026-06-23T12:00:00Z",
 			},
 			{
-				"LessonId": 2,
-        		"LessonName": "Nombre de la lección",
-        		"ModuleId": 1,
-        		"ModuleName": "Nombre del módulo",
+				"moduleId": 1,
+        		"moduleName": "Nombre del módulo",
+				"lessonId": 1,
+        		"lessonName": "Nombre de la lección",
+				"exerciseId": 2,
+      			"exerciseName": "Nombre del ejercicio",
         		"completadoEn":  "2026-06-23T12:00:00Z",
 			}
 		],
-		// Hay que modificar esto para que traiga la última lección (completada o no) del usuario, actualmente está hardcodeado
+		// Trae la última lección (completada o no) del usuario
 		"ultimaLeccion": {
-			"ModuleId": 1,
-			"ModuleName": "Nombre del módulo",
-			"LessonId": 3,
-			"LessonName": "Nombre de la lección"
+			"moduleId": 1,
+        	"moduleName": "Nombre del módulo",
+			"lessonId": 1,
+        	"lessonName": "Nombre de la lección",
+			"exerciseId": 1,
+      		"exerciseName": "Nombre del ejercicio",
+			"completadoEn":  "2026-06-23T12:00:00Z",
 		},
 		"puntos": 50,
 		"racha": 5,
@@ -208,14 +216,24 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Respuesta:
 	```json
 	{
-		"progreso": [
+  	"progreso": [
 			{
-				"ModuleId": 1,
-				"LessonId": [1, 2, 3]
+			"moduloId": 1,
+			"modulo": {
+				"nombre": "Palabras"
 			},
-			{
-				"ModuleId": 2,
-				"LessonId": [4]
+			"leccionId": 1,
+			"leccion": {
+				"titulo": "Alfabeto"
+			},
+			"ejercicioId": 1,
+			"ejercicio": {
+				"titulo": "Letra A"
+			},
+			"errores": 0,
+			"puntos": 0,
+			"primerIntento": "2026-06-30T20:03:50.000Z",
+			"completadoEn": "2026-06-30T20:03:50.000Z"
 			}
 		]
 	}
@@ -239,7 +257,8 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	```json
 	{
 		"ModuleId": 1,
-		"LessonId": [4]
+		"LessonId": 4,
+		"exerciseId":10
 	}
 	```
 	Respuesta:
@@ -305,8 +324,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 			{
 				"id": 1,
 				"titulo": "Alfabeto",
-				"contenido": "Contenido de la lección",
-				"videoUrl": "https://..."
+				"contenido": "Contenido de la lección"
 			}
 		]
 	}
@@ -330,8 +348,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"lesson": {
 			"id": 1,
 			"titulo": "Alfabeto",
-			"contenido": "Contenido de la lección",
-			"videoUrl": "https://..."
+			"contenido": "Contenido de la lección"
 		}
 	}
 	```
@@ -341,6 +358,25 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"error": "No se pudo obtener la lección especificada"
 	}
 	```
+
+- Obtener ejercicios de una lección
+
+	Method: GET
+
+	Endpoint: module/{moduleId}/lessons/{lessonId}/exercises
+
+	Respuesta:
+	```json
+	{
+		"exercises": [
+			{
+			"id": 1,
+			"titulo": "Titulo del ejercicio",
+			"status": "completed",// Puede ser "completed", "inProgress" o "notStarted"
+			"contenidoMultimedia": "Link a contenido multimedia"
+			}
+		]
+	}
 
 ## Favoritos
 
@@ -355,7 +391,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 	Body:
 	```json
 	{
-		"leccionId": 3
+		"exerciseId": 3
 	}
 	```
 	Respuesta:
@@ -365,7 +401,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"favorite": {
 			"id": 1,
 			"userId": 1,
-			"leccionId": 3,
+			"exerciseId": 3,
 			"createdAt": "2026-06-09T00:00:00.000Z"
 		}
 	}
@@ -415,12 +451,14 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 
 	Method: DELETE
 
-	Endpoint: /favorites/:id
+	Endpoint: /favorites/:exerciseId
 
+	Header: {Authorization: "Bearer `token`",}
+	
 	Respuesta:
 	```json
 	{
-		"mensaje": "Lección eliminada de favoritos"
+		"mensaje": "Ejercicio eliminado de favoritos"
 	}
 	```
 	Error:
@@ -490,6 +528,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 		"error": "No se pudo guardar el resultado del usuario"
 	}
 	```	
+	
 ## Logros del usuario
 
 - Obtener logros del usuario
