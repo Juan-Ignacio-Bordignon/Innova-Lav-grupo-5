@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, TextInput, ScrollView, SafeAreaView } from 'react-native';
 import { styles } from './FavoritesScreen.styles';
 
+
 // Importaciones de tu sistema de diseño
 import { AppText } from '../../../components/ui/AppText'; 
 import { colors } from '../../../constants/colors';
 
 // Importamos los íconos (Asegurate de haber creado este archivo según la tarea del issue)
-import { EmptyFavoritesIcon, HeartBubbleIcon } from '../components/FavoriteIcons';
+import {CategoryIcon,IconState } from '../components/FavoriteIcons';
 
 type TabType = 'Palabras' | 'Frases';
 
@@ -16,9 +17,9 @@ export function FavoritesScreen() {
   
   // Mock temporal para simular el cambio de estado (Palabras tiene items, Frases está vacío)
   const favoriteCategories = activeTab === 'Palabras' ? [
-    { id: 1, title: 'Abecedario' },
-    { id: 2, title: 'Días de la semana' },
-    { id: 3, title: 'Números' },
+    { id: 1, title: 'Abecedario', status: 'completed' },
+    { id: 2, title: 'Días de la semana', status: 'completed' },
+    { id: 3, title: 'Números', status: 'notStarted' },
   ] : [];
 
   const isEmpty = favoriteCategories.length === 0;
@@ -62,7 +63,7 @@ export function FavoritesScreen() {
         {/* RENDERIZADO CONDICIONAL */}
         {isEmpty ? (
           <View style={styles.emptyStateContainer}>
-            <EmptyFavoritesIcon />
+            <CategoryIcon state="notStarted" />
             <AppText variant="title" style={styles.emptyStateTitle}>
               Tu espacio de repaso está vacío
             </AppText>
@@ -81,7 +82,7 @@ export function FavoritesScreen() {
             
             {favoriteCategories.map((cat) => (
               <TouchableOpacity key={cat.id} style={styles.categoryCard} activeOpacity={0.7}>
-                <HeartBubbleIcon isFilled={false} />
+                <CategoryIcon state={cat.status as IconState} />
                 <AppText style={styles.categoryTitle}>{cat.title}</AppText>
               </TouchableOpacity>
             ))}

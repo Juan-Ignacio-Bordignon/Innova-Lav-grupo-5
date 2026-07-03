@@ -1,46 +1,44 @@
 import React from 'react';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
-// 1. Ícono para el Empty State (Estado vacío)
-export const EmptyFavoritesIcon = () => (
-  <Svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-    <Circle cx="40" cy="40" r="40" fill="#1B434D" />
-    <Path 
-      d="M52.5 45.8333C52.5 50.4357 48.769 54.1667 44.1667 54.1667H33.3333L25 62.5V33.3333C25 28.731 28.731 25 33.3333 25H44.1667C48.769 25 52.5 28.731 52.5 33.3333V45.8333Z" 
-      stroke="#FFFFFF" 
-      strokeWidth="2.5" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    <Path 
-      d="M38.75 36.6667C38.75 35.2858 37.6308 34.1667 36.25 34.1667C34.8692 34.1667 33.75 35.2858 33.75 36.6667C33.75 39.1667 38.75 42.5 38.75 42.5C38.75 42.5 43.75 39.1667 43.75 36.6667C43.75 35.2858 42.6308 34.1667 41.25 34.1667C39.8692 34.1667 38.75 35.2858 38.75 36.6667Z" 
-      fill="#D59B54" 
-    />
-  </Svg>
-);
+export type IconState = 'completed' | 'progress' | 'notStarted' | 'favorite';
 
-// 2. Ícono del corazón para las tarjetas (Dinámico)
-export const HeartBubbleIcon = ({ isFilled = false }: { isFilled?: boolean }) => {
-  const heartColor = isFilled ? "#1B434D" : "none";
-  const strokeColor = "#1B434D";
+interface CategoryIconProps {
+  state: IconState;
+  width?: number;
+  height?: number;
+}
+
+export const CategoryIcon = ({ state, width = 30, height = 30 }: CategoryIconProps) => {
+  // Colores definidos según los lineamientos de diseño de la marca
+  const color = state === 'progress' ? '#DAB16D' : '#194650';
 
   return (
-    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
+      {/* Burbuja Base con extensión a la derecha */}
+      {/* El segmento 'L21 22' crea la punta de la burbuja en la parte inferior derecha */}
       <Path 
-        d="M21 15A2 2 0 0 1 19 17H7L3 21V5A2 2 0 0 1 5 3H19A2 2 0 0 1 21 5V15Z" 
-        stroke={strokeColor} 
-        strokeWidth="1.5" 
-        strokeLinecap="round" 
+        d="M21 5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V17C3 18.1 3.9 19 5 19H18L21 22V5Z" 
+        stroke={color} 
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Path 
-        d="M12 10.5C12 9.11929 10.8807 8 9.5 8C8.11929 8 7 9.11929 7 10.5C7 13 12 16.3333 12 16.3333C12 16.3333 17 13 17 10.5C17 9.11929 15.8807 8 14.5 8C13.1193 8 12 9.11929 12 10.5Z" 
-        fill={heartColor}
-        stroke={strokeColor}
-        strokeWidth="1.2"
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
+      
+      {/* Ícono interno: Check (Completado) */}
+      {state === 'completed' && (
+        <Path d="M9 11l2 2 4-4" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      )}
+      
+      {/* Ícono interno: Puntos (Progreso) */}
+      {state === 'progress' && (
+        <Path d="M8 12h.01M12 12h.01M16 12h.01" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      )}
+      
+      {/* Ícono interno: Corazón (Favorito) */}
+      {state === 'favorite' && (
+        <Path d="M12 14.5l-1-1c-2-2-4-3.5-4-5.5A2.5 2.5 0 019.5 5.5c1.2 0 2.5.6 3.5 1.5 1-0.9 2.3-1.5 3.5-1.5A2.5 2.5 0 0119 8c0 2-2 3.5-4 5.5l-1 1z" fill={color} />
+      )}
     </Svg>
   );
 };
