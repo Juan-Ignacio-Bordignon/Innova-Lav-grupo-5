@@ -7,15 +7,18 @@ export const getLessons = async (req, res) => {
     const { moduleId } = req.params;
     const lecciones = await prisma.leccion.findMany({
       where: { moduloId: parseInt(moduleId) },
+      select: {
+        id: true,
+        titulo: true,
+        contenido: true,
+        moduloId: true,
+      },
     });
     res.json({ lessons: lecciones });
   } catch (e) {
-    res
-      .status(500)
-      .json({
-        error:
-          "No se pudieron obtener las lecciones para el módulo especificado",
-      });
+    res.status(500).json({
+      error: "No se pudieron obtener las lecciones para el módulo especificado",
+    });
   }
 };
 
