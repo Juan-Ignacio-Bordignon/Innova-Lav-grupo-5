@@ -2,6 +2,34 @@ import { StyleSheet } from 'react-native';
 import { colors } from '../../../constants/colors';
 
 export const styles = StyleSheet.create({
+  // En FavoritesScreen.styles.ts
+categoryCard: {
+  width: '100%', // Mantiene el tamaño para 3 columnas
+  alignItems: 'center',      // Centra el ícono y el texto horizontalmente
+  justifyContent: 'center',
+  padding:16,  // Centra verticalmente
+  paddingVertical: 12,       // Ajustado para que no sea muy alto
+  paddingHorizontal: 8,      // Menos padding lateral para que el texto respire
+  borderRadius: 12,
+  backgroundColor: '#FFFFFF',
+  flexDirection: 'row',   // Cambiado a COLUMN para que el ícono esté arriba y el texto abajo
+  marginBottom: 15,          // Un poco más de espacio entre filas
+  borderWidth: 1,
+  borderColor: '#F1F5F9',
+  // Sombra estándar para dar profundidad
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 3,
+  elevation: 2,
+},
+  categoryTitle: {
+  marginLeft: 16,           // Espacio entre el ícono y el texto
+  fontSize: 16,
+  fontWeight: '500',
+  color: '#1B434D',
+  flex: 1,
+},
   safeArea: {
     flex: 1,
     backgroundColor: colors.background || '#F8F9FA',
@@ -102,28 +130,8 @@ export const styles = StyleSheet.create({
     color: '#1B434D',
     marginBottom: 16,
   },
-  categoryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  categoryTitle: {
-    marginLeft: 16,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1B434D',
-    flex: 1,
-  },
+
+ 
   bottomSpacing: {
     height: 80,
   }, })
