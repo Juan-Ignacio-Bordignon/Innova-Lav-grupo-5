@@ -52,12 +52,13 @@ categoryCard: {
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'colors.primary',
     borderRadius: 25,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 12,
+    height: 50,
     marginBottom: 24,
   },
   searchIcon: {

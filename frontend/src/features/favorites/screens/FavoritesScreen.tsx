@@ -7,20 +7,32 @@ import { CategoryIcon, IconState } from '../components/FavoriteIcons';
 
 // Importamos nuestros datos mockeados
 import { MOCK_FAVORITES, FavoriteItem } from '../../../data/mocks/mockFavorites';
+import { SearchIcon } from '../../../assets/icons/SearchIcon';
 
 type TabType = 'Palabras' | 'Frases';
 
 export function FavoritesScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('Palabras');
+  // 1. Estado para guardar lo que el usuario escribe
+const [searchText, setSearchText] = useState('');
+
+// 2. Filtramos en dos niveles: 
+// Primero por pestaña (Palabras/Frases) y luego por texto (título)
+const filteredData = MOCK_FAVORITES.filter(item => {
+  const matchesTab = item.type === activeTab;
+  const matchesSearch = item.title.toLowerCase().includes(searchText.toLowerCase());
+  return matchesTab && matchesSearch;
+});
   
   // Filtramos los datos según la pestaña activa
-  const favoriteCategories = MOCK_FAVORITES.filter(item => item.type === activeTab);
-  const isEmpty = favoriteCategories.length === 0;
+  
+  const isEmpty = filteredData.length === 0;
 
 return (
   <SafeAreaView style={styles.safeArea}>
     <FlatList
-      data={favoriteCategories}
+      data={filteredData} // <--- Aquí usamos la constante que definimos arriba
+      keyboardShouldPersistTaps="handled"
       keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
       
@@ -30,14 +42,17 @@ return (
           <AppText variant="title" style={styles.mainTitle}>Favoritos</AppText>
           <AppText variant="body" style={styles.subtitle}>¿Qué lección repasamos?</AppText>
 
-          <View style={styles.searchContainer}>
-            <AppText style={styles.searchIcon}>🔍</AppText>
-            <TextInput 
-              placeholder="Buscar"
-              style={styles.searchInput}
-              placeholderTextColor={colors.textSecondary || "#A0AEC0"}
-            />
-          </View>
+      {/* BUSCADOR */}
+  <View style={styles.searchContainer}>
+  <SearchIcon color={colors.primary} /> {/* Usando el nuevo icono */}
+  <TextInput 
+    placeholder="Buscar"
+    style={styles.searchInput}
+    placeholderTextColor={colors.textSecondary || "#A0AEC0"}
+    value={searchText}
+    onChangeText={setSearchText}
+  />
+  </View>
 
           <View style={styles.tabContainer}>
             {(['Palabras', 'Frases'] as TabType[]).map((tab) => {
