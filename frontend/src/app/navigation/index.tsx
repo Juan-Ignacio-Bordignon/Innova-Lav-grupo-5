@@ -19,6 +19,8 @@ import { LessonScreen } from '../../features/lessons/screens/LessonScreen';
 import { ModuleDetailScreen } from '../../features/modules/screens/ModuleDetailScreen';
 import { Profile } from '../../features/profile/screens/ProfileScreen';
 import { Settings } from '../../features/profile/screens/SettingsScreen';
+import { LessonSelectionScreen } from '../../features/favorites/screens/LessonSelectionScreen';
+import { LessonHeader } from './components/LessonHeader';
 
 function FeedbackScreen() {
   return (
@@ -116,6 +118,16 @@ const RootStack = createNativeStackNavigator({
       screen: NotFound,
       options: { title: '404' },
       linking: { path: '*' },
+    },
+    // En tu objeto screens dentro de RootStack:
+    [ROUTES.LESSON_SELECTION]: {
+    screen: LessonSelectionScreen,
+    options: ({ navigation }) => ({
+    headerShown: true,
+    headerTitle: 'Repasemos',
+    headerShadowVisible: false,
+    headerLeft: () => <LessonHeader navigation={navigation} />,// O true si quieres que aparezca el botón de "atrás" por defecto
+    }),
     },
   },
 });

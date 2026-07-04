@@ -36,3 +36,7 @@ export type ApiModule = {
 export type ModulesResponse = {
   modules: ApiModule[];
 };
+export type RootStackParamList = {
+  Favorites: undefined;
+  LessonSelection: { categoryId: string }; // Necesitamos pasar el ID
+};

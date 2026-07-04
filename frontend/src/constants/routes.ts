@@ -24,6 +24,7 @@ export const ROUTES = {
 
   // 🔀 Contenedor maestro de las pestañas
   HOME_TABS: 'HomeTabs',
+  LESSON_SELECTION: 'LessonSelection',
 } as const;
 
 export type LearningStatus = 'completed' | 'inProgress' | 'notStarted';

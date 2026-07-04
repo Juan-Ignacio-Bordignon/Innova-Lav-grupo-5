@@ -4,18 +4,22 @@ import { styles } from './FavoritesScreen.styles';
 import { AppText } from '../../../components/ui/AppText'; 
 import { colors } from '../../../constants/colors';
 import { CategoryIcon, IconState } from '../components/FavoriteIcons';
-
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../modules/types'; // Ruta a tus tipos
 // Importamos nuestros datos mockeados
 import { MOCK_FAVORITES, FavoriteItem } from '../../../data/mocks/mockFavorites';
 import { SearchIcon } from '../../../assets/icons/SearchIcon';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { ROUTES } from '../../../constants/routes';
 
 type TabType = 'Palabras' | 'Frases';
+type FavoritesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Favorites'>;
 
 export function FavoritesScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('Palabras');
   // 1. Estado para guardar lo que el usuario escribe
 const [searchText, setSearchText] = useState('');
-
+const navigation = useNavigation<FavoritesScreenNavigationProp>();
 // 2. Filtramos en dos niveles: 
 // Primero por pestaña (Palabras/Frases) y luego por texto (título)
 const filteredData = MOCK_FAVORITES.filter(item => {
@@ -93,10 +97,17 @@ return (
 
       // El renderizado de los items que están en "Para repasar"
       renderItem={({ item }) => (
-        <TouchableOpacity style={styles.categoryCard} activeOpacity={0.7}>
-          <CategoryIcon state={item.status as IconState} />
-          <AppText style={styles.categoryTitle}>{item.title}</AppText>
-        </TouchableOpacity>
+        <TouchableOpacity 
+    style={styles.categoryCard} 
+    activeOpacity={0.7}
+   onPress={() => {
+    navigation.navigate(ROUTES.LESSON_SELECTION, { categoryId: item.id });
+  }}
+
+  >
+    <CategoryIcon state={item.status as IconState} />
+    <AppText style={styles.categoryTitle}>{item.title}</AppText>
+  </TouchableOpacity>
       )}
     />
   </SafeAreaView>
