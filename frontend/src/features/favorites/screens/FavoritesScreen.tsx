@@ -6,6 +6,7 @@ import { colors } from '../../../constants/colors';
 import { CategoryIcon, IconState } from '../components/FavoriteIcons';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../modules/types'; // Ruta a tus tipos
+
 // Importamos nuestros datos mockeados
 import { MOCK_FAVORITES, FavoriteItem } from '../../../data/mocks/mockFavorites';
 import { SearchIcon } from '../../../assets/icons/SearchIcon';

@@ -5,6 +5,8 @@ import { RootStackParamList } from '../../modules/types'; // Asegúrate de ajust
 import { AppText } from '../../../components/ui/AppText';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { styles } from './LessonSelectionStyles';
+import { IconNumeros } from '../../../assets/icons/IconNumeros';
+import { colors } from '../../../constants/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LessonSelection'>;
 
@@ -15,13 +17,16 @@ export function LessonSelectionScreen({ route }: Props) {
 
  return (
     <View style={styles.container}>
-      {/* 1. Header */}
-      <AppText style={styles.headerTitle}>Repasemos</AppText>
+     
 
       {/* 2. Banner de Categoría */}
       <View style={styles.categoryBanner}>
-        <AppText style={styles.categoryNumber}>123</AppText>
-        <AppText style={styles.categoryLabel}>Categoría {categoryId}</AppText>
+       <IconNumeros color={colors.primary} />
+       <View style={styles.categoryTextContainer}>
+    {/* Asegúrate de usar el nombre correcto definido en tu StyleSheet */}
+    <AppText style={styles.categoryTitle}>Categoría {categoryId}</AppText>
+    <AppText style={styles.categorySubtitle}>Lecciones Guardadas</AppText>
+  </View>
       </View>
 
       {/* 3. Grilla de Lecciones */}

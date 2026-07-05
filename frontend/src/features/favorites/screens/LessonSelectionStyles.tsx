@@ -1,19 +1,44 @@
 import { StyleSheet } from 'react-native';
+import { colors } from '../../../constants/colors';
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#F8F9FA' },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginVertical: 20 },
-  categoryBanner: { backgroundColor: '#FFF', padding: 20, borderRadius: 16, alignItems: 'center', marginBottom: 20 },
-  categoryNumber: { fontSize: 40, fontWeight: 'bold' },
-  categoryLabel: { fontSize: 16, color: '#000' }, 
+  container: { flex: 1, paddingHorizontal: 20, backgroundColor: colors.backgroundApp },
+  categoryBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    padding: 20,
+    borderRadius: 20,
+    marginVertical: 16,
+    elevation: 3,
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+  },
+  categoryTextContainer: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  categoryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.secondary,
+    
+  },
+  categorySubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 20 },
   lessonCard: { 
     flex: 1, 
-    margin: 5, 
+    aspectRatio: 1,
+    margin: 6, 
     height: 100, 
-    backgroundColor: '#FFF', 
+    backgroundColor: colors.surface, 
     borderRadius: 12, 
     justifyContent: 'center', 
     alignItems: 'center' 
-  }
+  },
 });
