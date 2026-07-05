@@ -6,7 +6,7 @@ import { colors } from '../../../constants/colors';
 import { CategoryIcon, IconState } from '../components/FavoriteIcons';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../modules/types'; // Ruta a tus tipos
-
+import { IconFavoritos } from '../../../assets/icons/IconFavoritos';
 // Importamos nuestros datos mockeados
 import { MOCK_FAVORITES, FavoriteItem } from '../../../data/mocks/mockFavorites';
 import { SearchIcon } from '../../../assets/icons/SearchIcon';
@@ -79,7 +79,8 @@ return (
           {/* Renderizado de estado vacío si no hay favoritos */}
           {isEmpty && (
             <View style={styles.emptyStateContainer}>
-              <CategoryIcon state="notStarted" />
+            {/* Aquí agregas el ícono */}
+    <IconFavoritos width={100} height={100} />
               <AppText variant="title" style={styles.emptyStateTitle}>
                 Tu espacio de repaso está vacío
               </AppText>
