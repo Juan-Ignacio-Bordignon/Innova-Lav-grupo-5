@@ -2,21 +2,41 @@ import { PrismaClient } from "@prisma/client";
 import { recuperarEstadoDeEjercicio } from "../services/exercise.service.js";
 
 const prisma = new PrismaClient();
+const URL_BASE_VIDEOS = "https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/";
+// URL Base para Supabase Storage (Bucket público: videos-lsa)
+// NOTA: el ID definitivo del proyecto es: ozrcernencngontkultp
+
 
 // GET /module/:moduleId/lessons/:lessonId/exercises
 export const getExercises = async (req, res) => {
   try {
     const { moduleId, lessonId } = req.params;
     const LessonExercises = await getExercisesBylessonId(lessonId);
-    if (LessonExercises.length === 0)
-      return res.status(404).json({
-        error: "No se pudo obtener los ejercicios de la lección especificada",
+    
+    //  1. Validación Defensiva: Si la lección está vacía, responde 200 con array vacío
+    if (!LessonExercises || LessonExercises.length === 0) {
+      return res.status(200).json({
+        exercises: [],
+        _meta: {
+          status: "inDevelopment",
+          message: "Esta lección se encuentra en desarrollo. Próximamente se añadirán ejercicios multimedia de LSA."
+        }
       });
+    }
+
+    //  2. Inyección de URL de Supabase: Convertimos los strings planos (ej: "Letra_A") en URLs reales (.mp4)
+    const exercisesConUrlReal = LessonExercises.map(exercise => {
+      return {
+        ...exercise,
+        contenidoMultimedia: `${URL_BASE_VIDEOS}${exercise.contenidoMultimedia}.mp4`
+      };
+    });
 
     const authorization = req.headers.authorization;
+    // Pasamos los ejercicios ya transformados al servicio de progreso de usuario
     let exercises = await recuperarEstadoDeEjercicio(
       authorization,
-      LessonExercises,
+      exercisesConUrlReal
     );
 
     res.status(200).json({ exercises });
