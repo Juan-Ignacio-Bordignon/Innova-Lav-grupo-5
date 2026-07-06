@@ -9,7 +9,7 @@ export const getExercises = async (req, res) => {
     const { moduleId, lessonId } = req.params;
     const LessonExercises = await getExercisesBylessonId(lessonId);
     
-    // 🛡️ El Fix defensivo de Lore: Validación elegante para lecciones sin ejercicios cargados
+    //  Validación  para lecciones sin ejercicios cargados
     if (!LessonExercises || LessonExercises.length === 0) {
       return res.status(200).json({
         exercises: [],
