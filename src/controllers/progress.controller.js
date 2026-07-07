@@ -97,4 +97,26 @@ export const updateProgress = async (req, res) => {
       .status(500)
       .json({ error: "No se pudo actualizar el progreso del usuario" });
   }
+
+export const saveProgress = async (req, res) => {
+  try {
+    const { userId, lessonId, exerciseId, isCorrect } = req.body;
+
+    // TODO: Ajustar las consultas Prisma una vez que acordemos el esquema .
+    // Por ahora mockeamos la respuesta para habilitar el desarrollo del Frontend.
+    const mockResultado = {
+      message: "Progreso recibido y procesado en Backend (Sprint Semana 8)",
+      puntosGanados: isCorrect ? 10 : 2,
+      rachaActual: 3, 
+      status: "success"
+    };
+
+    return res.status(200).json(mockResultado);
+  } catch (error) {
+    console.error("Error en saveProgress:", error);
+    return res.status(500).json({ error: "Error interno al procesar el progreso del MVP" });
+  }
 };
+
+};
+
