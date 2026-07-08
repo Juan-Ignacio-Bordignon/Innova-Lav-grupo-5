@@ -67,8 +67,11 @@ export type RootStackParamList = {
   [ROUTES.EXERCISE]: {
     exerciseId: string;
     moduleId?: string;
+    moduleName?: string;
     lessonId?: string;
+    lessonTitle?: string;
     exerciseTitle?: string;
+    contenidoMultimedia?: string;
   };
 
   [ROUTES.FEEDBACK]: {

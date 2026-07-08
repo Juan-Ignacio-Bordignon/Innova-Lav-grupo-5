@@ -15,6 +15,11 @@ export const ENDPOINTS = {
     lessonId: number | string
   ) => `/module/${moduleId}/lessons/${lessonId}`,
 
+  MODULE_LESSON_EXERCISES: (
+    moduleId: number | string,
+    lessonId: number | string
+  ) => `/module/${moduleId}/lessons/${lessonId}/exercises`,
+
   LESSONS: '/lessons',
   EXERCISES: '/exercises',
   PROGRESS: '/progress',
