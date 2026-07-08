@@ -7,8 +7,8 @@ import {
   useRoute,
   type RouteProp,
 } from '@react-navigation/native';
-import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import IconStatusCompleted from '../../../assets/icons/ux/status/IconStatusCompleted.svg';
@@ -26,6 +26,7 @@ import {
   type LearningStatus,
   type RootStackParamList,
 } from '../../../constants/routes';
+import { getLessonExercises } from '../services/lessonsService';
 import type { LessonExercise } from '../types';
 
 import { styles } from './LessonScreen.styles';
@@ -37,23 +38,47 @@ export function LessonScreen() {
   const route = useRoute<LessonRouteProp>();
 
   const [animationKey, setAnimationKey] = useState(0);
+  const [exercises, setExercises] = useState<LessonExercise[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const { moduleId, moduleName, lessonId, lessonTitle } = route.params;
+
+  const loadExercises = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
+
+      const lessonExercises = await getLessonExercises({
+        moduleId,
+        lessonId,
+      });
+
+      setExercises(lessonExercises);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'No se pudieron obtener los ejercicios de la lección';
+
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [lessonId, moduleId]);
 
   useFocusEffect(
     useCallback(() => {
       setAnimationKey((value) => value + 1);
-    }, [])
+      loadExercises();
+    }, [loadExercises])
   );
 
-  const exercises = useMemo(
-    () => createTemporaryExercises(lessonTitle),
-    [lessonTitle]
+  const completedCount = useMemo(
+    () =>
+      exercises.filter((exercise) => exercise.status === 'completed').length,
+    [exercises]
   );
-
-  const completedCount = exercises.filter(
-    (exercise) => exercise.status === 'completed'
-  ).length;
 
   const progress =
     exercises.length > 0 ? (completedCount / exercises.length) * 100 : 0;
@@ -62,8 +87,11 @@ export function LessonScreen() {
     navigation.navigate(ROUTES.EXERCISE, {
       exerciseId: exercise.id,
       moduleId,
+      moduleName,
       lessonId,
-      exerciseTitle: exercise.title.replace('\n', ' '),
+      lessonTitle,
+      exerciseTitle: exercise.title,
+      contenidoMultimedia: exercise.contenidoMultimedia,
     });
   };
 
@@ -95,7 +123,7 @@ export function LessonScreen() {
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Entrar a ${item.title.replace('\n', ' ')}`}
+        accessibilityLabel={`Entrar a ${item.title}`}
         onPress={() => handleExercisePress(item)}
         style={({ pressed }) => [
           styles.exerciseCard,
@@ -110,6 +138,106 @@ export function LessonScreen() {
       </Pressable>
     </AnimatedEntry>
   );
+
+  const renderListHeader = () => (
+    <>
+      <AnimatedEntry delay={150} triggerKey={animationKey}>
+        <View style={styles.breadcrumbContainer}>
+          <AppText style={styles.breadcrumbText}>{moduleName}</AppText>
+          <AppText style={styles.breadcrumbSeparator}>·</AppText>
+          <AppText style={styles.breadcrumbCurrent}>{lessonTitle}</AppText>
+        </View>
+      </AnimatedEntry>
+
+      <AnimatedEntry delay={220} triggerKey={animationKey}>
+        <View style={styles.summaryCard}>
+          <View style={styles.lessonIconBox}>
+            <AppText style={styles.lessonIconText}>
+              {getLessonIconText(lessonTitle)}
+            </AppText>
+            <View style={styles.lessonIconLine} />
+          </View>
+
+          <View style={styles.summaryContent}>
+            <AppText style={styles.summaryTitle}>{lessonTitle}</AppText>
+
+            <AnimatedProgressBar
+              progress={progress}
+              triggerKey={animationKey}
+              delay={380}
+              duration={850}
+              trackStyle={styles.summaryProgressTrack}
+              fillStyle={styles.summaryProgressFill}
+            />
+
+            <AppText style={styles.summaryProgressLabel}>
+              {completedCount} de {exercises.length} completadas
+            </AppText>
+          </View>
+        </View>
+      </AnimatedEntry>
+
+      <AnimatedEntry delay={300} triggerKey={animationKey}>
+        <AppText style={styles.sectionTitle}>Lecciones</AppText>
+      </AnimatedEntry>
+    </>
+  );
+
+  const renderListEmpty = () => {
+    if (isLoading) {
+      return (
+        <View style={{ paddingVertical: 40, alignItems: 'center', gap: 12 }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText style={{ color: colors.textSecondary }}>
+            Cargando ejercicios...
+          </AppText>
+        </View>
+      );
+    }
+
+    if (errorMessage) {
+      return (
+        <View style={{ paddingVertical: 40, alignItems: 'center', gap: 14 }}>
+          <AppText
+            style={{
+              color: colors.textSecondary,
+              textAlign: 'center',
+              lineHeight: 22,
+            }}
+          >
+            {errorMessage}
+          </AppText>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Reintentar"
+            onPress={loadExercises}
+            style={({ pressed }) => [
+              {
+                paddingHorizontal: 18,
+                paddingVertical: 10,
+                borderRadius: 20,
+                backgroundColor: colors.primary,
+              },
+              pressed && styles.pressed,
+            ]}
+          >
+            <AppText style={{ color: colors.textLight, fontWeight: '700' }}>
+              Reintentar
+            </AppText>
+          </Pressable>
+        </View>
+      );
+    }
+
+    return (
+      <View style={{ paddingVertical: 40, alignItems: 'center' }}>
+        <AppText style={{ color: colors.textSecondary }}>
+          Todavía no hay ejercicios para esta lección.
+        </AppText>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
@@ -173,131 +301,11 @@ export function LessonScreen() {
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={styles.exerciseRow}
         contentContainerStyle={styles.contentContainer}
-        ListHeaderComponent={
-          <>
-            <AnimatedEntry delay={150} triggerKey={animationKey}>
-              <View style={styles.breadcrumbContainer}>
-                <AppText style={styles.breadcrumbText}>{moduleName}</AppText>
-                <AppText style={styles.breadcrumbSeparator}>·</AppText>
-                <AppText style={styles.breadcrumbCurrent}>
-                  {lessonTitle}
-                </AppText>
-              </View>
-            </AnimatedEntry>
-
-            <AnimatedEntry delay={220} triggerKey={animationKey}>
-              <View style={styles.summaryCard}>
-                <View style={styles.lessonIconBox}>
-                  <AppText style={styles.lessonIconText}>
-                    {getLessonIconText(lessonTitle)}
-                  </AppText>
-                  <View style={styles.lessonIconLine} />
-                </View>
-
-                <View style={styles.summaryContent}>
-                  <AppText style={styles.summaryTitle}>{lessonTitle}</AppText>
-
-                  <AnimatedProgressBar
-                    progress={progress}
-                    triggerKey={animationKey}
-                    delay={380}
-                    duration={850}
-                    trackStyle={styles.summaryProgressTrack}
-                    fillStyle={styles.summaryProgressFill}
-                  />
-
-                  <AppText style={styles.summaryProgressLabel}>
-                    {completedCount} de {exercises.length} completadas
-                  </AppText>
-                </View>
-              </View>
-            </AnimatedEntry>
-
-            <AnimatedEntry delay={300} triggerKey={animationKey}>
-              <AppText style={styles.sectionTitle}>Lecciones</AppText>
-            </AnimatedEntry>
-          </>
-        }
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
       />
     </SafeAreaView>
   );
-}
-
-function createTemporaryExercises(lessonTitle: string): LessonExercise[] {
-  const normalizedTitle = lessonTitle.toLowerCase();
-
-  if (normalizedTitle.includes('número')) {
-    return Array.from({ length: 28 }, (_, index) => ({
-      id: `number-${index}`,
-      title: `Número\n${index}`,
-      status: getTemporaryExerciseStatus(index),
-    }));
-  }
-
-  if (normalizedTitle.includes('alfabeto')) {
-    const letters = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
-
-    return letters.map((letter, index) => ({
-      id: `letter-${letter}`,
-      title: `Letra\n${letter}`,
-      status: getTemporaryExerciseStatus(index),
-    }));
-  }
-
-  if (normalizedTitle.includes('día')) {
-    const days = [
-      'Lunes',
-      'Martes',
-      'Miércoles',
-      'Jueves',
-      'Viernes',
-      'Sábado',
-      'Domingo',
-    ];
-
-    return days.map((day, index) => ({
-      id: `day-${index}`,
-      title: day,
-      status: getTemporaryExerciseStatus(index),
-    }));
-  }
-
-  if (normalizedTitle.includes('sentimiento')) {
-    const feelings = [
-      'Feliz',
-      'Triste',
-      'Enojado',
-      'Cansado',
-      'Asustado',
-      'Sorprendido',
-      'Calmo',
-      'Nervioso',
-    ];
-
-    return feelings.map((feeling, index) => ({
-      id: `feeling-${index}`,
-      title: feeling,
-      status: getTemporaryExerciseStatus(index),
-    }));
-  }
-
-  return Array.from({ length: 12 }, (_, index) => ({
-    id: `exercise-${index + 1}`,
-    title: `Ejercicio\n${index + 1}`,
-    status: getTemporaryExerciseStatus(index),
-  }));
-}
-
-function getTemporaryExerciseStatus(index: number): LearningStatus {
-  if (index === 0 || index === 1) {
-    return 'completed';
-  }
-
-  if (index === 2) {
-    return 'inProgress';
-  }
-
-  return 'notStarted';
 }
 
 function getLessonIconText(lessonTitle: string) {
