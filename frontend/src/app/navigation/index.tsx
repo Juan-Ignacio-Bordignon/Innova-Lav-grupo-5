@@ -19,6 +19,9 @@ import { LessonScreen } from '../../features/lessons/screens/LessonScreen';
 import { ModuleDetailScreen } from '../../features/modules/screens/ModuleDetailScreen';
 import { Profile } from '../../features/profile/screens/ProfileScreen';
 import { Settings } from '../../features/profile/screens/SettingsScreen';
+import { LessonSelectionScreen } from '../../features/favorites/screens/LessonSelectionScreen';
+import { LessonHeader } from './components/LessonHeader';
+import { FavoritesStack } from '../../features/favorites/navigation/FavoritesNavigator';
 
 function FeedbackScreen() {
   return (
@@ -41,7 +44,7 @@ const HomeTabs = createBottomTabNavigator({
       },
     },
     [ROUTES.FAVORITES]: {
-      screen: FavoritesScreen,
+      screen: FavoritesStack, // Usamos el stack de favoritos aquí
       options: {
         title: 'Favoritos',
       },
@@ -52,6 +55,16 @@ const HomeTabs = createBottomTabNavigator({
         title: 'Perfil',
       },
     },
+  /*[ROUTES.LESSON_SELECTION]: {
+    screen: LessonSelectionScreen,
+    options: ({ navigation }) => ({
+    headerShown: true,
+    headerTitle: 'Repasemos',
+    headerShadowVisible: false,
+    headerLeft: () => <LessonHeader navigation={navigation} />,// O true si quieres que aparezca el botón de "atrás" por defecto
+    }),
+    },//*/
+    
   },
 });
 
@@ -117,6 +130,8 @@ const RootStack = createNativeStackNavigator({
       options: { title: '404' },
       linking: { path: '*' },
     },
+    // En tu objeto screens dentro de RootStack:
+    
   },
 });
 

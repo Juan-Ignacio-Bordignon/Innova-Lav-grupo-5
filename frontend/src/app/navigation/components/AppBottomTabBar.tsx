@@ -16,6 +16,7 @@ import { AppText } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
 import { ROUTES } from '../../../constants/routes';
 
+
 const TAB_LABELS: Record<string, string> = {
   [ROUTES.HOME]: 'Inicio',
   [ROUTES.FAVORITES]: 'Favoritos',
@@ -110,7 +111,8 @@ export function AppBottomTabBar({
     >
       <View style={styles.container}>
         {state.routes.map((route, index) => {
-          const isFocused = state.index === index;
+          const isFocused = state.index === index|| 
+    (route.name === ROUTES.FAVORITES && state.routes[state.index]?.name === ROUTES.LESSON_SELECTION);
           const options = descriptors[route.key]?.options;
           const isFirst = index === 0;
           const isLast = index === state.routes.length - 1;
