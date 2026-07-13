@@ -5,6 +5,9 @@ import { ROUTES } from '../../../constants/routes';
 import { AuthForm } from '../components/AuthForm';
 import { login } from '../services/authService';
 
+import { TRACKING_EVENTS } from '../../../services/tracking/trackingEvents';
+import { trackEvent } from '../../../services/tracking/trackingService';
+
 type LoginErrors = {
   email?: string;
   password?: string;
@@ -70,6 +73,11 @@ export function LoginScreen() {
       await login({
         email: email.trim(),
         password,
+      });
+
+      void trackEvent(TRACKING_EVENTS.USER_LOGGED_IN, {
+        authMethod: 'email',
+        sourceScreen: 'login',
       });
 
       navigation.reset({

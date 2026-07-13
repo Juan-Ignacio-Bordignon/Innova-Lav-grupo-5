@@ -16,8 +16,6 @@ export async function login(payload: LoginRequest) {
 
   await saveAuthToken(response.token);
 
-  console.log('Token guardado:', response.token);
-
   return response;
 }
 
@@ -28,8 +26,6 @@ export async function register(payload: RegisterRequest) {
   });
 
   await saveAuthToken(response.token);
-
-  console.log('Token guardado:', response.token); 
 
   return response;
 }

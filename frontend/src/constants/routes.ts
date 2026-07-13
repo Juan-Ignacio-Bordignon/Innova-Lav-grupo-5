@@ -59,6 +59,12 @@ export type RootStackParamList = {
   [ROUTES.LESSON]: {
     moduleId: string;
     moduleName: string;
+    moduleDescription?: string;
+    moduleLessons?: {
+      id: string;
+      title: string;
+      status?: LearningStatus;
+    }[];
     lessonId: string;
     lessonTitle: string;
     lessonStatus?: LearningStatus;

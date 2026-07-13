@@ -16,11 +16,12 @@ import IconModuleWords from '../../../assets/icons/ux/modules/IconModuleWords.sv
 import IconStatusCompleted from '../../../assets/icons/ux/status/IconStatusCompleted.svg';
 import IconStatusInProgress from '../../../assets/icons/ux/status/IconStatusInProgress.svg';
 import IconStatusNotStarted from '../../../assets/icons/ux/status/IconStatusNotStarted.svg';
+import { AppHeader } from '../../../components/navigation/AppHeader';
 import {
   AnimatedEntry,
+  AnimatedPop,
   AnimatedProgressBar,
   AppText,
-  AnimatedPop,
 } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
 import {
@@ -28,6 +29,9 @@ import {
   type LearningStatus,
   type RootStackParamList,
 } from '../../../constants/routes';
+import { TRACKING_EVENTS } from '../../../services/tracking/trackingEvents';
+import { trackEvent } from '../../../services/tracking/trackingService';
+
 import { styles } from './ModuleDetailScreen.styles';
 
 type ModuleDetailRouteProp = RouteProp<
@@ -44,6 +48,7 @@ type LessonItem = {
 export const ModuleDetailScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<ModuleDetailRouteProp>();
+
   const [animationKey, setAnimationKey] = useState(0);
 
   const {
@@ -61,17 +66,47 @@ export const ModuleDetailScreen = () => {
   );
 
   const safeProgress = Math.max(0, Math.min(moduleProgress, 100));
-  const isWordsModule = moduleName.toLowerCase().includes('palabra');
+
+  const isWordsModule = moduleName
+    .toLowerCase()
+    .includes('palabra');
 
   const items: LessonItem[] = useMemo(
     () =>
       lessons.map((lesson, index) => ({
         id: lesson.id,
         title: lesson.title,
-        status: lesson.status ?? getTemporaryLessonStatus(index),
+        status:
+          lesson.status ?? getTemporaryLessonStatus(index),
       })),
     [lessons]
   );
+
+  const handleBackFallback = () => {
+    navigation.replace(ROUTES.HOME_TABS);
+  };
+
+  const handleLessonPress = (lesson: LessonItem) => {
+    void trackEvent(TRACKING_EVENTS.CATEGORY_SELECTED, {
+      moduleId,
+      moduleName,
+      lessonId: lesson.id,
+      lessonName: lesson.title,
+      lessonStatus: lesson.status,
+      sourceScreen: 'module_detail',
+    });
+
+    navigation.navigate(ROUTES.LESSON, {
+      moduleId,
+      moduleName,
+      moduleDescription,
+      moduleLessons: lessons,
+      lessonId: lesson.id,
+      lessonTitle: lesson.title,
+      lessonStatus: lesson.status,
+      moduleProgress: safeProgress,
+    });
+  };
 
   const renderStatusIcon = (status: LearningStatus) => {
     switch (status) {
@@ -102,16 +137,7 @@ export const ModuleDetailScreen = () => {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Entrar a ${item.title}`}
-        onPress={() =>
-          navigation.navigate(ROUTES.LESSON, {
-            moduleId,
-            moduleName,
-            lessonId: item.id,
-            lessonTitle: item.title,
-            lessonStatus: item.status,
-            moduleProgress: safeProgress,
-          })
-        }
+        onPress={() => handleLessonPress(item)}
         style={({ pressed }) => [
           styles.categoryCard,
           pressed && styles.categoryCardPressed,
@@ -119,12 +145,17 @@ export const ModuleDetailScreen = () => {
       >
         <View style={styles.categoryLeftContainer}>
           <View style={styles.categoryIconContainer}>
-            <AnimatedPop delay={520 + index * 120} triggerKey={animationKey}>
+            <AnimatedPop
+              delay={520 + index * 120}
+              triggerKey={animationKey}
+            >
               {renderStatusIcon(item.status)}
             </AnimatedPop>
           </View>
 
-          <AppText style={styles.categoryTitle}>{item.title}</AppText>
+          <AppText style={styles.categoryTitle}>
+            {item.title}
+          </AppText>
         </View>
 
         <MaterialIcons
@@ -138,57 +169,12 @@ export const ModuleDetailScreen = () => {
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
-      <AnimatedEntry delay={80} triggerKey={animationKey}>
-        <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Volver"
-            onPress={() => navigation.goBack()}
-            style={({ pressed }) => [
-              styles.headerCircleButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <MaterialIcons
-              name="keyboard-arrow-left"
-              size={34}
-              color={colors.primary}
-            />
-          </Pressable>
-
-          <View style={styles.headerActions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver logros"
-              style={({ pressed }) => [
-                styles.headerIconButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <MaterialIcons
-                name="emoji-events"
-                size={25}
-                color={colors.textLight}
-              />
-            </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver notificaciones"
-              style={({ pressed }) => [
-                styles.headerIconButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <MaterialIcons
-                name="notifications-none"
-                size={25}
-                color={colors.textLight}
-              />
-            </Pressable>
-          </View>
-        </View>
-      </AnimatedEntry>
+      <AppHeader
+        variant="back"
+        notificationCount={1}
+        animationKey={animationKey}
+        onBackFallback={handleBackFallback}
+      />
 
       <AnimatedEntry delay={180} triggerKey={animationKey}>
         <View style={styles.mainCard}>
@@ -201,10 +187,15 @@ export const ModuleDetailScreen = () => {
           </View>
 
           <View style={styles.mainCardContent}>
-            <AppText style={styles.mainCardTitle}>{moduleName}</AppText>
+            <AppText style={styles.mainCardTitle}>
+              {moduleName}
+            </AppText>
 
             <AppText style={styles.mainCardDescription}>
-              {getModuleDetailDescription(moduleName, moduleDescription)}
+              {getModuleDetailDescription(
+                moduleName,
+                moduleDescription
+              )}
             </AppText>
 
             <AppText style={styles.progressLabel}>
@@ -224,7 +215,9 @@ export const ModuleDetailScreen = () => {
       </AnimatedEntry>
 
       <AnimatedEntry delay={280} triggerKey={animationKey}>
-        <AppText style={styles.sectionTitle}>Categorías</AppText>
+        <AppText style={styles.sectionTitle}>
+          Categorías
+        </AppText>
       </AnimatedEntry>
 
       <FlatList
@@ -238,7 +231,9 @@ export const ModuleDetailScreen = () => {
   );
 };
 
-function getTemporaryLessonStatus(index: number): LearningStatus {
+function getTemporaryLessonStatus(
+  index: number
+): LearningStatus {
   if (index === 0 || index === 1) {
     return 'completed';
   }

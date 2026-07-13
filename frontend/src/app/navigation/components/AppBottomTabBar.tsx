@@ -1,6 +1,8 @@
+// src/app/navigation/components/AppBottomTabBar.tsx
+
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,7 +17,9 @@ import Animated, {
 import { AppText } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
 import { ROUTES } from '../../../constants/routes';
-
+import { TRACKING_EVENTS } from '../../../services/tracking/trackingEvents';
+import { trackEvent } from '../../../services/tracking/trackingService';
+import type { TrackingTabName } from '../../../services/tracking/trackingTypes';
 
 const TAB_LABELS: Record<string, string> = {
   [ROUTES.HOME]: 'Inicio',
@@ -23,10 +27,21 @@ const TAB_LABELS: Record<string, string> = {
   [ROUTES.PROFILE_TAB]: 'Perfil',
 };
 
-const TAB_ICONS: Record<string, keyof typeof MaterialIcons.glyphMap> = {
+const TAB_ICONS: Record<
+  string,
+  keyof typeof MaterialIcons.glyphMap
+> = {
   [ROUTES.HOME]: 'home',
   [ROUTES.FAVORITES]: 'favorite-border',
   [ROUTES.PROFILE_TAB]: 'person-outline',
+};
+
+const TAB_TRACKING_NAMES: Partial<
+  Record<string, TrackingTabName>
+> = {
+  [ROUTES.HOME]: 'home',
+  [ROUTES.FAVORITES]: 'favorites',
+  [ROUTES.PROFILE_TAB]: 'profile',
 };
 
 type AnimatedTabIconProps = {
@@ -45,25 +60,25 @@ function AnimatedTabIcon({
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-  if (isFocused) {
-    rotation.value = 0;
+    if (isFocused) {
+      rotation.value = 0;
 
-    rotation.value = withSequence(
-      withTiming(385, {
-        duration: 520,
-        easing: Easing.out(Easing.cubic),
-      }),
-      withTiming(345, {
-        duration: 130,
-        easing: Easing.out(Easing.quad),
-      }),
-      withTiming(360, {
-        duration: 120,
-        easing: Easing.out(Easing.quad),
-      })
-    );
-  }
-}, [isFocused, rotation]);
+      rotation.value = withSequence(
+        withTiming(385, {
+          duration: 520,
+          easing: Easing.out(Easing.cubic),
+        }),
+        withTiming(345, {
+          duration: 130,
+          easing: Easing.out(Easing.quad),
+        }),
+        withTiming(360, {
+          duration: 120,
+          easing: Easing.out(Easing.quad),
+        })
+      );
+    }
+  }, [isFocused, rotation]);
 
   const animatedCircleStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
@@ -102,20 +117,64 @@ export function AppBottomTabBar({
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
+  const previousTabRef =
+    useRef<TrackingTabName | null>(null);
+
+  const activeRouteName =
+    state.routes[state.index]?.name;
+
+  const activeTrackingTab =
+    TAB_TRACKING_NAMES[activeRouteName];
+
+  useEffect(() => {
+    if (!activeTrackingTab) {
+      return;
+    }
+
+    const previousTab = previousTabRef.current;
+
+    // En el primer render solo guardamos la pestaña inicial.
+    // No registramos un cambio porque el usuario todavía no cambió de tab.
+    if (previousTab === null) {
+      previousTabRef.current = activeTrackingTab;
+      return;
+    }
+
+    // Evita eventos duplicados si vuelve a renderizar la misma pestaña.
+    if (previousTab === activeTrackingTab) {
+      return;
+    }
+
+    void trackEvent(TRACKING_EVENTS.TAB_VIEWED, {
+      tabName: activeTrackingTab,
+      previousTab,
+    });
+
+    previousTabRef.current = activeTrackingTab;
+  }, [activeTrackingTab]);
+
   return (
     <View
       style={[
         styles.wrapper,
-        { paddingBottom: Math.max(insets.bottom, 10) },
+        {
+          paddingBottom: Math.max(
+            insets.bottom,
+            10
+          ),
+        },
       ]}
     >
       <View style={styles.container}>
         {state.routes.map((route, index) => {
-          const isFocused = state.index === index|| 
-    (route.name === ROUTES.FAVORITES && state.routes[state.index]?.name === ROUTES.LESSON_SELECTION);
-          const options = descriptors[route.key]?.options;
+          const isFocused = state.index === index;
+          const options =
+            descriptors[route.key]?.options;
+
           const isFirst = index === 0;
-          const isLast = index === state.routes.length - 1;
+
+          const isLast =
+            index === state.routes.length - 1;
 
           const label =
             TAB_LABELS[route.name] ??
@@ -123,7 +182,8 @@ export function AppBottomTabBar({
             options.title ??
             route.name;
 
-          const iconName = TAB_ICONS[route.name] ?? 'circle';
+          const iconName =
+            TAB_ICONS[route.name] ?? 'circle';
 
           const backgroundColor = isFocused
             ? colors.primary
@@ -140,8 +200,14 @@ export function AppBottomTabBar({
               canPreventDefault: true,
             });
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+            if (
+              !isFocused &&
+              !event.defaultPrevented
+            ) {
+              navigation.navigate(
+                route.name,
+                route.params
+              );
             }
           };
 
@@ -156,9 +222,17 @@ export function AppBottomTabBar({
             <Pressable
               key={route.key}
               accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarButtonTestID}
+              accessibilityState={
+                isFocused
+                  ? { selected: true }
+                  : {}
+              }
+              accessibilityLabel={
+                options.tabBarAccessibilityLabel
+              }
+              testID={
+                options.tabBarButtonTestID
+              }
               onPress={onPress}
               onLongPress={onLongPress}
               style={({ pressed }) => [
@@ -172,13 +246,18 @@ export function AppBottomTabBar({
               <AnimatedTabIcon
                 iconName={iconName}
                 contentColor={contentColor}
-                backgroundColor={backgroundColor}
+                backgroundColor={
+                  backgroundColor
+                }
                 isFocused={isFocused}
               />
 
               <AppText
                 variant="caption"
-                style={[styles.label, { color: contentColor }]}
+                style={[
+                  styles.label,
+                  { color: contentColor },
+                ]}
               >
                 {label}
               </AppText>
@@ -239,7 +318,7 @@ const styles = StyleSheet.create({
   iconCircle: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 18,
-    borderWidth: 2.70,
+    borderWidth: 2.7,
     alignItems: 'center',
     justifyContent: 'center',
   },

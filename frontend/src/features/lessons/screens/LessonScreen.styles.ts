@@ -1,75 +1,32 @@
 // src/features/lessons/screens/LessonScreen.styles.ts
 
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { colors } from '../../../constants/colors';
 import { fonts } from '../../../theme/fonts';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const HORIZONTAL_PADDING = 24;
-const CARD_GAP = 12;
-const EXERCISE_CARD_WIDTH =
-  (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP * 2) / 3;
+export const LESSON_GRID = {
+  horizontalPadding: 24,
+  gap: 12,
+} as const;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F7F7F7',
   },
-  header: {
-    minHeight: 70,
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  headerCircleButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1.2,
-    borderColor: colors.primary,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  headerIconButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
+
   pressed: {
     opacity: 0.88,
     transform: [{ scale: 0.98 }],
   },
+
   contentContainer: {
-    paddingHorizontal: HORIZONTAL_PADDING,
+    paddingHorizontal:
+      LESSON_GRID.horizontalPadding,
     paddingBottom: 32,
   },
+
   breadcrumbContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -77,24 +34,28 @@ export const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 16,
   },
+
   breadcrumbText: {
     fontFamily: fonts.medium,
     fontSize: 14,
     lineHeight: 20,
     color: colors.textSecondary,
   },
+
   breadcrumbSeparator: {
     fontFamily: fonts.bold,
     fontSize: 16,
     lineHeight: 20,
     color: colors.textSecondary,
   },
+
   breadcrumbCurrent: {
     fontFamily: fonts.bold,
     fontSize: 14,
     lineHeight: 20,
     color: colors.textSecondary,
   },
+
   summaryCard: {
     width: '100%',
     minHeight: 132,
@@ -104,6 +65,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
     backgroundColor: colors.surface,
+
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
@@ -113,6 +75,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
+
   lessonIconBox: {
     width: 116,
     height: 96,
@@ -123,6 +86,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.surface,
   },
+
   lessonIconText: {
     fontFamily: fonts.bold,
     fontSize: 31,
@@ -130,6 +94,7 @@ export const styles = StyleSheet.create({
     color: colors.secondary,
     letterSpacing: 1,
   },
+
   lessonIconLine: {
     width: 22,
     height: 7,
@@ -137,9 +102,11 @@ export const styles = StyleSheet.create({
     marginTop: 2,
     backgroundColor: colors.primary,
   },
+
   summaryContent: {
     flex: 1,
   },
+
   summaryTitle: {
     fontFamily: fonts.bold,
     fontSize: 20,
@@ -147,20 +114,24 @@ export const styles = StyleSheet.create({
     color: colors.secondary,
     marginBottom: 12,
   },
+
   summaryProgressTrack: {
     height: 15,
     borderRadius: 10,
     marginBottom: 10,
   },
+
   summaryProgressFill: {
     borderRadius: 10,
   },
+
   summaryProgressLabel: {
     fontFamily: fonts.bold,
     fontSize: 14,
     lineHeight: 20,
     color: colors.primary,
   },
+
   sectionTitle: {
     fontFamily: fonts.bold,
     fontSize: 18,
@@ -169,16 +140,15 @@ export const styles = StyleSheet.create({
     marginTop: 26,
     marginBottom: 16,
   },
+
   exerciseRow: {
-    gap: CARD_GAP,
+    gap: LESSON_GRID.gap,
     marginBottom: 12,
   },
-  exerciseAnimationWrapper: {
-    width: EXERCISE_CARD_WIDTH,
-  },
+
   exerciseCard: {
-    width: EXERCISE_CARD_WIDTH,
-    height: EXERCISE_CARD_WIDTH,
+    width: '100%',
+    aspectRatio: 1,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
@@ -186,6 +156,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1.3,
     borderColor: colors.surface,
+
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
@@ -195,15 +166,47 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+
   exerciseCardPressed: {
     opacity: 0.92,
     transform: [{ scale: 0.985 }],
   },
+
   exerciseTitle: {
     fontFamily: fonts.medium,
     fontSize: 14,
     lineHeight: 18,
     color: colors.primary,
     textAlign: 'center',
+  },
+
+  emptyContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    gap: 14,
+  },
+
+  emptyText: {
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+
+  errorText: {
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+
+  retryButton: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: colors.primary,
+  },
+
+  retryButtonText: {
+    color: colors.textLight,
+    fontFamily: fonts.bold,
   },
 });

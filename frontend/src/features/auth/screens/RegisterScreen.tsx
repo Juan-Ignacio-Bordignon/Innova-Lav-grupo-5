@@ -5,6 +5,9 @@ import { ROUTES } from '../../../constants/routes';
 import { AuthForm } from '../components/AuthForm';
 import { register } from '../services/authService';
 
+import { TRACKING_EVENTS } from '../../../services/tracking/trackingEvents';
+import { trackEvent } from '../../../services/tracking/trackingService';
+
 type RegisterErrors = {
   name?: string;
   email?: string;
@@ -100,6 +103,11 @@ export function RegisterScreen() {
         nombre: name.trim(),
         email: email.trim(),
         password,
+      });
+
+      void trackEvent(TRACKING_EVENTS.USER_REGISTERED, {
+        authMethod: 'email',
+        sourceScreen: 'register',
       });
 
       navigation.reset({

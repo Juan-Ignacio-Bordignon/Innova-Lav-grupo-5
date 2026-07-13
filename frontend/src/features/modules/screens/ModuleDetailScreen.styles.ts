@@ -1,3 +1,5 @@
+// src/features/modules/screens/ModuleDetailScreen.styles.ts
+
 import { StyleSheet } from 'react-native';
 
 import { colors } from '../../../constants/colors';
@@ -7,60 +9,6 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-
-  header: {
-    minHeight: 78,
-    paddingHorizontal: 32,
-    paddingTop: 10,
-    paddingBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  headerCircleButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.surface,
-    borderWidth: 1.2,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-
-  headerIconButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.22,
-    shadowRadius: 4,
-    elevation: 5,
   },
 
   mainCard: {
@@ -152,7 +100,7 @@ export const styles = StyleSheet.create({
   },
 
   categoryAnimationWrapper: {
-  width: '100%',
+    width: '100%',
   },
 
   categoryCard: {
@@ -203,10 +151,5 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
     color: colors.primary,
     flex: 1,
-  },
-
-  pressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.985 }],
   },
 });

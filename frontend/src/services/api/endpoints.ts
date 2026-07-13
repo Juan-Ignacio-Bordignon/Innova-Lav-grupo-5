@@ -23,4 +23,6 @@ export const ENDPOINTS = {
   LESSONS: '/lessons',
   EXERCISES: '/exercises',
   PROGRESS: '/progress',
+
+  EVENT_LOG: '/event-log',
 } as const;

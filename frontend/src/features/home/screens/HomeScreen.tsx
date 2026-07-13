@@ -1,3 +1,5 @@
+// src/features/home/screens/HomeScreen.tsx
+
 import {
   useFocusEffect,
   useNavigation,
@@ -14,14 +16,16 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppHeader } from '../../../components/navigation/AppHeader';
 import { AnimatedEntry, AppText } from '../../../components/ui';
 import { colors } from '../../../constants/colors';
 import { ROUTES } from '../../../constants/routes';
-import { getCurrentUser } from '../../user/services/userService';
+import { TRACKING_EVENTS } from '../../../services/tracking/trackingEvents';
+import { trackEvent } from '../../../services/tracking/trackingService';
 import { ModuleCard } from '../../modules/components/ModuleCard';
 import { getHomeModules } from '../../modules/services/modulesService';
 import type { HomeModule } from '../../modules/types';
-import { HomeHeader } from '../components/HomeHeader';
+import { getCurrentUser } from '../../user/services/userService';
 import { HomeSearchBar } from '../components/HomeSearchBar';
 
 export function Home() {
@@ -33,6 +37,24 @@ export function Home() {
   const [animationKey, setAnimationKey] = useState(0);
 
   const navigation = useNavigation<any>();
+
+  const handleModulePress = (module: HomeModule) => {
+    void trackEvent(TRACKING_EVENTS.MODULE_OPENED, {
+      moduleId: module.id,
+      moduleName: module.subtitle,
+      moduleProgress: module.progress,
+      sourceScreen: 'home',
+    });
+
+    navigation.navigate(ROUTES.MODULE_DETAIL, {
+      moduleId: module.id,
+      moduleName: module.subtitle,
+      moduleDescription:
+        module.detailDescription ?? module.description,
+      moduleProgress: module.progress,
+      lessons: module.lessons,
+    });
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -66,7 +88,7 @@ export function Home() {
       }
     }
 
-    loadModules();
+    void loadModules();
 
     return () => {
       isMounted = false;
@@ -86,25 +108,25 @@ export function Home() {
       return true;
     }
 
-    return `${module.title} ${module.subtitle}`.toLowerCase().includes(search);
+    return `${module.title} ${module.subtitle}`
+      .toLowerCase()
+      .includes(search);
   });
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
+      <AppHeader
+        variant="home"
+        userName={userName}
+        notificationCount={1}
+        animationKey={animationKey}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.content}
       >
-        <View style={styles.topSpacer} />
-
-        <AnimatedEntry delay={80} triggerKey={animationKey}>
-          <HomeHeader
-            userName={userName}
-            notificationsCount={1}
-          />
-        </AnimatedEntry>
-
         <AnimatedEntry delay={180} triggerKey={animationKey}>
           <HomeSearchBar
             value={searchValue}
@@ -136,7 +158,9 @@ export function Home() {
             </AnimatedEntry>
           ) : null}
 
-          {!isLoading && !errorMessage && filteredModules.length === 0 ? (
+          {!isLoading &&
+          !errorMessage &&
+          filteredModules.length === 0 ? (
             <AnimatedEntry delay={360} triggerKey={animationKey}>
               <AppText variant="body" style={styles.feedbackText}>
                 No encontramos módulos con esa búsqueda.
@@ -155,16 +179,7 @@ export function Home() {
                   <ModuleCard
                     module={module}
                     animationKey={animationKey}
-                    onPress={() =>
-                      navigation.navigate(ROUTES.MODULE_DETAIL, {
-                        moduleId: module.id,
-                        moduleName: module.subtitle,
-                        moduleDescription:
-                          module.detailDescription ?? module.description,
-                        moduleProgress: module.progress,
-                        lessons: module.lessons,
-                      })
-                    }
+                    onPress={() => handleModulePress(module)}
                   />
                 </AnimatedEntry>
               ))
@@ -219,12 +234,8 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 14,
+    paddingTop: 18,
     paddingBottom: 28,
-  },
-
-  topSpacer: {
-    height: 24,
   },
 
   modulesSection: {
