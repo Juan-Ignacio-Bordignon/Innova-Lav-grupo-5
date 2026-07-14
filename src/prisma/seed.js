@@ -629,12 +629,11 @@ async function main() {
     },
     {
       lessonId: alfabeto.id,
-      titulo:
-        "Ordená las letras para formar la palabra 'Kilo' si la primera seña que viste fue la 'K':",
+      titulo: "Ordená las letras para formar la palabra 'Cada':",
       tipo: "ORDER_WORDS",
-      opcionesRespuesta: ["L", "O", "K", "I"],
-      respuestaEsperada: ["K", "I", "L", "O"],
-      contenidoMultimedia: "Letra_K",
+      opcionesRespuesta: ["D", "A", "C", "A"],
+      respuestaEsperada: ["C", "A", "D", "A"],
+      contenidoMultimedia: "Letra_C",
     },
     {
       lessonId: alfabeto.id,

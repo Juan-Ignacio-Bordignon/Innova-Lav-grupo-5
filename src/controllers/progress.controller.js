@@ -4,10 +4,13 @@ import { verifyToken } from "../utils/jws.js";
 
 const prisma = new PrismaClient();
 
-// GET /progress
+// GET /progress - Obtener el historial de progreso del usuario
 export const getProgress = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ error: "Token no provisto" });
+    }
     const userId = verifyToken(token);
 
     const progreso = await prisma.progreso.findMany({
@@ -47,10 +50,13 @@ export const getProgress = async (req, res) => {
   }
 };
 
-// POST /progress
+// POST /progress - Guardar el progreso de una lección completada por el usuario
 export const updateProgress = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ error: "Token no provisto" });
+    }
     const userId = verifyToken(token);
     const { moduloId, leccionId, exerciseId } = req.body;
 
@@ -65,7 +71,7 @@ export const updateProgress = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    // 2. Guardamos el progreso de la lección completada
+    // 2. Guardamos el progreso
     const nuevoProgreso = await prisma.progreso.create({
       data: {
         userId: userIdInt,
@@ -93,30 +99,72 @@ export const updateProgress = async (req, res) => {
       rachaActual: userActualizado.rachaActual,
     });
   } catch (e) {
+    console.error(e);
     res
       .status(500)
       .json({ error: "No se pudo actualizar el progreso del usuario" });
   }
+};
 
+// POST /progress/save-resolved - Guardar el progreso real de una respuesta 
 export const saveProgress = async (req, res) => {
   try {
-    const { userId, lessonId, exerciseId, isCorrect } = req.body;
+    const { userId, moduloId, lessonId, exerciseId, isCorrect } = req.body;
 
-    // TODO: Ajustar las consultas Prisma una vez que acordemos el esquema .
-    // Por ahora mockeamos la respuesta para habilitar el desarrollo del Frontend.
-    const mockResultado = {
-      message: "Progreso recibido y procesado en Backend (Sprint Semana 8)",
-      puntosGanados: isCorrect ? 10 : 2,
-      rachaActual: 3, 
-      status: "success"
-    };
+    if (!userId || !lessonId || !exerciseId) {
+      return res.status(400).json({ error: "Faltan parámetros requeridos (userId, lessonId, exerciseId)." });
+    }
 
-    return res.status(200).json(mockResultado);
+    const userIdInt = parseInt(userId);
+    const puntosGanados = isCorrect ? 10 : 2;
+
+    // 1. Buscamos al usuario para ver su racha actual
+    const user = await prisma.user.findUnique({
+      where: { id: userIdInt }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
+    // 2. Registramos el intento en la tabla progreso
+    const nuevoRegistro = await prisma.progreso.create({
+      data: {
+        userId: userIdInt,
+        moduloId: parseInt(moduloId) || 1, // Por defecto al módulo 1 si no viene
+        leccionId: parseInt(lessonId),
+        ejercicioId: parseInt(exerciseId),
+        puntos: puntosGanados,
+        errores: isCorrect ? 0 : 1,
+        primerIntento: true
+      }
+    });
+
+    // 3. Calculamos racha diaria 
+    const { rachaActual, ultimaActividad } = calcularNuevaRacha(
+      user.ultimaActividad,
+      user.rachaActual
+    );
+
+    // 4. Actualizamos el usuario en la DB
+    const userActualizado = await prisma.user.update({
+      where: { id: userIdInt },
+      data: { 
+        rachaActual, 
+        ultimaActividad 
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Progreso registrado con éxito en la base de datos.",
+      puntosGanados,
+      rachaActual: userActualizado.rachaActual,
+      progreso: nuevoRegistro
+    });
+
   } catch (error) {
     console.error("Error en saveProgress:", error);
-    return res.status(500).json({ error: "Error interno al procesar el progreso del MVP" });
+    return res.status(500).json({ error: "Error interno al procesar el progreso del MVP." });
   }
 };
-
-};
-
