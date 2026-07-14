@@ -5,7 +5,9 @@ export const ENDPOINTS = {
   },
 
   USER: '/user',
+  USER_ACHIEVEMENTS: '/user/logros',
   MODULES: '/module',
+  
 
   MODULE_LESSONS: (moduleId: number | string) =>
     `/module/${moduleId}/lessons`,
@@ -23,6 +25,10 @@ export const ENDPOINTS = {
   LESSONS: '/lessons',
   EXERCISES: '/exercises',
   PROGRESS: '/progress',
+
+  FAVORITES: '/favorites',
+  FAVORITE_BY_EXERCISE: (exerciseId: number | string) =>
+    `/favorites/${exerciseId}`,
 
   EVENT_LOG: '/event-log',
 } as const;

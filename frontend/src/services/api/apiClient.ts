@@ -27,12 +27,20 @@ export async function apiClient<T>(
   const data = await parseResponse<ApiErrorResponse | T>(response);
 
   if (!response.ok) {
-    const errorMessage =
-      (data as ApiErrorResponse)?.error ||
-      (data as ApiErrorResponse)?.message ||
-      `API request failed: ${response.status}`;
+  console.error('API request error:', {
+    method: fetchOptions.method ?? 'GET',
+    url: `${API_BASE_URL}${path}`,
+    status: response.status,
+    response: data,
+    hasToken: Boolean(token),
+  });
 
-    throw new Error(errorMessage);
+  const errorMessage =
+    (data as ApiErrorResponse)?.error ||
+    (data as ApiErrorResponse)?.message ||
+    `API request failed: ${response.status}`;
+
+  throw new Error(errorMessage);
   }
 
   return data as T;

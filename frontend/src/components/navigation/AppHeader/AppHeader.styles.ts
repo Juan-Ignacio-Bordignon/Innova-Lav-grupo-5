@@ -1,5 +1,3 @@
-// src/components/navigation/AppHeader/AppHeader.styles.ts
-
 import { StyleSheet } from 'react-native';
 
 import { colors } from '../../../constants/colors';
@@ -32,6 +30,30 @@ export const styles = StyleSheet.create({
     color: colors.primary,
   },
 
+  title: {
+    flexShrink: 1,
+    fontFamily: fonts.bold,
+    fontSize: 24,
+    lineHeight: 31,
+    color: colors.primary,
+  },
+
+  backContent: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+
+  backTitle: {
+    flex: 1,
+    fontFamily: fonts.medium,
+    fontSize: 21,
+    lineHeight: 28,
+    color: colors.primary,
+  },
+
   backButton: {
     width: 52,
     height: 52,
@@ -41,6 +63,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1.2,
     borderColor: colors.primary,
+
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
@@ -65,6 +88,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,
+
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
