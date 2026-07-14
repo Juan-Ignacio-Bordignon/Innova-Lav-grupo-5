@@ -35,10 +35,11 @@ export const getFavorites = async (req, res) => {
 
     const favoritos = await prisma.favorite.findMany({
       where: { userId: parseInt(userId) },
-      include: { ejercicio: true },
+      include: { teoria: true },
     });
     res.json({ favorites: favoritos });
   } catch (e) {
+    console.log(e);
     res.status(500).json({ error: "No se pudieron obtener los favoritos" });
   }
 };
