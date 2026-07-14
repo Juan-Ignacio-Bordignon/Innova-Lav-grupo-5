@@ -1,0 +1,19 @@
+/* 1. Colores normales de la app */
+:root {
+  --bg-principal: #ffffff;
+  --texto-color: #1a1a1a;
+}
+
+/* 2. Colores cuando se activa el Alto Contraste */
+[data-theme="high-contrast"] {
+  --bg-principal: #000000;
+  --texto-color: #ffff00; /* Amarillo brillante para accesibilidad visual */
+}
+
+/* 3. Aplicamos esos colores a toda la pantalla */
+body {
+  background-color: var(--bg-principal);
+  color: var(--texto-color);
+  font-family: sans-serif;
+  transition: background-color 0.3s ease; /* Para que el cambio de color sea suave */
+}
