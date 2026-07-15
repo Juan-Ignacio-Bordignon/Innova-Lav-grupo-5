@@ -1,10 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { calcularNuevaRacha } from "../utils/racha.utils.js";
-import { verifyToken } from "../utils/jws.js";
+import { verifyToken } from "../utils/jws.js"; 
 
 const prisma = new PrismaClient();
 
-// GET /progress - Obtener el historial de progreso del usuario
+// GET /progress - Obtener el historial de progreso real del usuario
 export const getProgress = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -43,82 +43,40 @@ export const getProgress = async (req, res) => {
 
     res.json({ progreso });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res
       .status(500)
       .json({ error: "No se pudo obtener el progreso del usuario" });
   }
 };
 
-// POST /progress - Guardar el progreso de una lección completada por el usuario
-export const updateProgress = async (req, res) => {
+// POST /progress/save-resolved - Registrar el progreso real y actualizar racha (soporta Ejercicios y Teorías)
+export const saveProgress = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      return res.status(401).json({ error: "Token no provisto" });
+      return res.status(401).json({ error: "Token no provisto o inválido." });
     }
     const userId = verifyToken(token);
-    const { moduloId, leccionId, exerciseId } = req.body;
-
     const userIdInt = parseInt(userId);
 
-    // 1. Buscamos el usuario para asegurarnos que existe
-    const user = await prisma.user.findUnique({
-      where: { id: userIdInt },
-    });
+    const { moduloId, lessonId, exerciseId, isCorrect, isTheory } = req.body;
 
-    if (!user) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
+    if (!lessonId || !exerciseId) {
+      return res.status(400).json({ error: "Faltan parámetros requeridos (lessonId, exerciseId)." });
     }
 
-    // 2. Guardamos el progreso
-    const nuevoProgreso = await prisma.progreso.create({
-      data: {
-        userId: userIdInt,
-        moduloId: parseInt(moduloId),
-        leccionId: parseInt(leccionId),
-        ejercicioId: parseInt(exerciseId),
-      },
-    });
+    // Definición de puntos y errores:
+    // Si es teoría, no suma puntos ni cuenta como error. Si es ejercicio, 10 si acierta, 2 si falla.
+    let puntosGanados = 0;
+    let cantidadErrores = 0;
 
-    // 3. Calculamos cómo queda la racha
-    const { rachaActual, ultimaActividad } = calcularNuevaRacha(
-      user.ultimaActividad,
-      user.rachaActual,
-    );
-
-    // 4. Actualizamos al usuario con la nueva racha
-    const userActualizado = await prisma.user.update({
-      where: { id: userIdInt },
-      data: { rachaActual, ultimaActividad },
-    });
-
-    res.json({
-      mensaje: "Progreso actualizado exitosamente",
-      progreso: nuevoProgreso,
-      rachaActual: userActualizado.rachaActual,
-    });
-  } catch (e) {
-    console.error(e);
-    res
-      .status(500)
-      .json({ error: "No se pudo actualizar el progreso del usuario" });
-  }
-};
-
-// POST /progress/save-resolved - Guardar el progreso real de una respuesta 
-export const saveProgress = async (req, res) => {
-  try {
-    const { userId, moduloId, lessonId, exerciseId, isCorrect } = req.body;
-
-    if (!userId || !lessonId || !exerciseId) {
-      return res.status(400).json({ error: "Faltan parámetros requeridos (userId, lessonId, exerciseId)." });
+    if (!isTheory) {
+      puntosGanados = isCorrect ? 10 : 2;
+      cantidadErrores = isCorrect ? 0 : 1;
     }
 
-    const userIdInt = parseInt(userId);
-    const puntosGanados = isCorrect ? 10 : 2;
-
-    // 1. Buscamos al usuario para ver su racha actual
+    // 1. Buscamos al usuario en la DB real para conocer su estado
     const user = await prisma.user.findUnique({
       where: { id: userIdInt }
     });
@@ -127,26 +85,26 @@ export const saveProgress = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
-    // 2. Registramos el intento en la tabla progreso
+    // 2. Guardamos el intento en la tabla progreso
     const nuevoRegistro = await prisma.progreso.create({
       data: {
         userId: userIdInt,
-        moduloId: parseInt(moduloId) || 1, // Por defecto al módulo 1 si no viene
+        moduloId: parseInt(moduloId) || 1, // Default al módulo 1 si no se envía
         leccionId: parseInt(lessonId),
         ejercicioId: parseInt(exerciseId),
         puntos: puntosGanados,
-        errores: isCorrect ? 0 : 1,
+        errores: cantidadErrores,
         primerIntento: true
       }
     });
 
-    // 3. Calculamos racha diaria 
+    // 3. Calculamos la nueva racha y última actividad del usuario
     const { rachaActual, ultimaActividad } = calcularNuevaRacha(
       user.ultimaActividad,
       user.rachaActual
     );
 
-    // 4. Actualizamos el usuario en la DB
+    // 4. Actualizamos el perfil del usuario con su nuevo puntaje/racha
     const userActualizado = await prisma.user.update({
       where: { id: userIdInt },
       data: { 
@@ -157,7 +115,9 @@ export const saveProgress = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Progreso registrado con éxito en la base de datos.",
+      message: isTheory 
+        ? "Visualización de teoría registrada con éxito." 
+        : "Progreso del ejercicio registrado con éxito en la base de datos.",
       puntosGanados,
       rachaActual: userActualizado.rachaActual,
       progreso: nuevoRegistro
@@ -165,6 +125,6 @@ export const saveProgress = async (req, res) => {
 
   } catch (error) {
     console.error("Error en saveProgress:", error);
-    return res.status(500).json({ error: "Error interno al procesar el progreso del MVP." });
+    return res.status(500).json({ error: "Error interno al procesar el progreso." });
   }
 };
