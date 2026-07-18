@@ -1,100 +1,111 @@
-import { PrismaClient } from "@prisma/client";
-import { calcularNuevaRacha } from "../utils/racha.utils.js";
-import { verifyToken } from "../utils/jws.js";
+import { PrismaClient } from '@prisma/client';
+import { calcularRacha } from '../helpers/rachas.helper.js'; // Asumiendo que usan el helper de rachas pactado
 
 const prisma = new PrismaClient();
 
-// GET /progress
-export const getProgress = async (req, res) => {
+export const saveProgress = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
-    const userId = verifyToken(token);
+    const { userId } = req.user; 
+    const { moduloId, lessonId, teoriaId, ejercicioId, respuestaUsuario, isTheory } = req.body;
 
-    const progreso = await prisma.progreso.findMany({
-      where: { userId: parseInt(userId) },
-      select: {
-        moduloId: true,
-        modulo: {
-          select: {
-            nombre: true,
-          },
+    // 1. FLUJO DE TEORÍA (Issue #71 - IDs separados)
+    if (isTheory) {
+      if (!teoriaId) {
+        return res.status(400).json({ error: "Falta el teoriaId para registrar el progreso de teoría." });
+      }
+
+      const progresoTeoria = await prisma.progreso.upsert({
+        where: {
+          userId_teoriaId: { userId, teoriaId }
         },
-        leccionId: true,
-        leccion: {
-          select: {
-            titulo: true,
-          },
+        update: {
+          completado: true,
+          updatedAt: new Date()
         },
-        ejercicioId: true,
-        ejercicio: {
-          select: {
-            titulo: true,
-          },
-        },
-        errores: true,
-        puntos: true,
-        primerIntento: true,
-        completadoEn: true,
-      },
-    });
+        create: {
+          userId,
+          moduloId,
+          leccionId: lessonId,
+          teoriaId,
+          completado: true
+        }
+      });
 
-    res.json({ progreso });
-  } catch (e) {
-    console.log(e);
-    res
-      .status(500)
-      .json({ error: "No se pudo obtener el progreso del usuario" });
-  }
-};
-
-// POST /progress
-export const updateProgress = async (req, res) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    const userId = verifyToken(token);
-    const { moduloId, leccionId, exerciseId } = req.body;
-
-    const userIdInt = parseInt(userId);
-
-    // 1. Buscamos el usuario para asegurarnos que existe
-    const user = await prisma.user.findUnique({
-      where: { id: userIdInt },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
+      return res.status(200).json({
+        message: "Progreso de teoría guardado correctamente.",
+        data: progresoTeoria
+      });
     }
 
-    // 2. Guardamos el progreso de la lección completada
-    const nuevoProgreso = await prisma.progreso.create({
-      data: {
-        userId: userIdInt,
-        moduloId: parseInt(moduloId),
-        leccionId: parseInt(leccionId),
-        ejercicioId: parseInt(exerciseId),
+    // 2. FLUJO DE EJERCICIO (Issue #71 - Validación en el Back y consolidación de endpoints)
+    if (!ejercicioId || respuestaUsuario === undefined) {
+      return res.status(400).json({ error: "Faltan datos obligatorios para validar el ejercicio." });
+    }
+
+    const ejercicio = await prisma.ejercicio.findUnique({
+      where: { id: ejercicioId }
+    });
+
+    if (!ejercicio) {
+      return res.status(404).json({ error: "Ejercicio no encontrado." });
+    }
+
+    // Validamos la respuesta contra la DB
+    const esCorrecto = ejercicio.respuestaCorrecta.trim().toLowerCase() === respuestaUsuario.trim().toLowerCase();
+    const puntosASumar = esCorrecto ? 10 : 2;
+    const errorRegistrado = esCorrecto ? 0 : 1;
+
+    // Persistimos en la tabla de progreso
+    const progresoEjercicio = await prisma.progreso.upsert({
+      where: {
+        userId_ejercicioId: { userId, ejercicioId }
       },
+      update: {
+        completado: esCorrecto ? true : false,
+        errores: { increment: errorRegistrado },
+        puntos: { increment: puntosASumar },
+        updatedAt: new Date()
+      },
+      create: {
+        userId,
+        moduloId,
+        leccionId: lessonId,
+        ejercicioId,
+        completado: esCorrecto ? true : false,
+        errores: errorRegistrado,
+        puntos: puntosASumar
+      }
     });
 
-    // 3. Calculamos cómo queda la racha
-    const { rachaActual, ultimaActividad } = calcularNuevaRacha(
-      user.ultimaActividad,
-      user.rachaActual,
-    );
-
-    // 4. Actualizamos al usuario con la nueva racha
-    const userActualizado = await prisma.user.update({
-      where: { id: userIdInt },
-      data: { rachaActual, ultimaActividad },
+    // 3. LÓGICA DE PUNTOS Y RACHAS (Issue #99 )
+    const usuarioActual = await prisma.usuario.findUnique({
+      where: { id: userId }
     });
 
-    res.json({
-      mensaje: "Progreso actualizado exitosamente",
-      progreso: nuevoProgreso,
-      rachaActual: userActualizado.rachaActual,
+    // Calculamos la nueva racha usando la fecha de la última actividad
+    const nuevaRacha = calcularRacha(usuarioActual.ultimaActividad, usuarioActual.rachaDias);
+
+    // Actualizamos el perfil global del usuario con sus nuevos totales
+    await prisma.usuario.update({
+      where: { id: userId },
+      data: {
+        puntosTotales: { increment: puntosASumar },
+        rachaDias: nuevaRacha,
+        ultimaActividad: new Date()
+      }
     });
-  } catch (e) {
-    res
-      .status(500)
-      .json({ error: "No se pudo actualizar el progreso del usuario" });
+
+    
+    return res.status(200).json({
+      message: "Progreso de ejercicio procesado, puntos y racha actualizados.",
+      esCorrecto,
+      puntosGanados: puntosASumar,
+      rachaActual: nuevaRacha,
+      data: progresoEjercicio
+    });
+
+  } catch (error) {
+    console.error("Error en saveProgress:", error);
+    return res.status(500).json({ error: "Error interno del servidor al guardar el progreso." });
   }
 };
