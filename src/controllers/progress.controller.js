@@ -112,3 +112,22 @@ export const saveProgress = async (req, res) => {
     return res.status(500).json({ error: "Error interno del servidor al guardar el progreso." });
   }
 };
+
+// Obtener el progreso general del usuario
+export const getProgress = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const progreso = await prisma.progreso.findMany({
+      where: { userId }
+    });
+
+    return res.status(200).json({
+      message: "Progreso obtenido correctamente.",
+      data: progreso
+    });
+  } catch (error) {
+    console.error("Error en getProgress:", error);
+    return res.status(500).json({ error: "Error al obtener el progreso del usuario." });
+  }
+};

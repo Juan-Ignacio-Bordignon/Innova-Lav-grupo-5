@@ -1,19 +1,16 @@
 import { Router } from "express";
 import {
   getProgress,
-  updateProgress,
-  saveProgress, //  importación 
+  saveProgress
 } from "../controllers/progress.controller.js";
 
 const router = Router();
 
-// Get user progress
+// Obtener el progreso general del usuario
 router.get("/", getProgress);
 
-// Update user progress
-router.post("/", updateProgress);
-
-// Save exercise and points progress (Semana 8 - MVP)
-router.post("/save", saveProgress); //  nueva ruta 
+// Guardar y resolver ejercicio o teoría (Mapeado a /save-resolved y /save por compatibilidad)
+router.post("/save", saveProgress);
+router.post("/save-resolved", saveProgress);
 
 export default router;
