@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { calcularRacha } from '../helpers/rachas.helper.js'; // Asumiendo que usan el helper de rachas pactado
+import { calcularNuevaRacha } from '../utils/racha.utils.js';
 
 const prisma = new PrismaClient();
 
@@ -77,30 +77,33 @@ export const saveProgress = async (req, res) => {
       }
     });
 
-    // 3. LÓGICA DE PUNTOS Y RACHAS (Issue #99 )
+    // 3. LÓGICA DE PUNTOS Y RACHAS (Issue #99)
     const usuarioActual = await prisma.usuario.findUnique({
       where: { id: userId }
     });
 
+    if (!usuarioActual) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
     // Calculamos la nueva racha usando la fecha de la última actividad
-    const nuevaRacha = calcularRacha(usuarioActual.ultimaActividad, usuarioActual.rachaDias);
+    const resultadoRacha = calcularNuevaRacha(usuarioActual.ultimaActividad, usuarioActual.rachaDias);
 
     // Actualizamos el perfil global del usuario con sus nuevos totales
     await prisma.usuario.update({
       where: { id: userId },
       data: {
         puntosTotales: { increment: puntosASumar },
-        rachaDias: nuevaRacha,
-        ultimaActividad: new Date()
+        rachaDias: resultadoRacha.rachaActual, // <-- Pasamos solo el número
+        ultimaActividad: resultadoRacha.ultimaActividad
       }
     });
 
-    
     return res.status(200).json({
       message: "Progreso de ejercicio procesado, puntos y racha actualizados.",
       esCorrecto,
       puntosGanados: puntosASumar,
-      rachaActual: nuevaRacha,
+      rachaActual: resultadoRacha.rachaActual,
       data: progresoEjercicio
     });
 
