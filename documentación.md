@@ -595,7 +595,7 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
     Body:
     ```json
     {
-        "exerciseId": 3
+        "teoriaId": 3
     }
     ```
     Respuesta:
