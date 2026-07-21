@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { recuperarEstadoDeEjercicio } from "../services/exercise.service.js";
+import { formatMediaUrls } from "../utils/formatters.js";
 
 const prisma = new PrismaClient();
 const URL_BASE_VIDEOS =
@@ -38,21 +39,10 @@ export const getExercises = async (req, res) => {
     }
 
     // Inyección de URL de Supabase: Convertimos los strings planos en URLs reales (.mp4)
-    const theoryConUrlReal = lessonTheory.map((theory) => {
-      return {
-        ...theory,
-        contenidoMultimedia: `${URL_BASE_VIDEOS}${theory.contenidoMultimedia}.mp4`,
-      };
-    });
-    /*
+    const theoryConUrlReal = formatMediaUrls(lessonTheory);
+
     // Inyección de URL de Supabase: Convertimos los strings planos en URLs reales (.mp4)
-    const exercisesConUrlReal = lessonExercises.map((exercise) => {
-      return {
-        ...exercise,
-        contenidoMultimedia: `${URL_BASE_VIDEOS}${exercise.contenidoMultimedia}.mp4`,
-      };
-    });
-    */
+    const exercisesConUrlReal = formatMediaUrls(lessonExercises);
     const authorization = req.headers.authorization;
     /*
     let exercisesConEstado = await recuperarEstadoDeEjercicio(
@@ -63,7 +53,7 @@ export const getExercises = async (req, res) => {
     const intervaloPreguntas = obtenerIntervaloPreguntas(lessonId);
     const theoryAndExercise = combinarContenido(
       theoryConUrlReal,
-      lessonExercises,
+      exercisesConUrlReal,
       intervaloPreguntas,
     );
     res.status(200).json(theoryAndExercise);
