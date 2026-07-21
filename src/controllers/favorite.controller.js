@@ -77,7 +77,6 @@ export const getFavorites = async (req, res) => {
     });
     res.json({ favorites: formattedFavorites });
   } catch (e) {
-    console.log(e);
     res.status(500).json({ error: "No se pudieron obtener los favoritos" });
   }
 };
@@ -88,7 +87,6 @@ export const deleteFavorite = async (req, res) => {
     const token = req.headers.authorization.split(" ")[1];
     const userId = verifyToken(token);
     const { teoriaId } = req.params;
-    console.log(teoriaId);
     await prisma.favorite.delete({
       where: {
         userId_teoriaId: {
@@ -99,7 +97,6 @@ export const deleteFavorite = async (req, res) => {
     });
     res.json({ mensaje: "Teoría eliminada de favoritos" });
   } catch (e) {
-    console.log(e);
     res.status(500).json({ error: "No se pudo eliminar de favoritos" });
   }
 };
