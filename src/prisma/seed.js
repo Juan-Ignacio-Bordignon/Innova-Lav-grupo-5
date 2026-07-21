@@ -609,7 +609,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_A", "Letra_B", "Letra_C"],
       respuestaEsperada: "Letra_B",
-      contenidoMultimedia: "Letra_B",
+      contenidoMultimedia: ["Letra_B"], // <-- Cambiado a Array
     },
     {
       lessonId: alfabeto.id,
@@ -617,7 +617,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
-      contenidoMultimedia: "Letra_E",
+      contenidoMultimedia: ["Letra_E"],
     },
     {
       lessonId: alfabeto.id,
@@ -625,7 +625,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_G", "Letra_H", "Letra_I"],
       respuestaEsperada: "Letra_H",
-      contenidoMultimedia: "Letra_H",
+      contenidoMultimedia: ["Letra_H"],
     },
     {
       lessonId: alfabeto.id,
@@ -633,7 +633,8 @@ async function main() {
       tipo: "ORDER_WORDS",
       opcionesRespuesta: ["D", "A", "C", "A"],
       respuestaEsperada: ["C", "A", "D", "A"],
-      contenidoMultimedia: "Letra_C",
+      // Ahora puedes pasar múltiples videos según las letras de la palabra:
+      contenidoMultimedia: ["Letra_C", "Letra_A", "Letra_D", "Letra_A"],
     },
     {
       lessonId: alfabeto.id,
@@ -641,7 +642,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_M", "Letra_N", "Letra_Ñ"],
       respuestaEsperada: "Letra_Ñ",
-      contenidoMultimedia: "Letra_Ñ",
+      contenidoMultimedia: ["Letra_Ñ"],
     },
     {
       lessonId: alfabeto.id,
@@ -649,7 +650,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: false,
-      contenidoMultimedia: "Letra_P",
+      contenidoMultimedia: ["Letra_P"],
     },
     {
       lessonId: alfabeto.id,
@@ -657,7 +658,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_R", "Letra_S", "Letra_T"],
       respuestaEsperada: "Letra_S",
-      contenidoMultimedia: "Letra_S",
+      contenidoMultimedia: ["Letra_S"],
     },
     {
       lessonId: alfabeto.id,
@@ -665,7 +666,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
-      contenidoMultimedia: "Letra_V",
+      contenidoMultimedia: ["Letra_V"],
     },
     {
       lessonId: alfabeto.id,
@@ -673,7 +674,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_X", "Letra_Y", "Letra_Z"],
       respuestaEsperada: "Letra_Z",
-      contenidoMultimedia: "Letra_Z",
+      contenidoMultimedia: ["Letra_Z"],
     },
 
     // === LECCIÓN 2: DÍAS ===
@@ -683,7 +684,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Lunes", "Martes", "Miércoles", "Jueves"],
       respuestaEsperada: "Miércoles",
-      contenidoMultimedia: "Miercoles",
+      contenidoMultimedia: ["Miercoles"],
     },
     {
       lessonId: dias.id,
@@ -691,7 +692,7 @@ async function main() {
       tipo: "ORDER_WORDS",
       opcionesRespuesta: ["Domingo", "Viernes", "Sábado"],
       respuestaEsperada: ["Viernes", "Sábado", "Domingo"],
-      contenidoMultimedia: "Sabado",
+      contenidoMultimedia: ["Domingo", "Viernes", "Sábado"],
     },
 
     // === LECCIÓN 3: NÚMEROS ===
@@ -701,7 +702,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Número 0", "Número 1", "Número 2", "Número 3"],
       respuestaEsperada: "Número 2",
-      contenidoMultimedia: "Numero_2",
+      contenidoMultimedia: ["Numero_2"],
     },
     {
       lessonId: numeros.id,
@@ -709,7 +710,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
-      contenidoMultimedia: "Numero_5",
+      contenidoMultimedia: ["Numero_5"],
     },
     {
       lessonId: numeros.id,
@@ -717,7 +718,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Numero_8", "Numero_9", "Numero_10", "Numero_20"],
       respuestaEsperada: "Numero_20",
-      contenidoMultimedia: "Numero_20",
+      contenidoMultimedia: ["Numero_20"],
     },
     {
       lessonId: numeros.id,
@@ -726,7 +727,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: false,
-      contenidoMultimedia: "Numero_50",
+      contenidoMultimedia: ["Numero_50"],
     },
     {
       lessonId: numeros.id,
@@ -734,7 +735,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Numero_70", "Numero_80", "Numero_90", "Numero_100"],
       respuestaEsperada: "Numero_100",
-      contenidoMultimedia: "Numero_100",
+      contenidoMultimedia: ["Numero_100"],
     },
     {
       lessonId: numeros.id,
@@ -742,7 +743,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
-      contenidoMultimedia: "Numero_500",
+      contenidoMultimedia: ["Numero_500"],
     },
     {
       lessonId: numeros.id,
@@ -750,7 +751,12 @@ async function main() {
       tipo: "ORDER_WORDS",
       opcionesRespuesta: ["900", "700", "600", "800"],
       respuestaEsperada: ["600", "700", "800", "900"],
-      contenidoMultimedia: "Numero_600",
+      contenidoMultimedia: [
+        "Numero_900",
+        "Numero_700",
+        "Numero_600",
+        "Numero_800",
+      ],
     },
 
     // === LECCIÓN 4: SENTIMIENTOS ===
@@ -760,7 +766,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Feliz", "Triste", "Enojado", "Asustado"],
       respuestaEsperada: "Triste",
-      contenidoMultimedia: "Triste",
+      contenidoMultimedia: ["Triste"],
     },
     {
       lessonId: sentimientos.id,
@@ -769,7 +775,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
-      contenidoMultimedia: "Enfermo",
+      contenidoMultimedia: ["Enfermo"],
     },
 
     // === LECCIÓN 5: SALUDOS ===
@@ -784,7 +790,7 @@ async function main() {
         "Chau",
       ],
       respuestaEsperada: "Chau",
-      contenidoMultimedia: "Chau",
+      contenidoMultimedia: ["Chau"],
     },
 
     // === LECCIÓN 6: PRESENTACIONES ===
@@ -794,7 +800,7 @@ async function main() {
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
-      contenidoMultimedia: "Como_estas",
+      contenidoMultimedia: ["Como_estas"],
     },
 
     // === LECCIÓN 7: FRASES DE ENTORNO ===
@@ -810,18 +816,17 @@ async function main() {
         "Tenemos reunión",
       ],
       respuestaEsperada: "Pasá por acá",
-      contenidoMultimedia: "Pasa_por_aca",
+      contenidoMultimedia: ["Pasa_por_aca"],
     },
 
     // === LECCIÓN 8: CONECTORES DE EMERGENCIA ===
     {
       lessonId: conectores.id,
-      titulo:
-        "Ordená las palabras para estructurar la frase de alerta que acabás de ver:",
-      tipo: "ORDER_WORDS",
-      opcionesRespuesta: ["ayuda", "Necesito"],
-      respuestaEsperada: ["Necesito", "ayuda"],
-      contenidoMultimedia: "Necesito_ayuda",
+      titulo: "¿Qué seña de emergencia se representa en el siguiente video?",
+      tipo: "MULTIPLE_CHOICE",
+      opcionesRespuesta: ["Sí", "No", "Necesito ayuda", "Esperá un momento"],
+      respuestaEsperada: "Necesito ayuda",
+      contenidoMultimedia: ["Necesito_ayuda"],
     },
   ];
 
