@@ -82,7 +82,7 @@ export const getFavorites = async (req, res) => {
   }
 };
 
-// DELETE /favorites/:exerciseId → quitar favorito
+// DELETE /favorites/:teoriaId → quitar favorito
 export const deleteFavorite = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];

@@ -9,6 +9,6 @@ const router = Router();
 
 router.post("/", addFavorite);
 router.get("/", getFavorites);
-router.delete("/:exerciseId", deleteFavorite);
+router.delete("/:teoriaId", deleteFavorite);
 
 export default router;
