@@ -9,6 +9,7 @@ export const ROUTES = {
   // Se mantiene por compatibilidad con lo que ya estaba
   UPDATES: 'Updates',
   PROFILE: 'Profile',
+  ACHIEVEMENTS: 'Achievements',
   SETTINGS: 'Settings',
   NOT_FOUND: 'NotFound',
 
@@ -36,6 +37,7 @@ export type RootStackParamList = {
 
   [ROUTES.UPDATES]: undefined;
   [ROUTES.PROFILE]: undefined;
+  [ROUTES.ACHIEVEMENTS]: undefined;
   [ROUTES.SETTINGS]: undefined;
   [ROUTES.NOT_FOUND]: undefined;
 

@@ -1,5 +1,3 @@
-// src/components/navigation/AppHeader/AppHeader.tsx
-
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -15,15 +13,18 @@ import { ROUTES } from '../../../constants/routes';
 
 import { styles } from './AppHeader.styles';
 
-export type AppHeaderVariant = 'home' | 'back';
+export type AppHeaderVariant = 'home' | 'back' | 'title';
 
 export type AppHeaderProps = {
   variant: AppHeaderVariant;
+  title?: string;
   userName?: string;
   notificationCount?: number;
   animationKey?: number;
   animationDelay?: number;
   style?: StyleProp<ViewStyle>;
+  showAchievements?: boolean;
+  showNotifications?: boolean;
   onBackFallback?: () => void;
   onAchievementsPress?: () => void;
   onNotificationsPress?: () => void;
@@ -31,11 +32,14 @@ export type AppHeaderProps = {
 
 export function AppHeader({
   variant,
+  title,
   userName = 'Usuario',
   notificationCount = 0,
   animationKey = 0,
   animationDelay = 80,
   style,
+  showAchievements = true,
+  showNotifications = true,
   onBackFallback,
   onAchievementsPress,
   onNotificationsPress,
@@ -61,81 +65,117 @@ export function AppHeader({
     navigation.navigate(ROUTES.HOME_TABS);
   };
 
+  const renderLeftContent = () => {
+    if (variant === 'home') {
+      return (
+        <AppText
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={styles.greeting}
+        >
+          ¡Hola {safeUserName}!
+        </AppText>
+      );
+    }
+
+    if (variant === 'title') {
+      return (
+        <AppText
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={styles.title}
+        >
+          {title}
+        </AppText>
+      );
+    }
+
+    return (
+      <View style={styles.backContent}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Volver"
+          onPress={handleBackPress}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <MaterialIcons
+            name="keyboard-arrow-left"
+            size={34}
+            color={colors.primary}
+          />
+        </Pressable>
+
+        {title ? (
+          <AppText
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={styles.backTitle}
+          >
+            {title}
+          </AppText>
+        ) : null}
+      </View>
+    );
+  };
+
   return (
     <AnimatedEntry delay={animationDelay} triggerKey={animationKey}>
       <View style={[styles.container, style]}>
-        <View style={styles.leftSection}>
-          {variant === 'home' ? (
-            <AppText
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={styles.greeting}
-            >
-              ¡Hola {safeUserName}!
-            </AppText>
-          ) : (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Volver"
-              onPress={handleBackPress}
-              style={({ pressed }) => [
-                styles.backButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <MaterialIcons
-                name="keyboard-arrow-left"
-                size={34}
-                color={colors.primary}
-              />
-            </Pressable>
-          )}
-        </View>
+        <View style={styles.leftSection}>{renderLeftContent()}</View>
 
-        <View style={styles.actions}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ver logros"
-            onPress={onAchievementsPress}
-            style={({ pressed }) => [
-              styles.actionButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <MaterialIcons
-              name="emoji-events"
-              size={25}
-              color={colors.textLight}
-            />
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ver notificaciones"
-            onPress={onNotificationsPress}
-            style={({ pressed }) => [
-              styles.actionButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <MaterialIcons
-              name="notifications-none"
-              size={25}
-              color={colors.textLight}
-            />
-
-            {notificationCount > 0 && (
-              <View
-                pointerEvents="none"
-                style={styles.notificationBadge}
+        {showAchievements || showNotifications ? (
+          <View style={styles.actions}>
+            {showAchievements ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver logros"
+                onPress={onAchievementsPress}
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  pressed && styles.pressed,
+                ]}
               >
-                <AppText style={styles.notificationBadgeText}>
-                  {displayedNotificationCount}
-                </AppText>
-              </View>
-            )}
-          </Pressable>
-        </View>
+                <MaterialIcons
+                  name="emoji-events"
+                  size={25}
+                  color={colors.textLight}
+                />
+              </Pressable>
+            ) : null}
+
+            {showNotifications ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver notificaciones"
+                onPress={onNotificationsPress}
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <MaterialIcons
+                  name="notifications-none"
+                  size={25}
+                  color={colors.textLight}
+                />
+
+                {notificationCount > 0 ? (
+                  <View
+                    pointerEvents="none"
+                    style={styles.notificationBadge}
+                  >
+                    <AppText style={styles.notificationBadgeText}>
+                      {displayedNotificationCount}
+                    </AppText>
+                  </View>
+                ) : null}
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
       </View>
     </AnimatedEntry>
   );
