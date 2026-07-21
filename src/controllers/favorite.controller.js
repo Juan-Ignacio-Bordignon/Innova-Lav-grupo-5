@@ -88,10 +88,10 @@ export const deleteFavorite = async (req, res) => {
     const token = req.headers.authorization.split(" ")[1];
     const userId = verifyToken(token);
     const { teoriaId } = req.params;
-
+    console.log(teoriaId);
     await prisma.favorite.delete({
       where: {
-        userId_ejercicioId: {
+        userId_teoriaId: {
           userId: parseInt(userId),
           teoriaId: parseInt(teoriaId),
         },
