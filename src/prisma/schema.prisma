@@ -103,11 +103,11 @@ model Progreso {
 model Favorite {
   id          Int       @id @default(autoincrement())
   userId      Int
-  teoriaId Int
+  teoriaId    Int
   createdAt   DateTime  @default(now())
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teoria    Teoria   @relation(fields: [teoriaId], references: [id], onDelete: Cascade)
+  teoria      Teoria   @relation(fields: [teoriaId], references: [id], onDelete: Cascade)
   @@unique([userId, teoriaId])
   }
 

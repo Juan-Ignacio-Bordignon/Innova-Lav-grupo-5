@@ -9,11 +9,11 @@ export const addFavorite = async (req, res) => {
     const token = req.headers.authorization.split(" ")[1];
     const userId = verifyToken(token);
 
-    const { exerciseId } = req.body;
+    const { teoriaId } = req.body;
     const favorite = await prisma.favorite.create({
       data: {
         userId: parseInt(userId),
-        ejercicioId: parseInt(exerciseId),
+        teoriaId: parseInt(teoriaId),
       },
     });
     res.json({ mensaje: "Ejercicio agregado a favoritos", favorite });
@@ -23,6 +23,7 @@ export const addFavorite = async (req, res) => {
         .status(400)
         .json({ error: "Este ejercicio ya está en favoritos" });
     }
+    console.log(e);
     res.status(500).json({ error: "No se pudo agregar a favoritos" });
   }
 };
