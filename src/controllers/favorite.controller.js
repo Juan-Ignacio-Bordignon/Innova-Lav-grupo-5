@@ -47,6 +47,9 @@ export const getFavorites = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        id: "asc",
+      },
     });
     // Para simplificar la estructura
     const formattedFavorites = favoritos.map((fav) => {

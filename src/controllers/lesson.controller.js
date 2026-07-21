@@ -13,6 +13,9 @@ export const getLessons = async (req, res) => {
         contenido: true,
         moduloId: true,
       },
+      orderBy: {
+        id: "asc",
+      },
     });
     res.json({ lessons: lecciones });
   } catch (e) {
@@ -30,6 +33,9 @@ export const getLesson = async (req, res) => {
       where: {
         id: parseInt(lessonId),
         moduloId: parseInt(moduleId),
+      },
+      orderBy: {
+        id: "asc",
       },
     });
     if (!leccion)
