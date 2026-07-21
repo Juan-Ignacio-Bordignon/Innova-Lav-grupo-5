@@ -24,7 +24,6 @@ export const addFavorite = async (req, res) => {
         .status(400)
         .json({ error: "Este ejercicio ya está en favoritos" });
     }
-    console.log(e);
     res.status(500).json({ error: "No se pudo agregar a favoritos" });
   }
 };
