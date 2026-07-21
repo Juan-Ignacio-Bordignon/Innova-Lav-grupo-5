@@ -69,10 +69,16 @@ async function getTheoryAndExercisesBylessonId(lessonId) {
     where: {
       lessonId: parseInt(lessonId),
     },
+    orderBy: {
+      id: "asc",
+    },
   });
   const lessonExercises = await prisma.ejercicio.findMany({
     where: {
       lessonId: parseInt(lessonId),
+    },
+    orderBy: {
+      id: "asc",
     },
   });
   return { lessonTheory, lessonExercises };
