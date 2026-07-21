@@ -17,12 +17,12 @@ export const addFavorite = async (req, res) => {
         teoriaId: parseInt(teoriaId),
       },
     });
-    res.json({ mensaje: "Ejercicio agregado a favoritos", favorite });
+    res.json({ mensaje: "Teoría agregada a favoritos", favorite });
   } catch (e) {
     if (e.code === "P2002") {
       return res
         .status(400)
-        .json({ error: "Este ejercicio ya está en favoritos" });
+        .json({ error: "Esta teoría ya está en favoritos" });
     }
     res.status(500).json({ error: "No se pudo agregar a favoritos" });
   }
@@ -87,17 +87,17 @@ export const deleteFavorite = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const userId = verifyToken(token);
-    const { exerciseId } = req.params;
+    const { teoriaId } = req.params;
 
     await prisma.favorite.delete({
       where: {
         userId_ejercicioId: {
           userId: parseInt(userId),
-          ejercicioId: parseInt(exerciseId),
+          teoriaId: parseInt(teoriaId),
         },
       },
     });
-    res.json({ mensaje: "Ejercicio eliminado de favoritos" });
+    res.json({ mensaje: "Teoría eliminada de favoritos" });
   } catch (e) {
     console.log(e);
     res.status(500).json({ error: "No se pudo eliminar de favoritos" });
