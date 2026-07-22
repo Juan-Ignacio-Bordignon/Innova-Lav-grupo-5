@@ -5,18 +5,36 @@ const prisma = new PrismaClient();
 
 export const saveProgress = async (req, res) => {
   try {
-    const { userId } = req.user; 
-    const { moduloId, lessonId, teoriaId, ejercicioId, respuestaUsuario, isTheory } = req.body;
+    const rawUserId = req.user?.userId || req.user?.id;
+    if (!rawUserId) {
+      return res.status(401).json({ error: "Usuario no autenticado correctamente." });
+    }
 
-    // 1. FLUJO DE TEORÍA (Issue #71 - IDs separados)
+    const userId = Number(rawUserId);
+    const { moduloId, lessonId, leccionId, teoriaId, ejercicioId, respuestaUsuario, isTheory } = req.body;
+
+    // Normalizamos el ID de la lección por si llega como lessonId o leccionId
+    const targetLessonId = Number(lessonId || leccionId);
+    const targetModuloId = Number(moduloId);
+
+    if (!targetModuloId || !targetLessonId) {
+      return res.status(400).json({ error: "Faltan los identificadores obligatorios (moduloId y lessonId/leccionId)." });
+    }
+
+    // 1. FLUJO DE TEORÍA
     if (isTheory) {
       if (!teoriaId) {
         return res.status(400).json({ error: "Falta el teoriaId para registrar el progreso de teoría." });
       }
 
+      const targetTeoriaId = Number(teoriaId);
+
       const progresoTeoria = await prisma.progreso.upsert({
         where: {
-          userId_teoriaId: { userId, teoriaId }
+          userId_teoriaId: { 
+            userId, 
+            teoriaId: targetTeoriaId 
+          }
         },
         update: {
           completado: true,
@@ -24,9 +42,9 @@ export const saveProgress = async (req, res) => {
         },
         create: {
           userId,
-          moduloId,
-          leccionId: lessonId,
-          teoriaId,
+          moduloId: targetModuloId,
+          leccionId: targetLessonId,
+          teoriaId: targetTeoriaId,
           completado: true
         }
       });
@@ -37,47 +55,52 @@ export const saveProgress = async (req, res) => {
       });
     }
 
-    // 2. FLUJO DE EJERCICIO (Issue #71 - Validación en el Back y consolidación de endpoints)
+    // 2. FLUJO DE EJERCICIO
     if (!ejercicioId || respuestaUsuario === undefined) {
       return res.status(400).json({ error: "Faltan datos obligatorios para validar el ejercicio." });
     }
 
+    const targetEjercicioId = Number(ejercicioId);
+
     const ejercicio = await prisma.ejercicio.findUnique({
-      where: { id: ejercicioId }
+      where: { id: targetEjercicioId }
     });
 
     if (!ejercicio) {
       return res.status(404).json({ error: "Ejercicio no encontrado." });
     }
 
-    // Validamos la respuesta contra la DB
-    const esCorrecto = ejercicio.respuestaCorrecta.trim().toLowerCase() === respuestaUsuario.trim().toLowerCase();
+    // Validamos respuesta
+    const esCorrecto = String(ejercicio.respuestaCorrecta).trim().toLowerCase() === String(respuestaUsuario).trim().toLowerCase();
     const puntosASumar = esCorrecto ? 10 : 2;
     const errorRegistrado = esCorrecto ? 0 : 1;
 
-    // Persistimos en la tabla de progreso
+    // Persistimos progreso
     const progresoEjercicio = await prisma.progreso.upsert({
       where: {
-        userId_ejercicioId: { userId, ejercicioId }
+        userId_ejercicioId: { 
+          userId, 
+          ejercicioId: targetEjercicioId 
+        }
       },
       update: {
-        completado: esCorrecto ? true : false,
+        completado: esCorrecto,
         errores: { increment: errorRegistrado },
         puntos: { increment: puntosASumar },
         updatedAt: new Date()
       },
       create: {
         userId,
-        moduloId,
-        leccionId: lessonId,
-        ejercicioId,
-        completado: esCorrecto ? true : false,
+        moduloId: targetModuloId,
+        leccionId: targetLessonId,
+        ejercicioId: targetEjercicioId,
+        completado: esCorrecto,
         errores: errorRegistrado,
         puntos: puntosASumar
       }
     });
 
-    // 3. LÓGICA DE PUNTOS Y RACHAS (Issue #99)
+    // 3. ACTUALIZACIÓN DE USUARIO Y RACHA
     const usuarioActual = await prisma.usuario.findUnique({
       where: { id: userId }
     });
@@ -86,21 +109,19 @@ export const saveProgress = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
-    // Calculamos la nueva racha usando la fecha de la última actividad
     const resultadoRacha = calcularNuevaRacha(usuarioActual.ultimaActividad, usuarioActual.rachaDias);
 
-    // Actualizamos el perfil global del usuario con sus nuevos totales
     await prisma.usuario.update({
       where: { id: userId },
       data: {
         puntosTotales: { increment: puntosASumar },
-        rachaDias: resultadoRacha.rachaActual, // <-- Pasamos solo el número
+        rachaDias: resultadoRacha.rachaActual,
         ultimaActividad: resultadoRacha.ultimaActividad
       }
     });
 
     return res.status(200).json({
-      message: "Progreso de ejercicio procesado, puntos y racha actualizados.",
+      message: "Progreso de ejercicio procesado correctamente.",
       esCorrecto,
       puntosGanados: puntosASumar,
       rachaActual: resultadoRacha.rachaActual,
@@ -116,15 +137,21 @@ export const saveProgress = async (req, res) => {
 // Obtener el progreso general del usuario
 export const getProgress = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const rawUserId = req.user?.userId || req.user?.id;
+    if (!rawUserId) {
+      return res.status(401).json({ error: "Usuario no autenticado." });
+    }
+
+    const userId = Number(rawUserId);
 
     const progreso = await prisma.progreso.findMany({
       where: { userId }
     });
 
+    // Si no tiene registros, devolvemos un array vacío sin tirar error
     return res.status(200).json({
       message: "Progreso obtenido correctamente.",
-      data: progreso
+      data: progreso || []
     });
   } catch (error) {
     console.error("Error en getProgress:", error);
