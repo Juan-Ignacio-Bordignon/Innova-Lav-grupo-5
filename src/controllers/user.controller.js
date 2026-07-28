@@ -33,15 +33,21 @@ export const getUser = async (req, res) => {
         email: user.email,
         interes: user.interes,
       },
-      progreso: user.progreso.map((progreso) => ({
-        moduleId: progreso.modulo.id,
-        moduleName: progreso.modulo.nombre,
-        lessonId: progreso.leccionId,
-        lessonName: progreso.leccion.titulo,
-        exerciseId: progreso.ejercicio.id,
-        exerciseName: progreso.ejercicio.titulo,
-        completadoEn: progreso.completadoEn,
-      })),
+      progreso: user.progreso.map((progreso) => {
+        const esEjercicio = Boolean(progreso.ejercicio);
+        return {
+          tipo: esEjercicio ? "ejercicio" : "teoria",
+          moduleId: progreso.modulo.id,
+          moduleName: progreso.modulo.nombre,
+          lessonId: progreso.leccionId,
+          lessonName: progreso.leccion.titulo,
+          exerciseId: progreso.ejercicio?.id ?? null,
+          exerciseName: progreso.ejercicio?.titulo ?? null,
+          teoriaId: progreso.teoria?.id ?? null,
+          teoriaName: progreso.teoria?.titulo ?? null,
+          completadoEn: progreso.completadoEn,
+        };
+      }),
       ultimaLeccion: ultimaLeccion,
       puntos: user.puntos,
       racha: user.rachaActual,

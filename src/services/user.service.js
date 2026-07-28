@@ -39,6 +39,12 @@ export const getUserInfo = async (userId) => {
               titulo: true,
             },
           },
+          teoria: {
+            select: {
+              id: true,
+              titulo: true,
+            },
+          },
         },
       },
       // Los logros del usuario, incluyendo la fecha en que se obtuvieron y la información del logro
