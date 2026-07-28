@@ -13,23 +13,21 @@ model User {
   nombre          String
   email           String      @unique
   password        String
-  interes         String?     @default("Sin definir")
-  puntos          Int         @default(0)
   rachaActual     Int         @default(0)
   ultimaActividad DateTime?
   creadoEn        DateTime    @default(now())
-
-  progreso        Progreso[]
+  interes         String?     @default("Sin definir")
+  puntos          Int         @default(0)
+  eventos         EventoLog[]
   favoritos       Favorite[]
+  progreso        Progreso[]
   logros          UserLogro[]
-  eventos         EventoLog[]  
 }
 
 model Modulo {
-  id          Int       @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   nombre      String
   descripcion String
-
   lecciones   Leccion[]
   progreso    Progreso[]
 }
@@ -39,86 +37,75 @@ model Leccion {
   titulo    String
   contenido String
   moduloId  Int
-
+  ejercicio Ejercicio[]
   modulo    Modulo      @relation(fields: [moduloId], references: [id])
+  logros    Logro[]
   progreso  Progreso[]
-  logros    Logro[] 
-  teoria    Teoria[]  
-  ejercicio Ejercicio[]  
+  teoria    Teoria[]
 }
 
 model Teoria {
-  id                  Int       @id @default(autoincrement())
+  id                  Int        @id @default(autoincrement())
   lessonId            Int
   titulo              String
-  tipo                String    @default("teoria")
   contenidoMultimedia String
-
-  leccion             Leccion   @relation(fields: [lessonId], references: [id])
-  progreso  Progreso[]
-  favoritos Favorite[]
-}
-
-enum TipoEjercicio {
-  MULTIPLE_CHOICE
-  TRUE_FALSE
-  ORDER_WORDS
+  tipo                String     @default("teoria")
+  favoritos           Favorite[]
+  progreso            Progreso[]
+  leccion             Leccion    @relation(fields: [lessonId], references: [id])
 }
 
 model Ejercicio {
-  id                  Int            @id @default(autoincrement())
+  id                  Int           @id @default(autoincrement())
   lessonId            Int
   titulo              String
   tipo                TipoEjercicio
-  opcionesRespuesta   Json           @db.JsonB
-  respuestaEsperada   Json           @db.JsonB
+  opcionesRespuesta   Json
+  respuestaEsperada   Json
   contenidoMultimedia String[]
-  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  leccion             Leccion       @relation(fields: [lessonId], references: [id])
+  progreso            Progreso[]
 
-  leccion             Leccion        @relation(fields: [lessonId], references: [id])
-  progreso  Progreso[]
   @@map("Ejercicios")
 }
 
-
 model Progreso {
-  id            Int         @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   userId        Int
   moduloId      Int
   leccionId     Int
-  teoriaId      Int?
-  ejercicioId   Int?
-  errores       Int         @default(0)
-  puntos        Int         @default(0)
-  primerIntento DateTime    @default(now())
   completadoEn  DateTime?
-
-  user          User        @relation(fields: [userId], references: [id])
-  modulo        Modulo      @relation(fields: [moduloId], references: [id])
-  leccion       Leccion     @relation(fields: [leccionId], references: [id])
-  teoria        Teoria?     @relation(fields: [teoriaId], references: [id])
-  ejercicio     Ejercicio?  @relation(fields: [ejercicioId], references: [id])
+  primerIntento DateTime   @default(now())
+  errores       Int        @default(0)
+  puntos        Int        @default(0)
+  ejercicioId   Int?
+  teoriaId      Int?
+  ejercicio     Ejercicio? @relation(fields: [ejercicioId], references: [id])
+  leccion       Leccion    @relation(fields: [leccionId], references: [id])
+  modulo        Modulo     @relation(fields: [moduloId], references: [id])
+  teoria        Teoria?    @relation(fields: [teoriaId], references: [id])
+  user          User       @relation(fields: [userId], references: [id])
 }
 
 model Favorite {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  teoriaId    Int
-  createdAt   DateTime  @default(now())
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  createdAt DateTime @default(now())
+  teoriaId  Int
+  teoria    Teoria   @relation(fields: [teoriaId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teoria      Teoria   @relation(fields: [teoriaId], references: [id], onDelete: Cascade)
   @@unique([userId, teoriaId])
-  }
+}
 
 model Logro {
   id          Int         @id @default(autoincrement())
   nombre      String
   descripcion String
   icono       String?
-  leccionId   Int?    
-
-  leccion     Leccion?    @relation(fields: [leccionId], references: [id])  
+  leccionId   Int?
+  leccion     Leccion?    @relation(fields: [leccionId], references: [id])
   userLogros  UserLogro[]
 }
 
@@ -127,9 +114,9 @@ model UserLogro {
   userId        Int
   logroId       Int
   fechaObtenido DateTime @default(now())
-
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   logro         Logro    @relation(fields: [logroId], references: [id])
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, logroId])
 }
 
@@ -139,6 +126,11 @@ model EventoLog {
   evento     String
   properties Json?
   timestamp  DateTime @default(now())
-
   user       User?    @relation(fields: [userId], references: [id])
+}
+
+enum TipoEjercicio {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  ORDER_WORDS
 }

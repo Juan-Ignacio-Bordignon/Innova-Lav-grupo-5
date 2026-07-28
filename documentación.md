@@ -195,18 +195,20 @@ JSON
 
 ```
 
-## Progreso del usuario
+##  Progreso del Usuario
 
-### Obtener progreso general
+Endpoints para consultar y registrar el avance del usuario en módulos, lecciones, teorías y ejercicios.
 
--   **Method:** `GET`
-    
--   **Endpoint:** `/progress`
-    
--   **Header:** `Authorization: Bearer <token>`
-    
--   **Respuesta (200):**
-    
+---
+
+### 1. Obtener progreso general
+
+Obtiene el historial completo de progresos registrados para el usuario autenticado.
+
+* **Method:** `GET`
+* **Endpoint:** `/progress`
+* **Header:** `Authorization: Bearer <token>`
+* **Respuesta (200 OK):**
 
 JSON
 
@@ -216,22 +218,23 @@ JSON
   "data": [
     {
       "id": 1,
-      "userId": 2,
+      "userId": 17,
       "moduloId": 1,
       "leccionId": 1,
-      "teoriaId": 1,
-      "ejercicioId": null,
-      "completado": true,
+      "teoriaId": null,
+      "ejercicioId": 1,
+      "completadoEn": "2026-07-28T01:36:07.286Z",
+      "primerIntento": "2026-07-28T01:36:07.286Z",
       "errores": 0,
-      "puntos": 0,
-      "createdAt": "2026-07-21T20:00:00.000Z"
+      "puntos": 10
     }
   ]
 }
-
 ```
 
+
 ### Guardar progreso (Consolidación de Validación, Puntos y Rachas)
+Registra la resolución de un ejercicio o la lectura de un bloque teórico. Valida respuestas, calcula puntos (+10 si es correcto, +2 por intento de consolidación), acumula errores e incrementa la racha activa del usuario
 
 -   **Method:** `POST`
     
@@ -250,8 +253,8 @@ JSON
 ```
 {
   "moduloId": 1,
-  "lessonId": 1,
-  "teoriaId": 5,
+  "leccionId": 1,
+  "teoriaId": 1,
   "isTheory": true
 }
 
@@ -266,11 +269,13 @@ JSON
 {
   "message": "Progreso de teoría guardado correctamente.",
   "data": {
-    "userId": 2,
+    "id": 2,
+    "userId": 17,
     "moduloId": 1,
     "leccionId": 1,
-    "teoriaId": 5,
-    "completado": true
+    "teoriaId": 1,
+    "ejercicioId": null,
+    "completadoEn": "2026-07-28T01:40:00.000Z"
   }
 }
 
@@ -286,9 +291,9 @@ JSON
 ```
 {
   "moduloId": 1,
-  "lessonId": 1,
-  "ejercicioId": 12,
-  "respuestaUsuario": "Opción A",
+  "leccionId": 1,
+  "ejercicioId": 1,
+  "respuestaUsuario": "A",
   "isTheory": false
 }
 
@@ -304,11 +309,14 @@ JSON
   "message": "Progreso de ejercicio procesado correctamente.",
   "esCorrecto": true,
   "puntosGanados": 10,
-  "rachaActual": 5,
+  "rachaActual": 1,
   "data": {
-    "userId": 2,
-    "ejercicioId": 12,
-    "completado": true,
+    "id": 1,
+    "userId": 17,
+    "moduloId": 1,
+    "leccionId": 1,
+    "ejercicioId": 1,
+    "completadoEn": "2026-07-28T01:36:07.286Z",
     "errores": 0,
     "puntos": 10
   }

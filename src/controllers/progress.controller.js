@@ -13,7 +13,6 @@ export const saveProgress = async (req, res) => {
     const userId = Number(rawUserId);
     const { moduloId, lessonId, leccionId, teoriaId, ejercicioId, respuestaUsuario, isTheory } = req.body;
 
-    // Normalizamos el ID de la lección por si llega como lessonId o leccionId
     const targetLessonId = Number(lessonId || leccionId);
     const targetModuloId = Number(moduloId);
 
@@ -29,25 +28,29 @@ export const saveProgress = async (req, res) => {
 
       const targetTeoriaId = Number(teoriaId);
 
-      const progresoTeoria = await prisma.progreso.upsert({
-        where: {
-          userId_teoriaId: { 
-            userId, 
-            teoriaId: targetTeoriaId 
-          }
-        },
-        update: {
-          completado: true,
-          updatedAt: new Date()
-        },
-        create: {
-          userId,
-          moduloId: targetModuloId,
-          leccionId: targetLessonId,
-          teoriaId: targetTeoriaId,
-          completado: true
-        }
+      const progresoExistente = await prisma.progreso.findFirst({
+        where: { userId, teoriaId: targetTeoriaId }
       });
+
+      let progresoTeoria;
+      if (progresoExistente) {
+        progresoTeoria = await prisma.progreso.update({
+          where: { id: progresoExistente.id },
+          data: {
+            completadoEn: new Date()
+          }
+        });
+      } else {
+        progresoTeoria = await prisma.progreso.create({
+          data: {
+            userId,
+            moduloId: targetModuloId,
+            leccionId: targetLessonId,
+            teoriaId: targetTeoriaId,
+            completadoEn: new Date()
+          }
+        });
+      }
 
       return res.status(200).json({
         message: "Progreso de teoría guardado correctamente.",
@@ -75,33 +78,37 @@ export const saveProgress = async (req, res) => {
     const puntosASumar = esCorrecto ? 10 : 2;
     const errorRegistrado = esCorrecto ? 0 : 1;
 
-    // Persistimos progreso
-    const progresoEjercicio = await prisma.progreso.upsert({
-      where: {
-        userId_ejercicioId: { 
-          userId, 
-          ejercicioId: targetEjercicioId 
-        }
-      },
-      update: {
-        completado: esCorrecto,
-        errores: { increment: errorRegistrado },
-        puntos: { increment: puntosASumar },
-        updatedAt: new Date()
-      },
-      create: {
-        userId,
-        moduloId: targetModuloId,
-        leccionId: targetLessonId,
-        ejercicioId: targetEjercicioId,
-        completado: esCorrecto,
-        errores: errorRegistrado,
-        puntos: puntosASumar
-      }
+    // Buscar si ya existe progreso registrado para este ejercicio
+    const progresoExistente = await prisma.progreso.findFirst({
+      where: { userId, ejercicioId: targetEjercicioId }
     });
 
+    let progresoEjercicio;
+    if (progresoExistente) {
+      progresoEjercicio = await prisma.progreso.update({
+        where: { id: progresoExistente.id },
+        data: {
+          completadoEn: esCorrecto ? new Date() : progresoExistente.completadoEn,
+          errores: { increment: errorRegistrado },
+          puntos: { increment: puntosASumar }
+        }
+      });
+    } else {
+      progresoEjercicio = await prisma.progreso.create({
+        data: {
+          userId,
+          moduloId: targetModuloId,
+          leccionId: targetLessonId,
+          ejercicioId: targetEjercicioId,
+          completadoEn: esCorrecto ? new Date() : null,
+          errores: errorRegistrado,
+          puntos: puntosASumar
+        }
+      });
+    }
+
     // 3. ACTUALIZACIÓN DE USUARIO Y RACHA
-    const usuarioActual = await prisma.usuario.findUnique({
+    const usuarioActual = await prisma.user.findUnique({
       where: { id: userId }
     });
 
@@ -109,22 +116,26 @@ export const saveProgress = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
-    const resultadoRacha = calcularNuevaRacha(usuarioActual.ultimaActividad, usuarioActual.rachaDias);
+    // Mapeo seguro para calcular racha (por si en la BD el campo es rachaActual o rachaDias)
+    const rachaPrevio = usuarioActual.rachaActual ?? usuarioActual.rachaDias ?? 0;
+    const resultadoRacha = calcularNuevaRacha(usuarioActual.ultimaActividad, rachaPrevio);
 
-    await prisma.usuario.update({
+    const updateUserData = {
+      puntos: { increment: puntosASumar },
+      rachaActual: resultadoRacha.rachaActual ?? 1,
+      ultimaActividad: resultadoRacha.ultimaActividad ?? new Date()
+    };
+
+    await prisma.user.update({
       where: { id: userId },
-      data: {
-        puntosTotales: { increment: puntosASumar },
-        rachaDias: resultadoRacha.rachaActual,
-        ultimaActividad: resultadoRacha.ultimaActividad
-      }
+      data: updateUserData
     });
 
     return res.status(200).json({
       message: "Progreso de ejercicio procesado correctamente.",
       esCorrecto,
       puntosGanados: puntosASumar,
-      rachaActual: resultadoRacha.rachaActual,
+      rachaActual: resultadoRacha.rachaActual ?? 1,
       data: progresoEjercicio
     });
 
@@ -148,7 +159,6 @@ export const getProgress = async (req, res) => {
       where: { userId }
     });
 
-    // Si no tiene registros, devolvemos un array vacío sin tirar error
     return res.status(200).json({
       message: "Progreso obtenido correctamente.",
       data: progreso || []
