@@ -13,20 +13,17 @@ export const getUser = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
     const lastExercise = await getLastExercise(userId);
-    let ultimaLeccion = {};
-    if (lastExercise) {
-      ultimaLeccion = {
-        moduleId: lastExercise.moduloId,
-        moduleName: lastExercise.modulo.nombre,
-        lessonId: lastExercise.leccionId,
-        lessonName: lastExercise.leccion.titulo,
-        exerciseId: lastExercise.ejercicioId,
-        exerciseName: lastExercise.ejercicio.titulo,
-        completadoEn: lastExercise.completadoEn,
-      };
-    } else {
-      ultimaLeccion = null;
-    }
+    const ultimaLeccion = lastExercise
+      ? {
+          moduleId: lastExercise.moduloId,
+          moduleName: lastExercise.modulo.nombre,
+          lessonId: lastExercise.leccionId,
+          lessonName: lastExercise.leccion.titulo,
+          exerciseId: lastExercise.ejercicioId,
+          exerciseName: lastExercise.ejercicio?.titulo,
+          completadoEn: lastExercise.completadoEn,
+        }
+      : null;
     res.json({
       usuario: {
         username: user.nombre,
