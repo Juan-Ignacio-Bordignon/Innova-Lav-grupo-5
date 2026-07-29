@@ -609,7 +609,7 @@ async function main() {
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_A", "Letra_B", "Letra_C"],
       respuestaEsperada: "Letra_B",
-      contenidoMultimedia: ["Letra_B"], // <-- Cambiado a Array
+      contenidoMultimedia: ["Letra_B"],
     },
     {
       lessonId: alfabeto.id,
@@ -621,20 +621,19 @@ async function main() {
     },
     {
       lessonId: alfabeto.id,
+      titulo: "Ordená las letras para formar la palabra 'Cada':",
+      tipo: "ORDER_WORDS",
+      opcionesRespuesta: ["D", "A", "C", "A"],
+      respuestaEsperada: ["C", "A", "D", "A"],
+      contenidoMultimedia: ["Letra_C", "Letra_A", "Letra_D", "Letra_A"],
+    },
+    {
+      lessonId: alfabeto.id,
       titulo: "¿A qué letra corresponde esta seña?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_G", "Letra_H", "Letra_I"],
       respuestaEsperada: "Letra_H",
       contenidoMultimedia: ["Letra_H"],
-    },
-    {
-      lessonId: alfabeto.id,
-      titulo: "Ordená las letras para formar la palabra 'Cada':",
-      tipo: "ORDER_WORDS",
-      opcionesRespuesta: ["D", "A", "C", "A"],
-      respuestaEsperada: ["C", "A", "D", "A"],
-      // Ahora puedes pasar múltiples videos según las letras de la palabra:
-      contenidoMultimedia: ["Letra_C", "Letra_A", "Letra_D", "Letra_A"],
     },
     {
       lessonId: alfabeto.id,
