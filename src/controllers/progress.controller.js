@@ -96,43 +96,58 @@ export const saveProgress = async (req, res) => {
       return res.status(404).json({ error: "Ejercicio no encontrado." });
     }
 
-    // Validamos respuesta
-    const esCorrecto =
-      String(ejercicio.respuestaEsperada).trim().toLowerCase() ===
-      String(respuestaUsuario).trim().toLowerCase();
-    const puntosASumar = esCorrecto ? 10 : 2;
-    const errorRegistrado = esCorrecto ? 0 : 1;
-
-    // Buscar si ya existe progreso registrado para este ejercicio
-    const progresoExistente = await prisma.progreso.findFirst({
-      where: { userId, ejercicioId: targetEjercicioId },
+    // Buscamos si el usuario ya tenía un progreso guardado en este ejercicio
+    const progresoExistente = await prisma.progreso.findUnique({
+      where: {
+        userId_ejercicioId: {
+          userId,
+          ejercicioId: targetEjercicioId,
+        },
+      },
     });
 
-    let progresoEjercicio;
-    if (progresoExistente) {
-      progresoEjercicio = await prisma.progreso.update({
-        where: { id: progresoExistente.id },
-        data: {
-          completadoEn: esCorrecto
-            ? new Date()
-            : progresoExistente.completadoEn,
-          errores: { increment: errorRegistrado },
-          puntos: { increment: puntosASumar },
-        },
-      });
-    } else {
-      progresoEjercicio = await prisma.progreso.create({
-        data: {
-          userId,
-          moduloId: targetModuloId,
-          leccionId: targetLessonId,
-          ejercicioId: targetEjercicioId,
-          completadoEn: esCorrecto ? new Date() : null,
-          errores: errorRegistrado,
-          puntos: puntosASumar,
-        },
-      });
+    // Validamos respuesta
+    const esCorrecto = String(ejercicio.respuestaCorrecta).trim().toLowerCase() === String(respuestaUsuario).trim().toLowerCase();
+
+    // LÓGICA DE PUNTAJES ACORDADA:
+    // - Incorrecta: 0 puntos.
+    // - Ya estaba completado antes: 0 puntos (evita farming de puntos).
+    // - Correcta al 1er intento (sin errores previos): 10 puntos.
+    // - Correcta en reintento (con errores previos): 5 puntos.
+    const yaEstabaCompletado = progresoExistente?.completado || false;
+    const tuvoErroresPrevios = (progresoExistente?.errores || 0) > 0;
+
+    let puntosASumar = 0;
+    if (esCorrecto && !yaEstabaCompletado) {
+      puntosASumar = tuvoErroresPrevios ? 5 : 10;
     }
+
+    const errorRegistrado = esCorrecto ? 0 : 1;
+
+    // Persistimos progreso de ejercicio
+    const progresoEjercicio = await prisma.progreso.upsert({
+      where: {
+        userId_ejercicioId: { 
+          userId, 
+          ejercicioId: targetEjercicioId 
+        }
+      },
+      update: {
+        completado: esCorrecto || yaEstabaCompletado,
+        errores: { increment: errorRegistrado },
+        puntos: { increment: puntosASumar },
+        updatedAt: new Date()
+      },
+      create: {
+        userId,
+        moduloId: targetModuloId,
+        leccionId: targetLessonId,
+        ejercicioId: targetEjercicioId,
+        completado: esCorrecto,
+        errores: errorRegistrado,
+        puntos: puntosASumar
+      }
+    });
 
     // 3. ACTUALIZACIÓN DE USUARIO Y RACHA
     const usuarioActual = await prisma.user.findUnique({
@@ -143,7 +158,7 @@ export const saveProgress = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
-    // Mapeo seguro para calcular racha (por si en la BD el campo es rachaActual o rachaDias)
+    // Mapeo seguro para calcular racha
     const rachaPrevio =
       usuarioActual.rachaActual ?? usuarioActual.rachaDias ?? 0;
     const resultadoRacha = calcularNuevaRacha(
