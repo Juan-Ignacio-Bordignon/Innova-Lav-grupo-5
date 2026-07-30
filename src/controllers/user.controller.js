@@ -13,35 +13,38 @@ export const getUser = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
     const lastExercise = await getLastExercise(userId);
-    let ultimaLeccion = {};
-    if (lastExercise) {
-      ultimaLeccion = {
-        moduleId: lastExercise.moduloId,
-        moduleName: lastExercise.modulo.nombre,
-        lessonId: lastExercise.leccionId,
-        lessonName: lastExercise.leccion.titulo,
-        exerciseId: lastExercise.ejercicioId,
-        exerciseName: lastExercise.ejercicio.titulo,
-        completadoEn: lastExercise.completadoEn,
-      };
-    } else {
-      ultimaLeccion = null;
-    }
+    const ultimaLeccion = lastExercise
+      ? {
+          moduleId: lastExercise.moduloId,
+          moduleName: lastExercise.modulo.nombre,
+          lessonId: lastExercise.leccionId,
+          lessonName: lastExercise.leccion.titulo,
+          exerciseId: lastExercise.ejercicioId,
+          exerciseName: lastExercise.ejercicio?.titulo,
+          completadoEn: lastExercise.completadoEn,
+        }
+      : null;
     res.json({
       usuario: {
         username: user.nombre,
         email: user.email,
         interes: user.interes,
       },
-      progreso: user.progreso.map((progreso) => ({
-        moduleId: progreso.modulo.id,
-        moduleName: progreso.modulo.nombre,
-        lessonId: progreso.leccionId,
-        lessonName: progreso.leccion.titulo,
-        exerciseId: progreso.ejercicio.id,
-        exerciseName: progreso.ejercicio.titulo,
-        completadoEn: progreso.completadoEn,
-      })),
+      progreso: user.progreso.map((progreso) => {
+        const esEjercicio = Boolean(progreso.ejercicio);
+        return {
+          tipo: esEjercicio ? "ejercicio" : "teoria",
+          moduleId: progreso.modulo.id,
+          moduleName: progreso.modulo.nombre,
+          lessonId: progreso.leccionId,
+          lessonName: progreso.leccion.titulo,
+          exerciseId: progreso.ejercicio?.id ?? null,
+          exerciseName: progreso.ejercicio?.titulo ?? null,
+          teoriaId: progreso.teoria?.id ?? null,
+          teoriaName: progreso.teoria?.titulo ?? null,
+          completadoEn: progreso.completadoEn,
+        };
+      }),
       ultimaLeccion: ultimaLeccion,
       puntos: user.puntos,
       racha: user.rachaActual,
