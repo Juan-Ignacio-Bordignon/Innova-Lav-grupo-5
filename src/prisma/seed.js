@@ -621,7 +621,7 @@ async function main() {
     },
     {
       lessonId: alfabeto.id,
-      titulo: "Ordená las letras para formar la palabra 'Cada':",
+      titulo: "¿Qué palabra estoy deletreando?",
       tipo: "ORDER_WORDS",
       opcionesRespuesta: ["D", "A", "C", "A"],
       respuestaEsperada: ["C", "A", "D", "A"],
