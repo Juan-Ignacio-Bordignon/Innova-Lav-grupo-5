@@ -70,12 +70,37 @@ export const saveProgress = async (req, res) => {
       return res.status(404).json({ error: "Ejercicio no encontrado." });
     }
 
-    // Validamos respuesta
+    // Buscamos si el usuario ya tenía un registro previo en este ejercicio
+    const progresoExistente = await prisma.progreso.findUnique({
+      where: {
+        userId_ejercicioId: {
+          userId,
+          ejercicioId: targetEjercicioId
+        }
+      }
+    });
+
+    // Validamos la respuesta entregada por el usuario
     const esCorrecto = String(ejercicio.respuestaCorrecta).trim().toLowerCase() === String(respuestaUsuario).trim().toLowerCase();
-    const puntosASumar = esCorrecto ? 10 : 2;
+
+    // Verificamos historial previo
+    const yaEstabaCompletado = progresoExistente?.completado || false;
+    const tuvoErroresPrevios = (progresoExistente?.errores || 0) > 0;
+
+    // LÓGICA DE PUNTAJE ACORDADA :
+    // - Incorrecta: 0 puntos.
+    // - Ya estaba completado antes: 0 puntos (no suma).
+    // - Correcta al 1er intento (sin errores previos): 10 puntos.
+    // - Correcta en reintento (con errores previos): 5 puntos.
+    let puntosASumar = 0;
+
+    if (esCorrecto && !yaEstabaCompletado) {
+      puntosASumar = tuvoErroresPrevios ? 5 : 10;
+    }
+
     const errorRegistrado = esCorrecto ? 0 : 1;
 
-    // Persistimos progreso
+    // Persistimos progreso del ejercicio
     const progresoEjercicio = await prisma.progreso.upsert({
       where: {
         userId_ejercicioId: { 
@@ -84,7 +109,7 @@ export const saveProgress = async (req, res) => {
         }
       },
       update: {
-        completado: esCorrecto,
+        completado: esCorrecto || yaEstabaCompletado, // Mantiene completado si ya lo aprobó
         errores: { increment: errorRegistrado },
         puntos: { increment: puntosASumar },
         updatedAt: new Date()
@@ -148,7 +173,6 @@ export const getProgress = async (req, res) => {
       where: { userId }
     });
 
-    // Si no tiene registros, devolvemos un array vacío sin tirar error
     return res.status(200).json({
       message: "Progreso obtenido correctamente.",
       data: progreso || []
