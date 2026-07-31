@@ -605,7 +605,7 @@ async function main() {
     // === LECCIÓN 1: ALFABETO ===
     {
       lessonId: alfabeto.id,
-      titulo: "¿Cuál es la seña correcta para la letra 'B'?",
+      titulo: "¿Qué letra se representa en la seña?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_A", "Letra_B", "Letra_C"],
       respuestaEsperada: "Letra_B",
@@ -623,7 +623,7 @@ async function main() {
       lessonId: alfabeto.id,
       titulo: "¿Qué palabra estoy deletreando?",
       tipo: "ORDER_WORDS",
-      opcionesRespuesta: ["D", "A", "C", "A"],
+      opcionesRespuesta: ["B", "D", "E", "A", "C", "A"],
       respuestaEsperada: ["C", "A", "D", "A"],
       contenidoMultimedia: ["Letra_C", "Letra_A", "Letra_D", "Letra_A"],
     },
@@ -637,7 +637,7 @@ async function main() {
     },
     {
       lessonId: alfabeto.id,
-      titulo: "Identificá la seña que corresponde a la letra 'Ñ'.",
+      titulo: "¿Qué letra se está ejecutando en la seña?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_M", "Letra_N", "Letra_Ñ"],
       respuestaEsperada: "Letra_Ñ",
@@ -645,7 +645,7 @@ async function main() {
     },
     {
       lessonId: alfabeto.id,
-      titulo: "Verdadero o Falso: Esta seña representa la letra 'O'.",
+      titulo: "El video muestra la seña correcta para la letra 'O'.",
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: false,
@@ -653,7 +653,7 @@ async function main() {
     },
     {
       lessonId: alfabeto.id,
-      titulo: "¿Cuál de estas opciones representa la letra 'S'?",
+      titulo: "¿A qué letra corresponde el movimiento del video?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Letra_R", "Letra_S", "Letra_T"],
       respuestaEsperada: "Letra_S",
@@ -705,7 +705,7 @@ async function main() {
     },
     {
       lessonId: numeros.id,
-      titulo: "Verdadero o Falso: ¿Esta seña corresponde al 'Número 5'?",
+      titulo: "La seña que se observa en el video representa al número 5.",
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
@@ -713,7 +713,7 @@ async function main() {
     },
     {
       lessonId: numeros.id,
-      titulo: "¿Cuál es la seña correcta para el número '20'?",
+      titulo: "¿Qué número se indica en esta seña?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Numero_8", "Numero_9", "Numero_10", "Numero_20"],
       respuestaEsperada: "Numero_20",
@@ -721,8 +721,7 @@ async function main() {
     },
     {
       lessonId: numeros.id,
-      titulo:
-        "Verdadero o Falso: ¿La siguiente seña representa al número '40'?",
+      titulo: "¿La siguiente seña representa al número '40'?",
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: false,
@@ -730,7 +729,7 @@ async function main() {
     },
     {
       lessonId: numeros.id,
-      titulo: "Seleccioná la opción que muestre la seña del número '100'.",
+      titulo: "¿Cuál es el valor numérico representado?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Numero_70", "Numero_80", "Numero_90", "Numero_100"],
       respuestaEsperada: "Numero_100",
@@ -738,7 +737,7 @@ async function main() {
     },
     {
       lessonId: numeros.id,
-      titulo: "Verdadero o Falso: Esta seña representa la cantidad '500'.",
+      titulo: "El video realiza correctamente la seña para el número 500.",
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
@@ -761,7 +760,7 @@ async function main() {
     // === LECCIÓN 4: SENTIMIENTOS ===
     {
       lessonId: sentimientos.id,
-      titulo: "Identificá la seña que exprese el sentimiento 'Triste'.",
+      titulo: "¿Qué emoción o sentimiento expresa esta seña?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: ["Feliz", "Triste", "Enojado", "Asustado"],
       respuestaEsperada: "Triste",
@@ -770,7 +769,7 @@ async function main() {
     {
       lessonId: sentimientos.id,
       titulo:
-        "Verdadero o Falso: Esta seña representa el estado de estar 'Enfermo'.",
+        "El sentimiento o estado de salud expresado en la seña es 'Enfermo'.",
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
@@ -780,7 +779,7 @@ async function main() {
     // === LECCIÓN 5: SALUDOS ===
     {
       lessonId: saludos.id,
-      titulo: "¿Cuál es la seña correcta para despedirse diciendo 'Chau'?",
+      titulo: "¿Qué saludo o expresión se muestra a continuación?",
       tipo: "MULTIPLE_CHOICE",
       opcionesRespuesta: [
         "Hola_buen_dia",
@@ -795,7 +794,7 @@ async function main() {
     // === LECCIÓN 6: PRESENTACIONES ===
     {
       lessonId: presentaciones.id,
-      titulo: "Verdadero o Falso: Esta seña expresa la frase '¿Cómo estás?'.",
+      titulo: "La seña mostrada se utiliza para preguntar '¿Cómo estás?'.",
       tipo: "TRUE_FALSE",
       opcionesRespuesta: [true, false],
       respuestaEsperada: true,
