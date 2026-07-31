@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../prisma/prisma.js";
 import { verifyToken } from "../utils/jws.js";
 
-const prisma = new PrismaClient();
 export async function recuperarEstadoDeEjercicio(
   authorization,
   lessonExercises,

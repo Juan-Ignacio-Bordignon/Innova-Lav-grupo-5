@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../prisma/prisma.js";
 import {
   recuperarEstadoDeEjercicio,
   recuperarEstadoDeTeoria,
 } from "../services/exercise.service.js";
 import { formatMediaUrls } from "../utils/formatters.js";
 
-const prisma = new PrismaClient();
 const URL_BASE_VIDEOS =
   "https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/";
 // URL Base para Supabase Storage (Bucket público: videos-lsa)

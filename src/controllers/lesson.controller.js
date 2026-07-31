@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "../prisma/prisma.js";
 
 // GET /module/:moduleId/lessons
 export const getLessons = async (req, res) => {

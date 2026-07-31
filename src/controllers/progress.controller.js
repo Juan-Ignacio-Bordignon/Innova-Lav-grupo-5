@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { calcularNuevaRacha } from "../utils/racha.utils.js";
-
-const prisma = new PrismaClient();
+import { prisma } from "../prisma/prisma.js";
 
 export const saveProgress = async (req, res) => {
   try {
@@ -27,22 +25,18 @@ export const saveProgress = async (req, res) => {
     const targetModuloId = Number(moduloId);
 
     if (!targetModuloId || !targetLessonId) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Faltan los identificadores obligatorios (moduloId y lessonId/leccionId).",
-        });
+      return res.status(400).json({
+        error:
+          "Faltan los identificadores obligatorios (moduloId y lessonId/leccionId).",
+      });
     }
 
     // 1. FLUJO DE TEORÍA
     if (isTheory) {
       if (!teoriaId) {
-        return res
-          .status(400)
-          .json({
-            error: "Falta el teoriaId para registrar el progreso de teoría.",
-          });
+        return res.status(400).json({
+          error: "Falta el teoriaId para registrar el progreso de teoría.",
+        });
       }
 
       const targetTeoriaId = Number(teoriaId);
@@ -79,11 +73,9 @@ export const saveProgress = async (req, res) => {
 
     // 2. FLUJO DE EJERCICIO
     if (!ejercicioId || respuestaUsuario === undefined) {
-      return res
-        .status(400)
-        .json({
-          error: "Faltan datos obligatorios para validar el ejercicio.",
-        });
+      return res.status(400).json({
+        error: "Faltan datos obligatorios para validar el ejercicio.",
+      });
     }
 
     const targetEjercicioId = Number(ejercicioId);
@@ -107,7 +99,9 @@ export const saveProgress = async (req, res) => {
     });
 
     // Validamos respuesta
-    const esCorrecto = String(ejercicio.respuestaCorrecta).trim().toLowerCase() === String(respuestaUsuario).trim().toLowerCase();
+    const esCorrecto =
+      String(ejercicio.respuestaCorrecta).trim().toLowerCase() ===
+      String(respuestaUsuario).trim().toLowerCase();
 
     // LÓGICA DE PUNTAJES ACORDADA:
     // - Incorrecta: 0 puntos.
@@ -127,16 +121,16 @@ export const saveProgress = async (req, res) => {
     // Persistimos progreso de ejercicio
     const progresoEjercicio = await prisma.progreso.upsert({
       where: {
-        userId_ejercicioId: { 
-          userId, 
-          ejercicioId: targetEjercicioId 
-        }
+        userId_ejercicioId: {
+          userId,
+          ejercicioId: targetEjercicioId,
+        },
       },
       update: {
         completado: esCorrecto || yaEstabaCompletado,
         errores: { increment: errorRegistrado },
         puntos: { increment: puntosASumar },
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       create: {
         userId,
@@ -145,8 +139,8 @@ export const saveProgress = async (req, res) => {
         ejercicioId: targetEjercicioId,
         completado: esCorrecto,
         errores: errorRegistrado,
-        puntos: puntosASumar
-      }
+        puntos: puntosASumar,
+      },
     });
 
     // 3. ACTUALIZACIÓN DE USUARIO Y RACHA

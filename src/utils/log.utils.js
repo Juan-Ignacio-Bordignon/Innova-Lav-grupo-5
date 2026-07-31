@@ -1,7 +1,5 @@
 import { generateToken, verifyToken } from "../utils/jws.js";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../prisma/prisma.js";
 
 export const logEvent = async (userId, evento, properties) => {
   try {

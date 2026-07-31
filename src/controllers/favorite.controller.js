@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../prisma/prisma.js";
 import { verifyToken } from "../utils/jws.js";
 import { formatMediaUrls } from "../utils/formatters.js";
-
-const prisma = new PrismaClient();
 
 // POST /favorites → agregar favorito
 export const addFavorite = async (req, res) => {
