@@ -1,7 +1,16 @@
 import { apiClient } from '../../../services/api/apiClient';
 import { ENDPOINTS } from '../../../services/api/endpoints';
 import { getAuthToken } from '../../../services/storage/authStorage';
+
 import type { ModulesResponse } from '../../modules/types';
+
+import {
+  buildLearningProgressOverview,
+} from '../../progress/services/learningProgressService';
+
+import {
+  getProgress,
+} from '../../progress/services/progressService';
 
 import type {
   AchievementVisualKey,
@@ -11,7 +20,6 @@ import type {
   RawCurrentUserResponse,
   RawEarnedAchievement,
   RawUserAchievement,
-  RawUserProgressItem,
 } from '../types';
 
 type AchievementCatalogItem = {
@@ -27,186 +35,220 @@ const ACHIEVEMENT_CATALOG: AchievementCatalogItem[] = [
   {
     id: 'alphabet',
     name: 'Abecedario',
-    description: 'Completaste la lección del abecedario.',
+    description:
+      'Completaste la lección del abecedario.',
     icon: '🔤',
     visualKey: 'alphabet',
-    aliases: ['abecedario', 'alfabeto'],
+    aliases: [
+      'abecedario',
+      'alfabeto',
+    ],
   },
   {
     id: 'days',
     name: 'Días',
-    description: 'Completaste la lección de los días de la semana.',
+    description:
+      'Completaste la lección de los días de la semana.',
     icon: '📅',
     visualKey: 'days',
-    aliases: ['dias', 'dias de la semana'],
+    aliases: [
+      'dias',
+      'dias de la semana',
+    ],
   },
   {
     id: 'numbers',
     name: 'Números',
-    description: 'Completaste la lección de números.',
+    description:
+      'Completaste la lección de números.',
     icon: '🔢',
     visualKey: 'numbers',
-    aliases: ['numeros', 'numero'],
+    aliases: [
+      'numeros',
+      'numero',
+    ],
   },
   {
     id: 'feelings',
     name: 'Sentimientos',
-    description: 'Completaste la lección de sentimientos.',
+    description:
+      'Completaste la lección de sentimientos.',
     icon: '💛',
     visualKey: 'feelings',
-    aliases: ['sentimientos', 'emociones'],
+    aliases: [
+      'sentimientos',
+      'emociones',
+    ],
   },
   {
     id: 'greetings',
     name: 'Saludos',
-    description: 'Completaste la lección de saludos.',
+    description:
+      'Completaste la lección de saludos.',
     icon: '👋',
     visualKey: 'greetings',
-    aliases: ['saludos', 'saludo'],
+    aliases: [
+      'saludos',
+      'saludo',
+    ],
   },
   {
     id: 'introductions',
     name: 'Presentaciones',
-    description: 'Completaste la lección de presentaciones.',
+    description:
+      'Completaste la lección de presentaciones.',
     icon: '💬',
     visualKey: 'introductions',
-    aliases: ['presentaciones', 'presentacion'],
+    aliases: [
+      'presentaciones',
+      'presentacion',
+    ],
   },
   {
     id: 'environment',
     name: 'Entorno',
-    description: 'Completaste la lección de entorno.',
+    description:
+      'Completaste la lección de entorno.',
     icon: '🏠',
     visualKey: 'environment',
-    aliases: ['entorno', 'hogar'],
+    aliases: [
+      'entorno',
+      'hogar',
+    ],
   },
   {
     id: 'emergency',
     name: 'Emergencia',
-    description: 'Completaste la lección de emergencia.',
+    description:
+      'Completaste la lección de emergencia.',
     icon: '⚠️',
     visualKey: 'emergency',
-    aliases: ['emergencia', 'emergencias'],
+    aliases: [
+      'emergencia',
+      'emergencias',
+    ],
   },
   {
     id: 'perfect',
     name: 'Sin errores',
-    description: 'Completaste una lección sin errores.',
+    description:
+      'Completaste una lección sin errores.',
     icon: '✅',
     visualKey: 'perfect',
-    aliases: ['sin errores', 'sin error', 'perfecto'],
+    aliases: [
+      'sin errores',
+      'sin error',
+      'perfecto',
+    ],
   },
   {
     id: 'diploma',
     name: 'Diploma',
-    description: 'Completaste todos los objetivos principales.',
+    description:
+      'Completaste todos los objetivos principales.',
     icon: '🏆',
     visualKey: 'diploma',
-    aliases: ['diploma', 'campeon', 'trofeo'],
+    aliases: [
+      'diploma',
+      'campeon',
+      'trofeo',
+    ],
   },
 ];
 
 export async function getProfileOverview(): Promise<ProfileOverview> {
-  const token = await getAuthToken();
+  const token =
+    await getAuthToken();
 
   if (!token) {
-    throw new Error('No se encontró una sesión activa.');
+    throw new Error(
+      'No se encontró una sesión activa.',
+    );
   }
 
-  const [userResponse, modulesResponse, achievementsResponse] =
-    await Promise.all([
-      apiClient<RawCurrentUserResponse>(ENDPOINTS.USER, {
+  const [
+    userResponse,
+    modulesResponse,
+    progressResponse,
+    achievementsResponse,
+  ] = await Promise.all([
+    apiClient<RawCurrentUserResponse>(
+      ENDPOINTS.USER,
+      {
         method: 'GET',
         token,
-      }),
+      },
+    ),
 
-      apiClient<ModulesResponse>(ENDPOINTS.MODULES, {
+    apiClient<ModulesResponse>(
+      ENDPOINTS.MODULES,
+      {
         method: 'GET',
-      }).catch(() => ({
-        modules: [],
-      })),
+      },
+    ),
 
-      apiClient<RawAchievementsResponse>(
-        ENDPOINTS.USER_ACHIEVEMENTS,
-        {
-          method: 'GET',
-          token,
-        },
-      ).catch(() => null),
-    ]);
+    getProgress(),
 
-  const completedLessonKeys = getCompletedLessonKeys(
-    userResponse.progreso,
-  );
+    apiClient<RawAchievementsResponse>(
+      ENDPOINTS.USER_ACHIEVEMENTS,
+      {
+        method: 'GET',
+        token,
+      },
+    ).catch(() => null),
+  ]);
 
-  const totalLessons = modulesResponse.modules.reduce(
-    (total, module) => total + module.lecciones.length,
-    0,
-  );
+  /*
+   * El porcentaje ya no se calcula contando simplemente
+   * cuántas lecciones aparecen en el progreso.
+   *
+   * Se compara cada teoría y ejercicio completado contra
+   * todos los contenidos existentes.
+   */
+  const learningProgress =
+    await buildLearningProgressOverview(
+      modulesResponse.modules,
+      progressResponse.data,
+    );
 
-  const completedLessons =
-    totalLessons > 0
-      ? Math.min(completedLessonKeys.size, totalLessons)
-      : completedLessonKeys.size;
-
-  const pendingLessons = Math.max(
-    totalLessons - completedLessons,
-    0,
-  );
-
-  const progressPercentage =
-    totalLessons > 0
-      ? Math.round((completedLessons / totalLessons) * 100)
-      : 0;
-
-  const earnedAchievements = achievementsResponse
-    ? achievementsResponse.logros
-    : userResponse.logros.map(mapFlatAchievementToEarned);
+  const earnedAchievements =
+    achievementsResponse
+      ? achievementsResponse.logros
+      : userResponse.logros.map(
+          mapFlatAchievementToEarned,
+        );
 
   return {
-    username: userResponse.usuario.username || 'Usuario',
-    email: userResponse.usuario.email || '',
-    completedLessons,
-    pendingLessons,
-    totalLessons,
-    progressPercentage,
-    points: Number(userResponse.puntos) || 0,
-    streak: Number(userResponse.racha) || 0,
-    achievements: mergeAchievementsWithCatalog(
-      earnedAchievements,
-    ),
+    username:
+      userResponse.usuario.username ||
+      'Usuario',
+
+    email:
+      userResponse.usuario.email || '',
+
+    completedLessons:
+      learningProgress.completedLessons,
+
+    pendingLessons:
+      learningProgress.pendingLessons,
+
+    totalLessons:
+      learningProgress.totalLessons,
+
+    progressPercentage:
+      learningProgress.progressPercentage,
+
+    points:
+      Number(userResponse.puntos) || 0,
+
+    streak:
+      Number(userResponse.racha) || 0,
+
+    achievements:
+      mergeAchievementsWithCatalog(
+        earnedAchievements,
+      ),
   };
-}
-
-function getCompletedLessonKeys(
-  progress: RawUserProgressItem[],
-) {
-  const completedLessons = new Set<string>();
-
-  progress.forEach((item) => {
-    if (!item.completadoEn) {
-      return;
-    }
-
-    const moduleId =
-      item.moduleId ??
-      item.ModuleId ??
-      item.moduloId ??
-      'module';
-
-    const lessonId =
-      item.lessonId ??
-      item.LessonId ??
-      item.leccionId;
-
-    if (lessonId === undefined || lessonId === null) {
-      return;
-    }
-
-    completedLessons.add(`${moduleId}:${lessonId}`);
-  });
-
-  return completedLessons;
 }
 
 function mapFlatAchievementToEarned(
@@ -223,91 +265,155 @@ function mapFlatAchievementToEarned(
 function mergeAchievementsWithCatalog(
   earnedAchievements: RawEarnedAchievement[],
 ): ProfileAchievement[] {
-  const consumedAchievementIds = new Set<number>();
+  const consumedAchievementIds =
+    new Set<number>();
 
-  const catalogAchievements = ACHIEVEMENT_CATALOG.map(
-    (catalogItem) => {
-      const earnedAchievement = earnedAchievements.find(
-        (item) => {
-          if (consumedAchievementIds.has(item.id)) {
-            return false;
-          }
+  const catalogAchievements =
+    ACHIEVEMENT_CATALOG.map(
+      (catalogItem) => {
+        const earnedAchievement =
+          earnedAchievements.find(
+            (item) => {
+              if (
+                consumedAchievementIds.has(
+                  item.id,
+                )
+              ) {
+                return false;
+              }
 
-          const isMatch = catalogItem.aliases.some((alias) =>
-            normalizeText(item.logro.nombre).includes(
-              normalizeText(alias),
-            ),
+              const isMatch =
+                catalogItem.aliases.some(
+                  (alias) =>
+                    normalizeText(
+                      item.logro.nombre,
+                    ).includes(
+                      normalizeText(alias),
+                    ),
+                );
+
+              if (isMatch) {
+                consumedAchievementIds.add(
+                  item.id,
+                );
+              }
+
+              return isMatch;
+            },
           );
 
-          if (isMatch) {
-            consumedAchievementIds.add(item.id);
-          }
+        return {
+          id: catalogItem.id,
 
-          return isMatch;
-        },
-      );
+          backendId:
+            earnedAchievement?.logro.id,
 
-      return {
-        id: catalogItem.id,
-        backendId: earnedAchievement?.logro.id,
-        name:
-          earnedAchievement?.logro.nombre ||
-          catalogItem.name,
-        description:
-          earnedAchievement?.logro.descripcion ||
-          catalogItem.description,
-        icon:
-          earnedAchievement?.logro.icono ||
-          catalogItem.icon,
-        visualKey: catalogItem.visualKey,
-        achieved: Boolean(earnedAchievement),
-        achievedAt:
-          earnedAchievement?.fechaObtenido || undefined,
-      } satisfies ProfileAchievement;
-    },
-  );
+          name:
+            earnedAchievement?.logro
+              .nombre ||
+            catalogItem.name,
 
-  const extraAchievements = earnedAchievements
-    .filter(
-      (item) => !consumedAchievementIds.has(item.id),
-    )
-    .map(
-      (item): ProfileAchievement => ({
-        id: `backend-${item.id}`,
-        backendId: item.logro.id,
-        name: item.logro.nombre,
-        description: item.logro.descripcion,
-        icon: item.logro.icono,
-        visualKey: 'generic',
-        achieved: true,
-        achievedAt: item.fechaObtenido || undefined,
-      }),
+          description:
+            earnedAchievement?.logro
+              .descripcion ||
+            catalogItem.description,
+
+          icon:
+            earnedAchievement?.logro
+              .icono ||
+            catalogItem.icon,
+
+          visualKey:
+            catalogItem.visualKey,
+
+          achieved: Boolean(
+            earnedAchievement,
+          ),
+
+          achievedAt:
+            earnedAchievement
+              ?.fechaObtenido ||
+            undefined,
+        } satisfies ProfileAchievement;
+      },
     );
+
+  const extraAchievements =
+    earnedAchievements
+      .filter(
+        (item) =>
+          !consumedAchievementIds.has(
+            item.id,
+          ),
+      )
+      .map(
+        (
+          item,
+        ): ProfileAchievement => ({
+          id: `backend-${item.id}`,
+
+          backendId:
+            item.logro.id,
+
+          name:
+            item.logro.nombre,
+
+          description:
+            item.logro.descripcion,
+
+          icon:
+            item.logro.icono,
+
+          visualKey: 'generic',
+
+          achieved: true,
+
+          achievedAt:
+            item.fechaObtenido ||
+            undefined,
+        }),
+      );
 
   return [
     ...catalogAchievements,
     ...extraAchievements,
   ].sort((first, second) => {
-    if (first.achieved !== second.achieved) {
-      return first.achieved ? -1 : 1;
+    if (
+      first.achieved !==
+      second.achieved
+    ) {
+      return first.achieved
+        ? -1
+        : 1;
     }
 
-    const firstDate = first.achievedAt
-      ? new Date(first.achievedAt).getTime()
-      : 0;
+    const firstDate =
+      first.achievedAt
+        ? new Date(
+            first.achievedAt,
+          ).getTime()
+        : 0;
 
-    const secondDate = second.achievedAt
-      ? new Date(second.achievedAt).getTime()
-      : 0;
+    const secondDate =
+      second.achievedAt
+        ? new Date(
+            second.achievedAt,
+          ).getTime()
+        : 0;
 
     return secondDate - firstDate;
   });
 }
 
-function normalizeText(value: string) {
+function normalizeText(
+  value: string,
+) {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(
+      /[\u0300-\u036f]/g,
+      '',
+    )
     .trim()
     .toLowerCase();
 }

@@ -59,7 +59,9 @@ export function Profile() {
   const navigation = useNavigation<any>();
 
   const [profile, setProfile] =
-    useState<ProfileOverview>(EMPTY_PROFILE);
+    useState<ProfileOverview>(
+      EMPTY_PROFILE,
+    );
 
   const [isLoading, setIsLoading] =
     useState(true);
@@ -107,7 +109,15 @@ export function Profile() {
 
   useFocusEffect(
     useCallback(() => {
-      setAnimationKey((value) => value + 1);
+      setAnimationKey(
+        (value) => value + 1,
+      );
+
+      /*
+       * Cada vez que Perfil recupera el foco se consulta
+       * nuevamente GET /user. De esta forma se actualizan
+       * la racha, los puntos y el progreso.
+       */
       void loadProfile();
     }, [loadProfile]),
   );
@@ -115,13 +125,18 @@ export function Profile() {
   const recentAchievements = useMemo(
     () =>
       profile.achievements
-        .filter((item) => item.achieved)
+        .filter(
+          (achievement) =>
+            achievement.achieved,
+        )
         .slice(0, 3),
     [profile.achievements],
   );
 
   const handleOpenAchievements = () => {
-    navigation.navigate(ROUTES.ACHIEVEMENTS);
+    navigation.navigate(
+      ROUTES.ACHIEVEMENTS,
+    );
   };
 
   const handleNotifications = () => {
@@ -131,7 +146,18 @@ export function Profile() {
     );
   };
 
-  const handleComingSoon = (title: string) => {
+  const handleStreakPress = () => {
+    Alert.alert(
+      'Racha actual',
+      profile.streak === 1
+        ? 'Llevás 1 día consecutivo aprendiendo.'
+        : `Llevás ${profile.streak} días consecutivos aprendiendo.`,
+    );
+  };
+
+  const handleComingSoon = (
+    title: string,
+  ) => {
     Alert.alert(
       title,
       'Esta sección estará disponible próximamente.',
@@ -144,7 +170,9 @@ export function Profile() {
       navigation.getParent() ??
       navigation;
 
-    rootNavigation.navigate(ROUTES.SETTINGS);
+    rootNavigation.navigate(
+      ROUTES.SETTINGS,
+    );
   };
 
   const handleLogout = async () => {
@@ -172,6 +200,13 @@ export function Profile() {
           ],
         }),
       );
+    } catch (error) {
+      Alert.alert(
+        'Cerrar sesión',
+        error instanceof Error
+          ? error.message
+          : 'No se pudo cerrar la sesión.',
+      );
     } finally {
       setIsLoggingOut(false);
     }
@@ -185,8 +220,10 @@ export function Profile() {
       <AppHeader
         variant="title"
         title="Perfil"
+        streak={profile.streak}
         notificationCount={1}
         animationKey={animationKey}
+        onStreakPress={handleStreakPress}
         onAchievementsPress={
           handleOpenAchievements
         }
@@ -228,9 +265,13 @@ export function Profile() {
               delay={160}
               triggerKey={animationKey}
             >
-              <View style={styles.progressCard}>
+              <View
+                style={styles.progressCard}
+              >
                 <View
-                  style={styles.progressTopRow}
+                  style={
+                    styles.progressTopRow
+                  }
                 >
                   <AnimatedPop
                     triggerKey={animationKey}
@@ -245,11 +286,15 @@ export function Profile() {
                       <MaterialIcons
                         name="star-border"
                         size={43}
-                        color={colors.secondary}
+                        color={
+                          colors.secondary
+                        }
                       />
 
                       <View
-                        style={styles.emblemBase}
+                        style={
+                          styles.emblemBase
+                        }
                       />
                     </View>
                   </AnimatedPop>
@@ -260,7 +305,9 @@ export function Profile() {
                     }
                   >
                     <AppText
-                      style={styles.progressTitle}
+                      style={
+                        styles.progressTitle
+                      }
                     >
                       Tu progreso
                     </AppText>
@@ -270,7 +317,9 @@ export function Profile() {
                         styles.progressDetail
                       }
                     >
-                      {profile.completedLessons}{' '}
+                      {
+                        profile.completedLessons
+                      }{' '}
                       {profile.completedLessons ===
                       1
                         ? 'lección completada'
@@ -282,8 +331,11 @@ export function Profile() {
                         styles.progressDetail
                       }
                     >
-                      {profile.pendingLessons}{' '}
-                      {profile.pendingLessons === 1
+                      {
+                        profile.pendingLessons
+                      }{' '}
+                      {profile.pendingLessons ===
+                      1
                         ? 'lección pendiente'
                         : 'lecciones pendientes'}
                     </AppText>
@@ -309,13 +361,19 @@ export function Profile() {
                     styles.progressPercentage
                   }
                 >
-                  {profile.progressPercentage}%
-                  completado
+                  {
+                    profile.progressPercentage
+                  }
+                  % completado
                 </AppText>
 
-                <View style={styles.divider} />
+                <View
+                  style={styles.divider}
+                />
 
-                <View style={styles.statsRow}>
+                <View
+                  style={styles.statsRow}
+                >
                   <ProfileStat
                     icon="star-border"
                     label="Racha actual"
@@ -324,7 +382,9 @@ export function Profile() {
                         ? 'día'
                         : 'días'
                     }`}
-                    animationKey={animationKey}
+                    animationKey={
+                      animationKey
+                    }
                     delay={430}
                   />
 
@@ -332,7 +392,9 @@ export function Profile() {
                     icon="done"
                     label="Puntos"
                     value={`${profile.points} pts`}
-                    animationKey={animationKey}
+                    animationKey={
+                      animationKey
+                    }
                     delay={520}
                   />
                 </View>
@@ -360,11 +422,14 @@ export function Profile() {
                   }
                   style={({ pressed }) => [
                     styles.viewAllButton,
-                    pressed && styles.pressed,
+                    pressed &&
+                      styles.pressed,
                   ]}
                 >
                   <AppText
-                    style={styles.viewAllText}
+                    style={
+                      styles.viewAllText
+                    }
                   >
                     Ver todos →
                   </AppText>
@@ -400,7 +465,8 @@ export function Profile() {
                           animationKey
                         }
                         animationDelay={
-                          470 + index * 90
+                          470 +
+                          index * 90
                         }
                         onPress={() =>
                           Alert.alert(
@@ -434,7 +500,8 @@ export function Profile() {
                         styles.emptyAchievementsTitle
                       }
                     >
-                      Tus logros aparecerán acá
+                      Tus logros aparecerán
+                      acá
                     </AppText>
 
                     <AppText
@@ -442,8 +509,9 @@ export function Profile() {
                         styles.emptyAchievementsText
                       }
                     >
-                      Seguí completando lecciones
-                      para desbloquearlos.
+                      Seguí completando
+                      lecciones para
+                      desbloquearlos.
                     </AppText>
                   </View>
                 </View>
@@ -503,7 +571,9 @@ export function Profile() {
                   icon="help-outline"
                   label="Ayuda"
                   onPress={() =>
-                    handleComingSoon('Ayuda')
+                    handleComingSoon(
+                      'Ayuda',
+                    )
                   }
                 />
 
@@ -554,7 +624,9 @@ function ProfileStat({
         delay={delay}
         startScale={0.82}
       >
-        <View style={styles.statIconCircle}>
+        <View
+          style={styles.statIconCircle}
+        >
           <MaterialIcons
             name={icon}
             size={24}
@@ -563,12 +635,18 @@ function ProfileStat({
         </View>
       </AnimatedPop>
 
-      <View style={styles.statTextContainer}>
-        <AppText style={styles.statLabel}>
+      <View
+        style={styles.statTextContainer}
+      >
+        <AppText
+          style={styles.statLabel}
+        >
           {label}
         </AppText>
 
-        <AppText style={styles.statValue}>
+        <AppText
+          style={styles.statValue}
+        >
           {value}
         </AppText>
       </View>
@@ -599,7 +677,8 @@ function AccountMenuItem({
       onPress={onPress}
       style={({ pressed }) => [
         styles.accountRow,
-        pressed && styles.accountRowPressed,
+        pressed &&
+          styles.accountRowPressed,
       ]}
     >
       <MaterialIcons
@@ -608,7 +687,9 @@ function AccountMenuItem({
         color={colors.primary}
       />
 
-      <AppText style={styles.accountRowText}>
+      <AppText
+        style={styles.accountRowText}
+      >
         {label}
       </AppText>
 
@@ -631,7 +712,9 @@ function ProfileError({
       delay={160}
       triggerKey={animationKey}
     >
-      <View style={styles.errorContainer}>
+      <View
+        style={styles.errorContainer}
+      >
         <MaterialIcons
           name="cloud-off"
           size={52}
@@ -673,22 +756,30 @@ function ProfileSkeleton({
       triggerKey={animationKey}
     >
       <View
-        style={styles.skeletonProgressCard}
+        style={
+          styles.skeletonProgressCard
+        }
       >
-        <View style={styles.skeletonTopRow}>
+        <View
+          style={styles.skeletonTopRow}
+        >
           <View
             style={styles.skeletonEmblem}
           />
 
           <View
-            style={styles.skeletonSummary}
+            style={
+              styles.skeletonSummary
+            }
           >
             <View
               style={styles.skeletonTitle}
             />
+
             <View
               style={styles.skeletonLine}
             />
+
             <View
               style={
                 styles.skeletonShortLine
@@ -712,11 +803,14 @@ function ProfileSkeleton({
         />
 
         <View
-          style={styles.skeletonStatsRow}
+          style={
+            styles.skeletonStatsRow
+          }
         >
           <View
             style={styles.skeletonStat}
           />
+
           <View
             style={styles.skeletonStat}
           />
@@ -724,7 +818,9 @@ function ProfileSkeleton({
       </View>
 
       <View
-        style={styles.skeletonSectionTitle}
+        style={
+          styles.skeletonSectionTitle
+        }
       />
 
       <View
@@ -737,11 +833,13 @@ function ProfileSkeleton({
             styles.skeletonAchievementCard
           }
         />
+
         <View
           style={
             styles.skeletonAchievementCard
           }
         />
+
         <View
           style={
             styles.skeletonAchievementCard
@@ -750,11 +848,15 @@ function ProfileSkeleton({
       </View>
 
       <View
-        style={styles.skeletonAccountTitle}
+        style={
+          styles.skeletonAccountTitle
+        }
       />
 
       <View
-        style={styles.skeletonAccountCard}
+        style={
+          styles.skeletonAccountCard
+        }
       />
     </AnimatedEntry>
   );

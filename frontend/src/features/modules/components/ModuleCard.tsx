@@ -1,17 +1,22 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {
   Pressable,
   StyleSheet,
   View,
-  type DimensionValue,
 } from 'react-native';
-
-import { AppText } from '../../../components/ui';
-import { colors } from '../../../constants/colors';
-import type { HomeModule } from '../types';
-import { AnimatedProgressBar } from '../../../components/ui';
 
 import IconModulePhrases from '../../../assets/icons/ux/modules/IconModulePhrases.svg';
 import IconModuleWords from '../../../assets/icons/ux/modules/IconModuleWords.svg';
+
+import {
+  AnimatedProgressBar,
+  AppText,
+} from '../../../components/ui';
+
+import { colors } from '../../../constants/colors';
+import { fonts } from '../../../theme/fonts';
+
+import type { HomeModule } from '../types';
 
 type ModuleCardProps = {
   module: HomeModule;
@@ -19,14 +24,42 @@ type ModuleCardProps = {
   animationKey?: number;
 };
 
-export function ModuleCard({ module, onPress, animationKey = 0, }: ModuleCardProps) {
-  const safeProgress = Math.max(0, Math.min(module.progress, 100));
-  const progressWidth = `${safeProgress}%` as DimensionValue;
+export function ModuleCard({
+  module,
+  onPress,
+  animationKey = 0,
+}: ModuleCardProps) {
+  const safeProgress = Math.max(
+    0,
+    Math.min(Number(module.progress) || 0, 100),
+  );
+
+  const description =
+    module.description?.trim() ?? '';
+
+  /*
+   * Algunas versiones del servicio usan la descripción
+   * para mostrar "Tu avance: 0%".
+   *
+   * Como ahora el progreso tiene su propia sección,
+   * evitamos repetir esa información.
+   */
+  const shouldShowDescription =
+    description.length > 0 &&
+    !/^tu avance\s*:/i.test(description);
+
+  const progressLabel =
+    safeProgress >= 100
+      ? 'Completado'
+      : safeProgress > 0
+        ? 'En progreso'
+        : 'Sin comenzar';
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${module.title} ${module.subtitle}`}
+      accessibilityLabel={`${module.title} ${module.subtitle}. ${safeProgress}% completado`}
+      accessibilityHint="Abre las lecciones de este módulo"
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
@@ -35,33 +68,75 @@ export function ModuleCard({ module, onPress, animationKey = 0, }: ModuleCardPro
     >
       <View style={styles.iconBox}>
         {module.icon === 'words' ? (
-          <IconModuleWords width={103} height={85} />
+          <IconModuleWords
+            width={88}
+            height={74}
+          />
         ) : (
-          <IconModulePhrases width={100} height={82} />
+          <IconModulePhrases
+            width={88}
+            height={72}
+          />
         )}
       </View>
 
       <View style={styles.content}>
-        <AppText variant="subtitle" style={styles.moduleTitle}>
-          {module.title}
-        </AppText>
+        <View style={styles.titleSection}>
+          <AppText
+            numberOfLines={1}
+            style={styles.moduleEyebrow}
+          >
+            {module.title}
+          </AppText>
 
-        <AppText variant="subtitle" style={styles.moduleSubtitle}>
-          {module.subtitle}
-        </AppText>
+          <View style={styles.moduleNameRow}>
+            <AppText
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={styles.moduleName}
+            >
+              {module.subtitle}
+            </AppText>
 
-        <AppText variant="body" style={styles.description}>
-          {module.description}
-        </AppText>
+            <MaterialIcons
+              name="arrow-forward-ios"
+              size={16}
+              color={colors.primary}
+              style={styles.arrowIcon}
+            />
+          </View>
+        </View>
 
-        <AnimatedProgressBar
-          progress={module.progress}
-          triggerKey={animationKey}
-          delay={450}
-          duration={850}
-          trackStyle={styles.progressTrack}
-          fillStyle={styles.progressFill}
-        />
+        {shouldShowDescription ? (
+          <AppText
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            style={styles.description}
+          >
+            {description}
+          </AppText>
+        ) : null}
+
+        <View style={styles.progressSection}>
+          <View style={styles.progressHeader}>
+            <AppText style={styles.progressStatus}>
+              {progressLabel}
+            </AppText>
+
+            <AppText style={styles.progressPercentage}>
+              {safeProgress}%
+            </AppText>
+          </View>
+
+          <AnimatedProgressBar
+            progress={safeProgress}
+            triggerKey={animationKey}
+            delay={420}
+            duration={850}
+            trackStyle={styles.progressTrack}
+            fillStyle={styles.progressFill}
+          />
+        </View>
       </View>
     </Pressable>
   );
@@ -70,71 +145,154 @@ export function ModuleCard({ module, onPress, animationKey = 0, }: ModuleCardPro
 const styles = StyleSheet.create({
   card: {
     width: '100%',
-    minHeight: 158,
-    borderRadius: 24,
-    backgroundColor: colors.surface,
+    minHeight: 144,
+
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    marginBottom: 22,
+
+    padding: 14,
+    marginBottom: 16,
+
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+
+    borderWidth: 1,
+    borderColor: '#E4E9EA',
 
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 2,
     },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
 
   cardPressed: {
     opacity: 0.94,
-    transform: [{ scale: 0.99 }],
+    transform: [
+      {
+        scale: 0.985,
+      },
+    ],
   },
 
   iconBox: {
-    width: 132,
-    height: 132,
-    borderRadius: 14,
-    backgroundColor: colors.primary,
+    width: 112,
+    height: 112,
+
+    borderRadius: 18,
+
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+
+    backgroundColor: colors.primary,
+
+    marginRight: 16,
   },
 
   content: {
     flex: 1,
+    minWidth: 0,
+    alignSelf: 'stretch',
     justifyContent: 'center',
   },
 
-  moduleTitle: {
-    fontSize: 22,
-    lineHeight: 27,
+  titleSection: {
+    width: '100%',
   },
 
-  moduleSubtitle: {
-    fontSize: 22,
-    lineHeight: 27,
-    marginBottom: 18,
+  moduleEyebrow: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    lineHeight: 15,
+
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+
+    color: colors.textSecondary,
+
+    marginBottom: 2,
+  },
+
+  moduleNameRow: {
+    width: '100%',
+
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    marginBottom: 6,
+  },
+
+  moduleName: {
+    flex: 1,
+
+    fontFamily: fonts.bold,
+    fontSize: 20,
+    lineHeight: 25,
+
+    color: colors.textPrimary,
+  },
+
+  arrowIcon: {
+    marginLeft: 6,
   },
 
   description: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 17,
+
+    color: colors.textSecondary,
+
     marginBottom: 10,
-    color: colors.textPrimary,
+  },
+
+  progressSection: {
+    width: '100%',
+    marginTop: 4,
+  },
+
+  progressHeader: {
+    width: '100%',
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+
+    marginBottom: 6,
+  },
+
+  progressStatus: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    lineHeight: 15,
+
+    color: colors.textSecondary,
+  },
+
+  progressPercentage: {
+    fontFamily: fonts.bold,
+    fontSize: 11,
+    lineHeight: 15,
+
+    color: colors.primary,
   },
 
   progressTrack: {
     width: '100%',
-    height: 13,
-    borderRadius: 8,
-    backgroundColor: '#D8D8D8',
+    height: 8,
+
+    borderRadius: 4,
+
+    backgroundColor: '#E1E5E6',
     overflow: 'hidden',
   },
 
   progressFill: {
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 4,
     backgroundColor: colors.primary,
   },
 });

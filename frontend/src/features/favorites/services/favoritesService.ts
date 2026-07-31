@@ -1,3 +1,5 @@
+// src/features/favorites/services/favoritesService.ts
+
 import { apiClient } from '../../../services/api/apiClient';
 import { ENDPOINTS } from '../../../services/api/endpoints';
 import { getAuthToken } from '../../../services/storage/authStorage';
@@ -22,22 +24,25 @@ export async function getFavorites(): Promise<FavoriteItem[]> {
       }
     );
 
-    return (response.favorites ?? [])
+    const favorites = Array.isArray(response.favorites)
+      ? response.favorites
+      : [];
+
+    return favorites
       .map(mapFavorite)
       .filter(
         (favorite): favorite is FavoriteItem =>
           favorite !== null
       )
       .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime()
+        (firstFavorite, secondFavorite) =>
+          new Date(secondFavorite.createdAt).getTime() -
+          new Date(firstFavorite.createdAt).getTime()
       );
   } catch (error) {
     if (
       error instanceof Error &&
-      error.message ===
-        'No se pudieron obtener los favoritos'
+      error.message === 'No se pudieron obtener los favoritos'
     ) {
       return [];
     }
@@ -46,21 +51,23 @@ export async function getFavorites(): Promise<FavoriteItem[]> {
   }
 }
 
-export async function addFavorite(exerciseId: number | string) {
+export async function addFavorite(theoryId: number | string) {
   const token = await getRequiredToken();
 
   return apiClient<AddFavoriteResponse>(ENDPOINTS.FAVORITES, {
     method: 'POST',
     token,
-    body: JSON.stringify({ exerciseId }),
+    body: JSON.stringify({
+      teoriaId: theoryId,
+    }),
   });
 }
 
-export async function removeFavorite(exerciseId: number | string) {
+export async function removeFavorite(theoryId: number | string) {
   const token = await getRequiredToken();
 
   return apiClient<RemoveFavoriteResponse>(
-    ENDPOINTS.FAVORITE_BY_EXERCISE(exerciseId),
+    ENDPOINTS.FAVORITE_BY_THEORY(theoryId),
     {
       method: 'DELETE',
       token,
@@ -68,11 +75,14 @@ export async function removeFavorite(exerciseId: number | string) {
   );
 }
 
-export async function isExerciseFavorite(exerciseId: number | string) {
+export async function isTheoryFavorite(
+  theoryId: number | string
+) {
   const favorites = await getFavorites();
+  const normalizedTheoryId = String(theoryId);
 
   return favorites.some(
-    (favorite) => favorite.exerciseId === String(exerciseId)
+    (favorite) => favorite.theoryId === normalizedTheoryId
   );
 }
 
@@ -80,54 +90,51 @@ async function getRequiredToken() {
   const token = await getAuthToken();
 
   if (!token) {
-    throw new Error('Tu sesión venció. Volvé a iniciar sesión.');
+    throw new Error(
+      'Tu sesión venció. Volvé a iniciar sesión.'
+    );
   }
 
   return token;
 }
 
-function mapFavorite(favorite: FavoriteApi): FavoriteItem | null {
-  // El contrato compartido mezcla nombres de lección y ejercicio.
-  // Se aceptan ambas variantes para mantener el frontend compatible.
-  const content = favorite.exercise ?? favorite.ejercicio ?? favorite.leccion;
-
-  const exerciseId =
-    favorite.exerciseId ??
-    favorite.ejercicioId ??
-    favorite.leccionId ??
-    content?.id;
-
-  if (exerciseId === undefined || exerciseId === null) {
+function mapFavorite(
+  favorite: FavoriteApi
+): FavoriteItem | null {
+  if (
+    !favorite.teoria ||
+    !favorite.leccion ||
+    !favorite.modulo
+  ) {
     return null;
   }
 
-  const title =
-    content?.titulo?.trim() ||
-    content?.nombre?.trim() ||
-    `Ejercicio ${exerciseId}`;
+  const theoryId = String(favorite.teoria.id);
 
-  const description = content?.contenido?.trim() || undefined;
+  const title =
+    favorite.teoria.titulo?.trim() ||
+    `Teoría ${theoryId}`;
+
   const videoUrl =
-    content?.videoUrl?.trim() || content?.contenidoMultimedia?.trim() || undefined;
+    favorite.teoria.contenidoMultimedia?.trim() ||
+    undefined;
 
   return {
     favoriteId: String(favorite.id),
-    exerciseId: String(exerciseId),
+    theoryId,
+
+    // Compatibilidad temporal.
+    exerciseId: theoryId,
+
     title,
-    description,
+    description: `Contenido de ${favorite.leccion.titulo}`,
     videoUrl,
     createdAt: favorite.createdAt,
-    moduleId: toOptionalString(content?.moduleId ?? content?.moduloId),
-    moduleName: content?.moduleName ?? content?.moduloNombre,
-    lessonId: toOptionalString(content?.lessonId ?? content?.leccionId),
-    lessonTitle: content?.lessonTitle ?? content?.leccionTitulo,
+
+    moduleId: String(favorite.modulo.id),
+    moduleName: favorite.modulo.nombre,
+
+    lessonId: String(favorite.leccion.id),
+    lessonTitle: favorite.leccion.titulo,
   };
-}
-
-function toOptionalString(value?: number | string) {
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-
-  return String(value);
 }

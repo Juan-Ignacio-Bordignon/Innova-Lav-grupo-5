@@ -1,173 +1,158 @@
-// src/features/modules/services/modulesService.ts
-
 import { HOME_MODULES } from '../../../data/mocks/homeMocks';
 import { apiClient } from '../../../services/api/apiClient';
 import { ENDPOINTS } from '../../../services/api/endpoints';
-import { getCurrentUser } from '../../user/services/userService';
 
-import type { UserProgressItem } from '../../user/types';
+import {
+  buildLearningProgressOverview,
+  type LearningProgressOverview,
+} from '../../progress/services/learningProgressService';
+
+import {
+  getProgress,
+} from '../../progress/services/progressService';
+
 import type {
   ApiModule,
   HomeModule,
   HomeModuleIcon,
-  LessonStatus,
   ModulesResponse,
 } from '../types';
 
 const USE_MOCK_MODULES = false;
-
-// Solo para probar visualmente.
-// Antes del commit cambiar a false.
-const USE_MOCK_USER_PROGRESS = false;
-
-const MOCK_USER_PROGRESS: UserProgressItem[] = [
-  {
-    LessonId: 1,
-    LessonName: 'Alfabeto',
-    ModuleId: 1,
-    ModuleName: 'Palabras',
-    completadoEn: '2026-06-23T12:00:00Z',
-  },
-  {
-    LessonId: 2,
-    LessonName: 'Días de la semana',
-    ModuleId: 1,
-    ModuleName: 'Palabras',
-    completadoEn: '2026-06-23T12:00:00Z',
-  },
-];
 
 export async function getHomeModules(): Promise<HomeModule[]> {
   if (USE_MOCK_MODULES) {
     return HOME_MODULES;
   }
 
-  const [modulesResponse, currentUser] = await Promise.all([
-    apiClient<ModulesResponse>(ENDPOINTS.MODULES, {
-      method: 'GET',
-    }),
-    USE_MOCK_USER_PROGRESS
-      ? Promise.resolve(null)
-      : getCurrentUser().catch(() => null),
+  const [
+    modulesResponse,
+    progressResponse,
+  ] = await Promise.all([
+    apiClient<ModulesResponse>(
+      ENDPOINTS.MODULES,
+      {
+        method: 'GET',
+      },
+    ),
+
+    getProgress(),
   ]);
 
-  const userProgress = USE_MOCK_USER_PROGRESS
-    ? MOCK_USER_PROGRESS
-    : currentUser?.progreso ?? [];
+  const learningProgress =
+    await buildLearningProgressOverview(
+      modulesResponse.modules,
+      progressResponse.data,
+    );
 
-  const progressByModule = createProgressByModuleMap(userProgress);
-
-  return modulesResponse.modules.map((module) =>
-    mapApiModuleToHomeModule(module, progressByModule)
+  return modulesResponse.modules.map(
+    (module) =>
+      mapApiModuleToHomeModule(
+        module,
+        learningProgress,
+      ),
   );
 }
 
 function mapApiModuleToHomeModule(
   module: ApiModule,
-  progressByModule: Map<string, Set<string>>
+  learningProgress: LearningProgressOverview,
 ): HomeModule {
-  const completedLessonIds = progressByModule.get(String(module.id)) ?? new Set();
+  const moduleId = String(module.id);
 
-  const progress = getModuleProgress(module, completedLessonIds);
+  const progress =
+    learningProgress.moduleProgressById.get(
+      moduleId,
+    ) ?? 0;
 
   return {
-    id: String(module.id),
+    id: moduleId,
+
     title: 'Módulo',
-    subtitle: module.nombre,
-    description: getHomeModuleStatus(module.nombre, progress),
-    detailDescription: module.descripcion,
+
+    subtitle:
+      module.nombre,
+
+    description:
+      getHomeModuleStatus(
+        module.nombre,
+        progress,
+      ),
+
+    detailDescription:
+      module.descripcion,
+
     progress,
-    icon: getModuleIcon(module.nombre),
-    lessons: module.lecciones.map((lesson, index) => ({
-      id: String(lesson.id),
-      title: lesson.titulo,
-      status: getLessonStatus({
-        lessonId: String(lesson.id),
-        lessonIndex: index,
-        lessons: module.lecciones,
-        completedLessonIds,
-      }),
-    })),
+
+    icon:
+      getModuleIcon(
+        module.nombre,
+      ),
+
+    lessons:
+      module.lecciones.map(
+        (lesson) => {
+          const lessonId = String(
+            lesson.id,
+          );
+
+          const lessonKey =
+            `${moduleId}:${lessonId}`;
+
+          return {
+            id: lessonId,
+
+            title:
+              lesson.titulo,
+
+            status:
+              learningProgress
+                .lessonStatusByKey
+                .get(lessonKey) ??
+              'notStarted',
+          };
+        },
+      ),
   };
 }
 
-function createProgressByModuleMap(progress: UserProgressItem[]) {
-  const progressByModule = new Map<string, Set<string>>();
-
-  progress.forEach((progressItem) => {
-    const moduleId = String(progressItem.ModuleId);
-    const lessonId = String(progressItem.LessonId);
-
-    const currentLessons = progressByModule.get(moduleId) ?? new Set<string>();
-
-    currentLessons.add(lessonId);
-    progressByModule.set(moduleId, currentLessons);
-  });
-
-  return progressByModule;
-}
-
-function getModuleProgress(
-  module: ApiModule,
-  completedLessonIds: Set<string>
+function getHomeModuleStatus(
+  moduleName: string,
+  progress: number,
 ) {
-  const totalLessons = module.lecciones.length;
-
-  if (totalLessons === 0) {
-    return 0;
+  if (progress >= 100) {
+    return '¡Módulo completado!';
   }
-
-  const completedLessons = module.lecciones.filter((lesson) =>
-    completedLessonIds.has(String(lesson.id))
-  ).length;
-
-  return Math.round((completedLessons / totalLessons) * 100);
-}
-
-function getLessonStatus({
-  lessonId,
-  lessonIndex,
-  lessons,
-  completedLessonIds,
-}: {
-  lessonId: string;
-  lessonIndex: number;
-  lessons: ApiModule['lecciones'];
-  completedLessonIds: Set<string>;
-}): LessonStatus {
-  if (completedLessonIds.has(lessonId)) {
-    return 'completed';
-  }
-
-  const firstPendingLessonIndex = lessons.findIndex(
-    (lesson) => !completedLessonIds.has(String(lesson.id))
-  );
-
-  if (lessonIndex === firstPendingLessonIndex) {
-    return 'inProgress';
-  }
-
-  return 'notStarted';
-}
-
-function getHomeModuleStatus(moduleName: string, progress: number) {
-  const normalizedName = moduleName.toLowerCase();
 
   if (progress > 0) {
     return `Tu avance: ${progress}%`;
   }
 
-  if (normalizedName.includes('palabra')) {
-    return `Tu avance: ${progress}%`;
+  const normalizedName =
+    moduleName.toLowerCase();
+
+  if (
+    normalizedName.includes(
+      'palabra',
+    )
+  ) {
+    return 'Empezá a aprender nuevas señas.';
   }
 
   return '¡Listo para comenzar!';
 }
 
-function getModuleIcon(moduleName: string): HomeModuleIcon {
-  const normalizedName = moduleName.toLowerCase();
+function getModuleIcon(
+  moduleName: string,
+): HomeModuleIcon {
+  const normalizedName =
+    moduleName.toLowerCase();
 
-  if (normalizedName.includes('palabra')) {
+  if (
+    normalizedName.includes(
+      'palabra',
+    )
+  ) {
     return 'words';
   }
 

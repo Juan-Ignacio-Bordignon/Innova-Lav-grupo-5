@@ -28,7 +28,7 @@ export type CurrentUserResponse = {
     email: string;
   };
   progreso: UserProgressItem[];
-  ultimaLeccion: UserLastLesson;
+  ultimaLeccion: UserLastLesson | null;
   puntos: number;
   racha: number;
   logros: UserAchievement[];

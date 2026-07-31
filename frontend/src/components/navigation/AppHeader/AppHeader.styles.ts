@@ -4,12 +4,18 @@ import { colors } from '../../../constants/colors';
 import { fonts } from '../../../theme/fonts';
 
 export const styles = StyleSheet.create({
+  animationWrapper: {
+    width: '100%',
+  },
+
   container: {
     width: '100%',
-    minHeight: 70,
-    paddingTop: 8,
-    paddingBottom: 10,
-    paddingHorizontal: 24,
+    minHeight: 66,
+
+    paddingHorizontal: 20,
+    paddingTop: 7,
+    paddingBottom: 7,
+
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -22,105 +28,179 @@ export const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  greeting: {
+  greetingContent: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+  },
+
+  greetingLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    lineHeight: 15,
+    letterSpacing: 0.2,
+    color: colors.textSecondary,
+    marginBottom: 1,
+  },
+
+  greetingName: {
     flexShrink: 1,
     fontFamily: fonts.bold,
-    fontSize: 24,
-    lineHeight: 31,
+    fontSize: 20,
+    lineHeight: 25,
     color: colors.primary,
   },
 
   title: {
     flexShrink: 1,
     fontFamily: fonts.bold,
-    fontSize: 24,
-    lineHeight: 31,
+    fontSize: 21,
+    lineHeight: 27,
     color: colors.primary,
   },
 
   backContent: {
     flex: 1,
     minWidth: 0,
+
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 11,
   },
 
   backTitle: {
     flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 21,
-    lineHeight: 28,
+    fontFamily: fonts.bold,
+    fontSize: 20,
+    lineHeight: 26,
     color: colors.primary,
   },
 
   backButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+
     alignItems: 'center',
     justifyContent: 'center',
+
+    paddingLeft: 2,
+
     backgroundColor: colors.surface,
-    borderWidth: 1.2,
-    borderColor: colors.primary,
+
+    borderWidth: 1,
+    borderColor: '#DCE4E6',
 
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 2,
     },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.07,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 2,
   },
 
-  actions: {
+  backButtonPressed: {
+    opacity: 0.84,
+    transform: [{ scale: 0.96 }],
+  },
+
+  actionsToolbar: {
     flexShrink: 0,
+
+    height: 44,
+    paddingHorizontal: 3,
+
+    borderRadius: 22,
+
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-  },
 
-  actionButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surface,
+
+    borderWidth: 1,
+    borderColor: '#DCE4E6',
 
     shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 2,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOpacity: 0.07,
+    shadowRadius: 5,
+    elevation: 2,
   },
 
-  pressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.98 }],
+  streakAction: {
+    minWidth: 48,
+    height: 36,
+
+    paddingHorizontal: 7,
+
+    borderRadius: 18,
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+
+  streakText: {
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.primary,
+  },
+
+  actionItem: {
+    position: 'relative',
+
+    width: 36,
+    height: 36,
+
+    borderRadius: 18,
+
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  actionSeparator: {
+    borderLeftWidth: 1,
+    borderLeftColor: '#E1E7E8',
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+
+  actionPressed: {
+    backgroundColor: '#F0F3F4',
+    transform: [{ scale: 0.95 }],
   },
 
   notificationBadge: {
     position: 'absolute',
-    top: -5,
-    right: -5,
-    minWidth: 22,
-    height: 22,
-    paddingHorizontal: 5,
-    borderRadius: 11,
+    top: -4,
+    right: -2,
+
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+
+    borderRadius: 9,
+
     alignItems: 'center',
     justifyContent: 'center',
+
     backgroundColor: colors.secondary,
+
+    borderWidth: 1.5,
+    borderColor: colors.surface,
   },
 
   notificationBadgeText: {
     fontFamily: fonts.bold,
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 9,
+    lineHeight: 11,
     color: colors.primary,
     textAlign: 'center',
   },

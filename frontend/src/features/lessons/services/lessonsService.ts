@@ -1,8 +1,17 @@
 // src/features/lessons/services/lessonsService.ts
 
+import type {
+  LearningContentType,
+  LearningStatus,
+} from '../../../constants/routes';
 import { apiClient } from '../../../services/api/apiClient';
 import { ENDPOINTS } from '../../../services/api/endpoints';
-import type { LessonExercise, LessonExercisesResponse } from '../types';
+import { getAuthToken } from '../../../services/storage/authStorage';
+import type {
+  LessonExercise,
+  LessonExerciseApi,
+  LessonExercisesResponse,
+} from '../types';
 
 type GetLessonExercisesParams = {
   moduleId: number | string;
@@ -13,50 +22,292 @@ export async function getLessonExercises({
   moduleId,
   lessonId,
 }: GetLessonExercisesParams): Promise<LessonExercise[]> {
+  const token = await getAuthToken();
+
   const response = await apiClient<LessonExercisesResponse>(
-    ENDPOINTS.MODULE_LESSON_EXERCISES(moduleId, lessonId)
+    ENDPOINTS.MODULE_LESSON_EXERCISES(moduleId, lessonId),
+    {
+      token: token ?? undefined,
+    }
   );
 
-  const exercises = response.exercises.map((exercise) => ({
-    id: String(exercise.id),
+  /*
+   * Backend puede devolver directamente:
+   *
+   * [
+   *   { ... },
+   *   { ... }
+   * ]
+   *
+   * También mantenemos compatibilidad con:
+   *
+   * {
+   *   exercises: [...]
+   * }
+   */
+  const apiExercises = Array.isArray(response)
+    ? response
+    : Array.isArray(response.exercises)
+      ? response.exercises
+      : [];
+
+  const exercises = apiExercises.map((exercise) =>
+    mapLessonExercise(exercise, lessonId)
+  );
+
+  /*
+   * Las evaluaciones deben mantener su posición.
+   * Solo ordenamos segmentos consecutivos de teoría.
+   */
+  return sortTheorySegments(exercises);
+}
+
+function mapLessonExercise(
+  exercise: LessonExerciseApi,
+  fallbackLessonId: number | string
+): LessonExercise {
+  const type = normalizeContentType(exercise.tipo);
+  const id = String(exercise.id);
+
+  return {
+    key: `${type}-${id}`,
+    id,
+    lessonId: String(
+      exercise.lessonId ?? fallbackLessonId
+    ),
     title: exercise.titulo,
-    status: exercise.status,
-    contenidoMultimedia: exercise.contenidoMultimedia,
-  }));
+    type,
+    status: normalizeStatus(exercise.status),
 
-  return exercises.sort(sortLessonExercises);
+    contenidoMultimedia: normalizeMultimedia(
+      exercise.contenidoMultimedia
+    ),
+
+    options: Array.isArray(
+      exercise.opcionesRespuesta
+    )
+      ? exercise.opcionesRespuesta
+      : [],
+
+    expectedAnswer: normalizeExpectedAnswer(
+      exercise.respuestaEsperada
+    ),
+  };
 }
 
-function sortLessonExercises(a: LessonExercise, b: LessonExercise) {
-  const customOrderA = getCustomOrderIndex(a.title);
-  const customOrderB = getCustomOrderIndex(b.title);
+/*
+ * Normaliza los dos formatos enviados por backend:
+ *
+ * "https://video.mp4"
+ *
+ * o:
+ *
+ * [
+ *   "https://video-1.mp4",
+ *   "https://video-2.mp4"
+ * ]
+ *
+ * Siempre devolvemos un array para conservar todos
+ * los videos de los ejercicios ORDER_WORDS.
+ */
+function normalizeMultimedia(
+  value?: string | string[] | null
+): string[] | undefined {
+  const multimediaItems =
+    Array.isArray(value)
+      ? value
+      : typeof value ===
+          'string'
+        ? [value]
+        : [];
 
-  if (customOrderA !== null && customOrderB !== null) {
-    return customOrderA - customOrderB;
-  }
+  const normalizedItems =
+    multimediaItems
+      .filter(
+        (
+          item
+        ): item is string =>
+          typeof item ===
+          'string'
+      )
+      .map((item) =>
+        item.trim()
+      )
+      .filter(Boolean);
 
-  const numberA = getNumberValue(a.title);
-  const numberB = getNumberValue(b.title);
-
-  if (numberA !== null && numberB !== null) {
-    return numberA - numberB;
-  }
-
-  const idA = Number(a.id);
-  const idB = Number(b.id);
-
-  if (!Number.isNaN(idA) && !Number.isNaN(idB)) {
-    return idA - idB;
-  }
-
-  return a.title.localeCompare(b.title, 'es', {
-    numeric: true,
-    sensitivity: 'base',
-  });
+  return normalizedItems.length >
+    0
+    ? normalizedItems
+    : undefined;
 }
 
-function getCustomOrderIndex(title: string) {
-  const normalizedTitle = normalizeTitle(title);
+function normalizeContentType(
+  value: string
+): LearningContentType {
+  const normalizedValue = value
+    .trim()
+    .toLowerCase();
+
+  switch (normalizedValue) {
+    case 'teoria':
+    case 'theory':
+      return 'theory';
+
+    case 'true_false':
+    case 'truefalse':
+    case 'true-or-false':
+      return 'trueFalse';
+
+    case 'multiple_choice':
+    case 'multiplechoice':
+      return 'multipleChoice';
+
+    case 'order_words':
+    case 'orderwords':
+      return 'orderWords';
+
+    default:
+      return 'unknown';
+  }
+}
+
+function normalizeStatus(
+  status?: LearningStatus
+): LearningStatus {
+  switch (status) {
+    case 'completed':
+    case 'inProgress':
+    case 'notStarted':
+      return status;
+
+    default:
+      /*
+       * Hasta que backend integre el progreso
+       * en este endpoint, queda como no iniciado.
+       */
+      return 'notStarted';
+  }
+}
+
+function normalizeExpectedAnswer(
+  value: unknown
+): LessonExercise['expectedAnswer'] {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'boolean'
+  ) {
+    return value;
+  }
+
+  if (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        typeof item === 'string' ||
+        typeof item === 'boolean'
+    )
+  ) {
+    return value;
+  }
+
+  return undefined;
+}
+
+function sortTheorySegments(
+  exercises: LessonExercise[]
+): LessonExercise[] {
+  const sortedExercises = [...exercises];
+
+  let currentIndex = 0;
+
+  while (
+    currentIndex < sortedExercises.length
+  ) {
+    if (
+      sortedExercises[currentIndex].type !==
+      'theory'
+    ) {
+      currentIndex += 1;
+      continue;
+    }
+
+    const segmentStart = currentIndex;
+    let segmentEnd = currentIndex + 1;
+
+    while (
+      segmentEnd < sortedExercises.length &&
+      sortedExercises[segmentEnd].type ===
+        'theory'
+    ) {
+      segmentEnd += 1;
+    }
+
+    const sortedSegment = sortedExercises
+      .slice(segmentStart, segmentEnd)
+      .sort(compareTheoryContent);
+
+    sortedExercises.splice(
+      segmentStart,
+      sortedSegment.length,
+      ...sortedSegment
+    );
+
+    currentIndex = segmentEnd;
+  }
+
+  return sortedExercises;
+}
+
+function compareTheoryContent(
+  firstExercise: LessonExercise,
+  secondExercise: LessonExercise
+) {
+  const firstCustomOrder =
+    getCustomOrderIndex(firstExercise.title);
+
+  const secondCustomOrder =
+    getCustomOrderIndex(secondExercise.title);
+
+  if (
+    firstCustomOrder !== null &&
+    secondCustomOrder !== null
+  ) {
+    return (
+      firstCustomOrder -
+      secondCustomOrder
+    );
+  }
+
+  const firstNumber = getNumberValue(
+    firstExercise.title
+  );
+
+  const secondNumber = getNumberValue(
+    secondExercise.title
+  );
+
+  if (
+    firstNumber !== null &&
+    secondNumber !== null
+  ) {
+    return firstNumber - secondNumber;
+  }
+
+  return firstExercise.title.localeCompare(
+    secondExercise.title,
+    'es',
+    {
+      numeric: true,
+      sensitivity: 'base',
+    }
+  );
+}
+
+function getCustomOrderIndex(
+  title: string
+) {
+  const normalizedTitle =
+    normalizeTitle(title);
 
   const alphabet = [
     'a',
@@ -98,14 +349,19 @@ function getCustomOrderIndex(title: string) {
     'domingo',
   ];
 
-  const possibleLetter = normalizedTitle.replace(/^letra\s+/, '').trim();
-  const letterIndex = alphabet.indexOf(possibleLetter);
+  const possibleLetter = normalizedTitle
+    .replace(/^letra\s+/, '')
+    .trim();
+
+  const letterIndex =
+    alphabet.indexOf(possibleLetter);
 
   if (letterIndex !== -1) {
     return letterIndex;
   }
 
-  const weekDayIndex = weekDays.indexOf(normalizedTitle);
+  const weekDayIndex =
+    weekDays.indexOf(normalizedTitle);
 
   if (weekDayIndex !== -1) {
     return weekDayIndex;

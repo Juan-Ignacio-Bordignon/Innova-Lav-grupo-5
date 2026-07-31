@@ -1,30 +1,28 @@
-export type FavoriteContentApi = {
+// src/features/favorites/types.ts
+
+export type FavoriteTheoryApi = {
   id: number | string;
-  titulo?: string;
-  nombre?: string;
-  contenido?: string | null;
-  videoUrl?: string | null;
+  titulo: string;
+  tipo: 'teoria' | string;
   contenidoMultimedia?: string | null;
-  moduleId?: number | string;
-  moduloId?: number | string;
-  moduleName?: string;
-  moduloNombre?: string;
-  lessonId?: number | string;
-  leccionId?: number | string;
-  lessonTitle?: string;
-  leccionTitulo?: string;
+};
+
+export type FavoriteLessonApi = {
+  id: number | string;
+  titulo: string;
+};
+
+export type FavoriteModuleApi = {
+  id: number | string;
+  nombre: string;
 };
 
 export type FavoriteApi = {
   id: number | string;
-  userId: number | string;
-  exerciseId?: number | string;
-  ejercicioId?: number | string;
-  leccionId?: number | string;
   createdAt: string;
-  exercise?: FavoriteContentApi | null;
-  ejercicio?: FavoriteContentApi | null;
-  leccion?: FavoriteContentApi | null;
+  teoria: FavoriteTheoryApi;
+  leccion: FavoriteLessonApi;
+  modulo: FavoriteModuleApi;
 };
 
 export type FavoritesResponse = {
@@ -32,12 +30,19 @@ export type FavoritesResponse = {
 };
 
 export type AddFavoriteRequest = {
-  exerciseId: number | string;
+  teoriaId: number | string;
+};
+
+export type CreatedFavoriteApi = {
+  id: number | string;
+  userId: number | string;
+  teoriaId: number | string;
+  createdAt: string;
 };
 
 export type AddFavoriteResponse = {
   mensaje: string;
-  favorite: FavoriteApi;
+  favorite: CreatedFavoriteApi;
 };
 
 export type RemoveFavoriteResponse = {
@@ -46,13 +51,22 @@ export type RemoveFavoriteResponse = {
 
 export type FavoriteItem = {
   favoriteId: string;
+  theoryId: string;
+
+  /*
+   * Alias temporal para evitar romper componentes
+   * que anteriormente usaban exerciseId.
+   */
   exerciseId: string;
+
   title: string;
   description?: string;
   videoUrl?: string;
   createdAt: string;
-  moduleId?: string;
-  moduleName?: string;
-  lessonId?: string;
-  lessonTitle?: string;
+
+  moduleId: string;
+  moduleName: string;
+
+  lessonId: string;
+  lessonTitle: string;
 };

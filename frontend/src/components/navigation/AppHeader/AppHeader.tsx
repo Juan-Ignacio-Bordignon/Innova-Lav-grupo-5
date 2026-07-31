@@ -17,39 +17,166 @@ export type AppHeaderVariant = 'home' | 'back' | 'title';
 
 export type AppHeaderProps = {
   variant: AppHeaderVariant;
+
   title?: string;
   userName?: string;
+
+  streak?: number;
   notificationCount?: number;
+
   animationKey?: number;
   animationDelay?: number;
+
   style?: StyleProp<ViewStyle>;
+
+  showStreak?: boolean;
   showAchievements?: boolean;
   showNotifications?: boolean;
+
   onBackFallback?: () => void;
+  onStreakPress?: () => void;
   onAchievementsPress?: () => void;
   onNotificationsPress?: () => void;
 };
+
+type HeaderIconActionProps = {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  accessibilityLabel: string;
+  showSeparator?: boolean;
+  badgeText?: string;
+  onPress?: () => void;
+};
+
+function HeaderIconAction({
+  icon,
+  accessibilityLabel,
+  showSeparator = false,
+  badgeText,
+  onPress,
+}: HeaderIconActionProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{
+        disabled: !onPress,
+      }}
+      disabled={!onPress}
+      hitSlop={6}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.actionItem,
+        showSeparator && styles.actionSeparator,
+        pressed && styles.actionPressed,
+      ]}
+    >
+      <MaterialIcons
+        name={icon}
+        size={22}
+        color={colors.primary}
+      />
+
+      {badgeText ? (
+        <View
+          pointerEvents="none"
+          style={styles.notificationBadge}
+        >
+          <AppText style={styles.notificationBadgeText}>
+            {badgeText}
+          </AppText>
+        </View>
+      ) : null}
+    </Pressable>
+  );
+}
+
+type HeaderStreakActionProps = {
+  streak: number;
+  onPress?: () => void;
+};
+
+function HeaderStreakAction({
+  streak,
+  onPress,
+}: HeaderStreakActionProps) {
+  const displayedStreak =
+    streak > 999 ? '999+' : String(streak);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Racha actual: ${streak} ${
+        streak === 1 ? 'día' : 'días'
+      }`}
+      accessibilityState={{
+        disabled: !onPress,
+      }}
+      disabled={!onPress}
+      hitSlop={6}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.streakAction,
+        pressed && styles.actionPressed,
+      ]}
+    >
+      <MaterialIcons
+        name="local-fire-department"
+        size={23}
+        color={colors.secondary}
+      />
+
+      <AppText
+        numberOfLines={1}
+        style={styles.streakText}
+      >
+        {displayedStreak}
+      </AppText>
+    </Pressable>
+  );
+}
 
 export function AppHeader({
   variant,
   title,
   userName = 'Usuario',
+
+  streak,
   notificationCount = 0,
+
   animationKey = 0,
   animationDelay = 80,
+
   style,
+
+  showStreak,
   showAchievements = true,
   showNotifications = true,
+
   onBackFallback,
+  onStreakPress,
   onAchievementsPress,
   onNotificationsPress,
 }: AppHeaderProps) {
   const navigation = useNavigation<any>();
 
-  const safeUserName = userName.trim() || 'Usuario';
+  const safeUserName =
+    userName.trim() || 'Usuario';
+
+  const normalizedStreak =
+    typeof streak === 'number' &&
+    Number.isFinite(streak)
+      ? Math.max(0, Math.trunc(streak))
+      : 0;
+
+  const shouldShowStreak =
+    showStreak ?? streak !== undefined;
 
   const displayedNotificationCount =
-    notificationCount > 99 ? '99+' : String(notificationCount);
+    notificationCount > 99
+      ? '99+'
+      : notificationCount > 0
+        ? String(notificationCount)
+        : undefined;
 
   const handleBackPress = () => {
     if (navigation.canGoBack()) {
@@ -68,13 +195,21 @@ export function AppHeader({
   const renderLeftContent = () => {
     if (variant === 'home') {
       return (
-        <AppText
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={styles.greeting}
-        >
-          ¡Hola {safeUserName}!
-        </AppText>
+        <View style={styles.greetingContent}>
+          <AppText style={styles.greetingLabel}>
+            Hola,
+          </AppText>
+
+          <AppText
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}
+            style={styles.greetingName}
+          >
+            {safeUserName}
+          </AppText>
+        </View>
       );
     }
 
@@ -83,6 +218,8 @@ export function AppHeader({
         <AppText
           numberOfLines={1}
           ellipsizeMode="tail"
+          adjustsFontSizeToFit
+          minimumFontScale={0.82}
           style={styles.title}
         >
           {title}
@@ -95,15 +232,16 @@ export function AppHeader({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Volver"
+          hitSlop={8}
           onPress={handleBackPress}
           style={({ pressed }) => [
             styles.backButton,
-            pressed && styles.pressed,
+            pressed && styles.backButtonPressed,
           ]}
         >
           <MaterialIcons
-            name="keyboard-arrow-left"
-            size={34}
+            name="arrow-back-ios-new"
+            size={19}
             color={colors.primary}
           />
         </Pressable>
@@ -112,6 +250,8 @@ export function AppHeader({
           <AppText
             numberOfLines={1}
             ellipsizeMode="tail"
+            adjustsFontSizeToFit
+            minimumFontScale={0.82}
             style={styles.backTitle}
           >
             {title}
@@ -121,58 +261,63 @@ export function AppHeader({
     );
   };
 
-  return (
-    <AnimatedEntry delay={animationDelay} triggerKey={animationKey}>
-      <View style={[styles.container, style]}>
-        <View style={styles.leftSection}>{renderLeftContent()}</View>
+  const hasActions =
+    shouldShowStreak ||
+    showAchievements ||
+    showNotifications;
 
-        {showAchievements || showNotifications ? (
-          <View style={styles.actions}>
+  const showAchievementSeparator =
+    shouldShowStreak;
+
+  const showNotificationSeparator =
+    shouldShowStreak || showAchievements;
+
+  return (
+    <AnimatedEntry
+      delay={animationDelay}
+      duration={360}
+      translateY={7}
+      startScale={0.995}
+      triggerKey={animationKey}
+      style={styles.animationWrapper}
+    >
+      <View style={[styles.container, style]}>
+        <View style={styles.leftSection}>
+          {renderLeftContent()}
+        </View>
+
+        {hasActions ? (
+          <View style={styles.actionsToolbar}>
+            {shouldShowStreak ? (
+              <HeaderStreakAction
+                streak={normalizedStreak}
+                onPress={onStreakPress}
+              />
+            ) : null}
+
             {showAchievements ? (
-              <Pressable
-                accessibilityRole="button"
+              <HeaderIconAction
+                icon="emoji-events"
                 accessibilityLabel="Ver logros"
+                showSeparator={
+                  showAchievementSeparator
+                }
                 onPress={onAchievementsPress}
-                style={({ pressed }) => [
-                  styles.actionButton,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <MaterialIcons
-                  name="emoji-events"
-                  size={25}
-                  color={colors.textLight}
-                />
-              </Pressable>
+              />
             ) : null}
 
             {showNotifications ? (
-              <Pressable
-                accessibilityRole="button"
+              <HeaderIconAction
+                icon="notifications-none"
                 accessibilityLabel="Ver notificaciones"
+                showSeparator={
+                  showNotificationSeparator
+                }
+                badgeText={
+                  displayedNotificationCount
+                }
                 onPress={onNotificationsPress}
-                style={({ pressed }) => [
-                  styles.actionButton,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <MaterialIcons
-                  name="notifications-none"
-                  size={25}
-                  color={colors.textLight}
-                />
-
-                {notificationCount > 0 ? (
-                  <View
-                    pointerEvents="none"
-                    style={styles.notificationBadge}
-                  >
-                    <AppText style={styles.notificationBadgeText}>
-                      {displayedNotificationCount}
-                    </AppText>
-                  </View>
-                ) : null}
-              </Pressable>
+              />
             ) : null}
           </View>
         ) : null}

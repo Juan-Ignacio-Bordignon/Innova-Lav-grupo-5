@@ -22,8 +22,7 @@ export const styles = StyleSheet.create({
   },
 
   contentContainer: {
-    paddingHorizontal:
-      LESSON_GRID.horizontalPadding,
+    paddingHorizontal: LESSON_GRID.horizontalPadding,
     paddingBottom: 32,
   },
 
@@ -50,6 +49,7 @@ export const styles = StyleSheet.create({
   },
 
   breadcrumbCurrent: {
+    flexShrink: 1,
     fontFamily: fonts.bold,
     fontSize: 14,
     lineHeight: 20,
@@ -150,9 +150,12 @@ export const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
     borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 5,
+    overflow: 'hidden',
     backgroundColor: colors.surface,
     borderWidth: 1.3,
     borderColor: colors.surface,
@@ -167,17 +170,49 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
 
+  exerciseCardAssessment: {
+    borderColor: colors.secondary,
+  },
+
   exerciseCardPressed: {
     opacity: 0.92,
     transform: [{ scale: 0.985 }],
   },
 
+  exerciseTitleContainer: {
+    width: '100%',
+    height: 43,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   exerciseTitle: {
+    width: '100%',
     fontFamily: fonts.medium,
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 17,
     color: colors.primary,
     textAlign: 'center',
+  },
+
+  exerciseTitleAssessment: {
+    fontFamily: fonts.bold,
+  },
+
+  exerciseIconSlot: {
+    width: '100%',
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  assessmentIconContainer: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(226, 183, 104, 0.16)',
   },
 
   emptyContainer: {
