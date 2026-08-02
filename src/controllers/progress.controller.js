@@ -1,6 +1,19 @@
 import { calcularNuevaRacha } from "../utils/racha.utils.js";
 import { prisma } from "../prisma/prisma.js";
 
+// Función auxiliar para normalizar respuestas (soporta JSON, cadenas, números y arreglos de la DB)
+const normalizarRespuesta = (val) => {
+  if (val === null || val === undefined) return "";
+  if (typeof val === "string") return val.trim().toLowerCase();
+  if (typeof val === "number") return String(val).trim().toLowerCase();
+  if (Array.isArray(val)) return val.map((v) => String(v).trim().toLowerCase()).join(",");
+  if (typeof val === "object") {
+    const textVal = val.text || val.value || val.respuesta || JSON.stringify(val);
+    return String(textVal).trim().toLowerCase();
+  }
+  return String(val).trim().toLowerCase();
+};
+
 export const saveProgress = async (req, res) => {
   try {
     const rawUserId = req.user?.userId || req.user?.id;
@@ -21,17 +34,20 @@ export const saveProgress = async (req, res) => {
       isTheory,
     } = req.body;
 
-    const targetLessonId = Number(lessonId || leccionId);
+    // Aceptamos leccionId o lessonId desde el Front y lo mapeamos a targetLeccionId (columna en DB: leccionId)
+    const targetLeccionId = Number(leccionId || lessonId);
     const targetModuloId = Number(moduloId);
 
-    if (!targetModuloId || !targetLessonId) {
+    if (!targetModuloId || !targetLeccionId) {
       return res.status(400).json({
         error:
-          "Faltan los identificadores obligatorios (moduloId y lessonId/leccionId).",
+          "Faltan los identificadores obligatorios (moduloId y leccionId/lessonId).",
       });
     }
 
+    // ==========================================
     // 1. FLUJO DE TEORÍA
+    // ==========================================
     if (isTheory) {
       if (!teoriaId) {
         return res.status(400).json({
@@ -58,7 +74,7 @@ export const saveProgress = async (req, res) => {
           data: {
             userId,
             moduloId: targetModuloId,
-            leccionId: targetLessonId,
+            leccionId: targetLeccionId,
             teoriaId: targetTeoriaId,
             completadoEn: new Date(),
           },
@@ -71,7 +87,9 @@ export const saveProgress = async (req, res) => {
       });
     }
 
+    // ==========================================
     // 2. FLUJO DE EJERCICIO
+    // ==========================================
     if (!ejercicioId || respuestaUsuario === undefined) {
       return res.status(400).json({
         error: "Faltan datos obligatorios para validar el ejercicio.",
@@ -96,18 +114,18 @@ export const saveProgress = async (req, res) => {
       },
     });
 
-    // Validamos respuesta (soportando respuestaCorrecta o respuestaEsperada)
-    const respuestaValidaBD = ejercicio.respuestaCorrecta ?? ejercicio.respuestaEsperada ?? "";
-    const esCorrecto =
-      String(respuestaValidaBD).trim().toLowerCase() ===
-      String(respuestaUsuario).trim().toLowerCase();
+    // Validamos respuesta usando respuestaEsperada (columna Json del schema.prisma)
+    const strRespuestaBD = normalizarRespuesta(ejercicio.respuestaEsperada);
+    const strRespuestaUser = normalizarRespuesta(respuestaUsuario);
+
+    const esCorrecto = strRespuestaBD === strRespuestaUser;
 
     // LÓGICA DE PUNTAJES ACORDADA:
     // - Incorrecta: 0 puntos.
-    // - Ya estaba completado antes: 0 puntos (evita farming de puntos).
+    // - Ya estaba completado antes (completadoEn != null): 0 puntos (evita farming de puntos).
     // - Correcta al 1er intento (sin errores previos): 10 puntos.
     // - Correcta en reintento (con errores previos): 5 puntos.
-    const yaEstabaCompletado = progresoExistente?.completado || (progresoExistente?.completadoEn !== null && progresoExistente?.completadoEn !== undefined);
+    const yaEstabaCompletado = Boolean(progresoExistente?.completadoEn);
     const tuvoErroresPrevios = (progresoExistente?.errores || 0) > 0;
 
     let puntosASumar = 0;
@@ -123,11 +141,9 @@ export const saveProgress = async (req, res) => {
       progresoEjercicio = await prisma.progreso.update({
         where: { id: progresoExistente.id },
         data: {
-          completado: esCorrecto || yaEstabaCompletado,
-          completadoEn: esCorrecto ? new Date() : progresoExistente.completadoEn,
+          completadoEn: esCorrecto ? (progresoExistente.completadoEn || new Date()) : progresoExistente.completadoEn,
           errores: { increment: errorRegistrado },
           puntos: { increment: puntosASumar },
-          updatedAt: new Date(),
         },
       });
     } else {
@@ -135,9 +151,8 @@ export const saveProgress = async (req, res) => {
         data: {
           userId,
           moduloId: targetModuloId,
-          leccionId: targetLessonId,
+          leccionId: targetLeccionId,
           ejercicioId: targetEjercicioId,
-          completado: esCorrecto,
           completadoEn: esCorrecto ? new Date() : null,
           errores: errorRegistrado,
           puntos: puntosASumar,
@@ -145,7 +160,9 @@ export const saveProgress = async (req, res) => {
       });
     }
 
+    // ==========================================
     // 3. ACTUALIZACIÓN DE USUARIO Y RACHA
+    // ==========================================
     const usuarioActual = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -154,38 +171,30 @@ export const saveProgress = async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
-    const rachaPrevio =
-      usuarioActual.rachaActual ?? usuarioActual.rachaDias ?? usuarioActual.racha ?? 0;
+    const rachaPrevio = usuarioActual.rachaActual ?? 0;
 
     const resultadoRacha = calcularNuevaRacha(
       usuarioActual.ultimaActividad,
       rachaPrevio
     );
 
-    const nuevaRachaValor = typeof resultadoRacha === "number"
-      ? resultadoRacha
-      : (resultadoRacha?.rachaActual ?? resultadoRacha?.racha ?? 1);
+    const nuevaRachaValor =
+      typeof resultadoRacha === "number"
+        ? resultadoRacha
+        : resultadoRacha?.rachaActual ?? 1;
 
-    const fechaActividad = typeof resultadoRacha === "object" && resultadoRacha?.ultimaActividad
-      ? resultadoRacha.ultimaActividad
-      : new Date();
-
-    const updateUserData = {
-      puntos: { increment: puntosASumar },
-      ultimaActividad: fechaActividad,
-    };
-
-    if ("rachaActual" in usuarioActual) {
-      updateUserData.rachaActual = nuevaRachaValor;
-    } else if ("rachaDias" in usuarioActual) {
-      updateUserData.rachaDias = nuevaRachaValor;
-    } else if ("racha" in usuarioActual) {
-      updateUserData.racha = nuevaRachaValor;
-    }
+    const fechaActividad =
+      typeof resultadoRacha === "object" && resultadoRacha?.ultimaActividad
+        ? resultadoRacha.ultimaActividad
+        : new Date();
 
     await prisma.user.update({
       where: { id: userId },
-      data: updateUserData,
+      data: {
+        puntos: { increment: puntosASumar },
+        ultimaActividad: fechaActividad,
+        rachaActual: nuevaRachaValor,
+      },
     });
 
     return res.status(200).json({
