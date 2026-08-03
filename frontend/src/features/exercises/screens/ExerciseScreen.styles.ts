@@ -10,6 +10,7 @@ import { fonts } from '../../../theme/fonts';
  * que forman parte de los videos originales.
  */
 const VIDEO_ZOOM = 1.8;
+const VIDEO_MAX_WIDTH = 380;
 
 export const styles = StyleSheet.create({
   container: {
@@ -29,13 +30,15 @@ export const styles = StyleSheet.create({
   },
 
   sequenceVideoBlock: {
-  width: '100%',
-  marginBottom: 20,
-},
+    width: '100%',
+    maxWidth: VIDEO_MAX_WIDTH,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
 
-sequenceVideoCard: {
-  marginBottom: 0,
-},
+  sequenceVideoCard: {
+    marginBottom: 0,
+  },
 
 sequenceLoadingOverlay: {
   ...StyleSheet.absoluteFillObject,
@@ -164,14 +167,21 @@ sequenceProgressFill: {
 
   videoCard: {
     position: 'relative',
+
     width: '100%',
-    height: 310,
+    maxWidth: VIDEO_MAX_WIDTH,
+    aspectRatio: 1,
+    alignSelf: 'center',
+
     borderRadius: 26,
     marginBottom: 20,
     overflow: 'hidden',
+
     alignItems: 'center',
     justifyContent: 'center',
+
     backgroundColor: colors.surface,
+
     borderWidth: 1,
     borderColor: 'rgba(25, 70, 80, 0.08)',
 
@@ -186,13 +196,13 @@ sequenceProgressFill: {
   },
 
   videoZoom: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
+    ...StyleSheet.absoluteFillObject,
+
     alignItems: 'center',
     justifyContent: 'center',
+
+    backgroundColor: colors.surface,
+
     transform: [
       {
         scale: VIDEO_ZOOM,
