@@ -72,22 +72,16 @@ export const getExercises = async (req, res) => {
 };
 
 async function getTheoryAndExercisesBylessonId(lessonId) {
-  const lessonTheory = await prisma.teoria.findMany({
-    where: {
-      lessonId: parseInt(lessonId),
-    },
-    orderBy: {
-      id: "asc",
-    },
-  });
-  const lessonExercises = await prisma.ejercicio.findMany({
-    where: {
-      lessonId: parseInt(lessonId),
-    },
-    orderBy: {
-      id: "asc",
-    },
-  });
+  const [lessonTheory, lessonExercises] = await Promise.all([
+    prisma.teoria.findMany({
+      where: { lessonId: parseInt(lessonId) },
+      orderBy: { id: "asc" },
+    }),
+    prisma.ejercicio.findMany({
+      where: { lessonId: parseInt(lessonId) },
+      orderBy: { id: "asc" },
+    }),
+  ]);
   return { lessonTheory, lessonExercises };
 }
 

@@ -98,21 +98,21 @@ export const saveProgress = async (req, res) => {
 
     const targetEjercicioId = Number(ejercicioId);
 
-    const ejercicio = await prisma.ejercicio.findUnique({
-      where: { id: targetEjercicioId },
-    });
+    const [ejercicio, progresoExistente, usuarioActual] = await Promise.all([
+      prisma.ejercicio.findUnique({ where: { id: targetEjercicioId } }),
+      prisma.progreso.findFirst({
+        where: { userId, ejercicioId: targetEjercicioId },
+      }),
+      prisma.user.findUnique({ where: { id: userId } }),
+    ]);
 
     if (!ejercicio) {
       return res.status(404).json({ error: "Ejercicio no encontrado." });
     }
 
-    // Buscamos si el usuario ya tenía un progreso guardado en este ejercicio con findFirst
-    const progresoExistente = await prisma.progreso.findFirst({
-      where: {
-        userId,
-        ejercicioId: targetEjercicioId,
-      },
-    });
+    if (!usuarioActual) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
 
     // Validamos respuesta usando respuestaEsperada (columna Json del schema.prisma)
     const strRespuestaBD = normalizarRespuesta(ejercicio.respuestaEsperada);
@@ -163,14 +163,6 @@ export const saveProgress = async (req, res) => {
     // ==========================================
     // 3. ACTUALIZACIÓN DE USUARIO Y RACHA
     // ==========================================
-    const usuarioActual = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!usuarioActual) {
-      return res.status(404).json({ error: "Usuario no encontrado." });
-    }
-
     const rachaPrevio = usuarioActual.rachaActual ?? 0;
 
     const resultadoRacha = calcularNuevaRacha(
@@ -224,11 +216,33 @@ export const getProgress = async (req, res) => {
 
     const progreso = await prisma.progreso.findMany({
       where: { userId },
+      include: {
+        modulo: { select: { id: true, nombre: true } },
+        leccion: { select: { id: true, titulo: true } },
+        ejercicio: { select: { id: true, titulo: true } },
+        teoria: { select: { id: true, titulo: true } },
+      },
+      orderBy: { completadoEn: "desc" },
     });
+
+    const normalized = progreso.map((p) => ({
+      id: p.id,
+      moduloId: p.moduloId,
+      leccionId: p.leccionId,
+      ejercicioId: p.ejercicioId,
+      teoriaId: p.teoriaId,
+      completadoEn: p.completadoEn,
+      errores: p.errores,
+      puntos: p.puntos,
+      modulo: p.modulo,
+      leccion: p.leccion,
+      ejercicio: p.ejercicio,
+      teoria: p.teoria,
+    }));
 
     return res.status(200).json({
       message: "Progreso obtenido correctamente.",
-      data: progreso || [],
+      data: normalized,
     });
   } catch (error) {
     console.error("Error en getProgress:", error);

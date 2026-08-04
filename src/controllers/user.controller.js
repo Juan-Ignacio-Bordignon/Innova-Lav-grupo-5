@@ -8,11 +8,13 @@ export const getUser = async (req, res) => {
     const userId = verifyToken(token);
 
     // Obtener la información del usuario desde la base de datos
-    const user = await getUserInfo(userId);
+    const [user, lastExercise] = await Promise.all([
+      getUserInfo(userId),
+      getLastExercise(userId),
+    ]);
     if (!user) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
-    const lastExercise = await getLastExercise(userId);
     const ultimaLeccion = lastExercise
       ? {
           moduleId: lastExercise.moduloId,
