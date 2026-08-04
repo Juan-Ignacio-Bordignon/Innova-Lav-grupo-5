@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              Int         @id @default(autoincrement())
+  nombre          String
+  email           String      @unique
+  password        String
+  rachaActual     Int         @default(0)
+  ultimaActividad DateTime?
+  creadoEn        DateTime    @default(now())
+  interes         String?     @default("Sin definir")
+  puntos          Int         @default(0)
+  eventos         EventoLog[]
+  favoritos       Favorite[]
+  progreso        Progreso[]
+  logros          UserLogro[]
+}
+
+model Modulo {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  lecciones   Leccion[]
+  progreso    Progreso[]
+}
+
+model Leccion {
+  id        Int         @id @default(autoincrement())
+  titulo    String
+  contenido String
+  moduloId  Int
+  ejercicio Ejercicio[]
+  modulo    Modulo      @relation(fields: [moduloId], references: [id])
+  logros    Logro[]
+  progreso  Progreso[]
+  teoria    Teoria[]
+}
+
+model Teoria {
+  id                  Int        @id @default(autoincrement())
+  lessonId            Int
+  titulo              String
+  contenidoMultimedia String
+  tipo                String     @default("teoria")
+  favoritos           Favorite[]
+  progreso            Progreso[]
+  leccion             Leccion    @relation(fields: [lessonId], references: [id])
+}
+
+model Ejercicio {
+  id                  Int           @id @default(autoincrement())
+  lessonId            Int
+  titulo              String
+  tipo                TipoEjercicio
+  opcionesRespuesta   Json
+  respuestaEsperada   Json
+  contenidoMultimedia String[]
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  leccion             Leccion       @relation(fields: [lessonId], references: [id])
+  progreso            Progreso[]
+
+  @@map("Ejercicios")
+}
+
+model Progreso {
+  id            Int        @id @default(autoincrement())
+  userId        Int
+  moduloId      Int
+  leccionId     Int
+  completadoEn  DateTime?
+  primerIntento DateTime   @default(now())
+  errores       Int        @default(0)
+  puntos        Int        @default(0)
+  ejercicioId   Int?
+  teoriaId      Int?
+  ejercicio     Ejercicio? @relation(fields: [ejercicioId], references: [id])
+  leccion       Leccion    @relation(fields: [leccionId], references: [id])
+  modulo        Modulo     @relation(fields: [moduloId], references: [id])
+  teoria        Teoria?    @relation(fields: [teoriaId], references: [id])
+  user          User       @relation(fields: [userId], references: [id])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  createdAt DateTime @default(now())
+  teoriaId  Int
+  teoria    Teoria   @relation(fields: [teoriaId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teoriaId])
+}
+
+model Logro {
+  id          Int         @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  icono       String?
+  leccionId   Int?
+  leccion     Leccion?    @relation(fields: [leccionId], references: [id])
+  userLogros  UserLogro[]
+}
+
+model UserLogro {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  logroId       Int
+  fechaObtenido DateTime @default(now())
+  logro         Logro    @relation(fields: [logroId], references: [id])
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, logroId])
+}
+
+model EventoLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  evento     String
+  properties Json?
+  timestamp  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+enum TipoEjercicio {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  ORDER_WORDS
+}
