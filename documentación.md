@@ -1,4 +1,3 @@
-```
 # Documentación de uso de la API
 
 ## Descripción general
@@ -7,47 +6,35 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 ## Configuración y uso
 1. Clonar el repositorio del proyecto.
 2. Navegar al directorio del proyecto e instalar las dependencias:
-   ```bash
-   cd innovalab-grupo5
-   npm install
 
-```
+    ```Bash
+    cd innovalab-grupo5
+    npm install
+    ```
 
-3.  Configurar las variables de entorno necesarias en el archivo `.env`:
-    
-    Fragmento de código
+3. Configurar las variables de entorno necesarias en el archivo `.env`:
     
     ```
     DATABASE_URL="postgresql://..."
     DIRECT_URL="postgresql://..."
-    
     ```
-    
-4.  Generar el cliente de Prisma:
-    
-    Bash
-    
-    ```
+     
+4. Generar el cliente de Prisma:
+  
+    ```Bash
     npx prisma generate
-    
     ```
+  
+5. Iniciar el servidor:
     
-5.  Iniciar el servidor:
-    
-    Bash
-    
-    ```
+    ```Bash
     npm start
-    
     ```
     
-    O en modo desarrollo:
+  O en modo desarrollo:
     
-    Bash
-    
-    ```
+    ```Bash
     npm run dev
-    
     ```
     
 
@@ -71,42 +58,36 @@ Esta API proporciona endpoints para la gestión de usuarios, progreso del usuari
 -   **Endpoint:** `/auth/register`
     
 -   **Body:**
-    
 
-JSON
-
-```
+```JSON
 {
   "nombre": "Juan Pérez",
   "email": "juan.perez@example.com",
   "password": "password123"
 }
-
 ```
 
 -   **Respuesta (201):**
     
 
-JSON
 
-```
+
+```JSON
 {
   "message": "Usuario creado exitosamente",
   "token": "eyJhbGciOiJIUzI1NiIsIn..."
 }
-
 ```
 
 -   **Error (400):**
     
 
-JSON
 
-```
+
+```JSON
 {
   "message": "El correo electrónico ya está en uso"
 }
-
 ```
 
 ### Inicio de sesión
@@ -116,41 +97,35 @@ JSON
 -   **Endpoint:** `/auth/login`
     
 -   **Body:**
-    
 
-JSON
-
-```
+```JSON
 {
   "email": "juan.perez@example.com",
   "password": "password123"
 }
-
 ```
 
 -   **Respuesta (200):**
     
 
-JSON
 
-```
+
+```JSON
 {
   "mensaje": "Inicio de sesión exitoso",
   "token": "eyJhbGciOiJIUzI1NiIsIn..."
 }
-
 ```
 
 -   **Error (401):**
     
 
-JSON
 
-```
+
+```JSON
 {
   "message": "Credenciales inválidas"
 }
-
 ```
 
 ## Usuario
@@ -164,11 +139,8 @@ JSON
 -   **Header:** `Authorization: Bearer <token>`
     
 -   **Respuesta (200):**
-    
 
-JSON
-
-```
+```JSON
 {
   "usuario": {
     "username": "Juan Pérez",
@@ -195,7 +167,7 @@ JSON
 
 ```
 
-##  Progreso del Usuario
+## Progreso del Usuario
 
 Endpoints para consultar y registrar el avance del usuario en módulos, lecciones, teorías y ejercicios.
 
@@ -210,9 +182,7 @@ Obtiene el historial completo de progresos registrados para el usuario autentica
 * **Header:** `Authorization: Bearer <token>`
 * **Respuesta (200 OK):**
 
-JSON
-
-```
+```JSON
 {
   "message": "Progreso obtenido correctamente.",
   "data": [
@@ -234,7 +204,7 @@ JSON
 
 
 ### Guardar progreso (Consolidación de Validación, Puntos y Rachas)
-Registra la resolución de un ejercicio o la lectura de un bloque teórico. Valida respuestas, calcula puntos (+10 si es correcto, +2 por intento de consolidación), acumula errores e incrementa la racha activa del usuario
+Registra la resolución de un ejercicio o la lectura de un bloque teórico. Valida respuestas, calcula puntos (+10 si es correcto, +2 por intento de consolidación), acumula errores e incrementa la racha activa del usuario.
 
 -   **Method:** `POST`
     
@@ -246,11 +216,8 @@ Registra la resolución de un ejercicio o la lectura de un bloque teórico. Vali
 #### Caso A: El usuario visualiza/completa TEORÍA
 
 -   **Body:**
-    
 
-JSON
-
-```
+```JSON
 {
   "moduloId": 1,
   "leccionId": 1,
@@ -261,11 +228,8 @@ JSON
 ```
 
 -   **Respuesta (200):**
-    
 
-JSON
-
-```
+```JSON
 {
   "message": "Progreso de teoría guardado correctamente.",
   "data": {
@@ -284,11 +248,8 @@ JSON
 #### Caso B: El usuario responde un EJERCICIO
 
 -   **Body:**
-    
 
-JSON
-
-```
+```JSON
 {
   "moduloId": 1,
   "leccionId": 1,
@@ -300,11 +261,8 @@ JSON
 ```
 
 -   **Respuesta (200):**
-    
 
-JSON
-
-```
+```JSON
 {
   "message": "Progreso de ejercicio procesado correctamente.",
   "esCorrecto": true,
@@ -333,11 +291,8 @@ JSON
 -   **Endpoint:** `/module`
     
 -   **Respuesta (200):**
-    
 
-JSON
-
-```
+```JSON
 {
   "modules": [
     {
@@ -367,23 +322,21 @@ JSON
 -   **Respuesta (200 - Con inyección de URL de Supabase y estado):**
     
 
-JSON
-
-```
+```JSON
 [
   {
     "id": 1,
     "titulo": "Letra A",
     "tipo": "teoria",
     "status": "completed",
-    "contenidoMultimedia": "[https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4](https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4)"
+    "contenidoMultimedia": "https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4"
   },
   {
     "id": 1,
     "pregunta": "¿Qué letra es?",
     "tipo": "ejercicio",
     "status": "notStarted",
-    "contenidoMultimedia": "[https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4](https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4)"
+    "contenidoMultimedia": "https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4"
   }
 ]
 
@@ -400,11 +353,8 @@ JSON
 -   **Header:** `Authorization: Bearer <token>`
     
 -   **Body:**
-    
 
-JSON
-
-```
+```JSON
 {
   "teoriaId": 1
 }
@@ -412,11 +362,8 @@ JSON
 ```
 
 -   **Respuesta (201):**
-    
 
-JSON
-
-```
+```JSON
 {
   "mensaje": "Agregado a favoritos correctamente",
   "favorite": {
@@ -438,11 +385,8 @@ JSON
 -   **Header:** `Authorization: Bearer <token>`
     
 -   **Respuesta (200):**
-    
 
-JSON
-
-```
+```JSON
 {
   "favorites": [
     {
@@ -452,7 +396,7 @@ JSON
         "id": 1,
         "titulo": "Letra A",
         "tipo": "teoria",
-        "contenidoMultimedia": "[https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4](https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4)"
+        "contenidoMultimedia": "https://ozrcernencngontkultp.supabase.co/storage/v1/object/public/videos-lsa/Letra_A.mp4"
       },
       "leccion": {
         "id": 1,
@@ -477,11 +421,8 @@ JSON
 -   **Header:** `Authorization: Bearer <token>`
     
 -   **Respuesta (200):**
-    
 
-JSON
-
-```
+```JSON
 {
   "mensaje": "Eliminado de favoritos correctamente"
 }
@@ -497,11 +438,8 @@ JSON
 -   **Endpoint:** `/event-log`
     
 -   **Respuesta (200):**
-    
 
-JSON
-
-```
+```JSON
 [
   {
     "id": 1,
@@ -523,11 +461,8 @@ JSON
 -   **Header:** `Authorization: Bearer <token>`
     
 -   **Body:**
-    
 
-JSON
-
-```
+```JSON
 {
   "evento": "Ejercicio respondido",
   "properties": { "ejercicioId": 12, "esCorrecto": true }
@@ -536,11 +471,8 @@ JSON
 ```
 
 -   **Respuesta (201):**
-    
 
-JSON
-
-```
+```JSON
 {
   "createdEvent": {
     "id": 1,
@@ -562,11 +494,8 @@ JSON
 -   **Endpoint:** `/module/:moduleId/lessons/:lessonId/exercises`
     
 -   **Respuesta (Con inyección de URL de Supabase):**
-    
 
-JSON
-
-```
+```JSON
 {
   "exercises": [
     {
@@ -590,11 +519,8 @@ JSON
 -   **Endpoint:** `/module/:moduleId/lessons/:lessonId/exercises`
     
 -   **Respuesta (Caso lección en desarrollo sin ejercicios):**
-    
 
-JSON
-
-```
+```JSON
 []
 
 ```
