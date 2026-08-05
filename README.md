@@ -59,12 +59,23 @@ App de aprendizaje de Lengua de Señas Argentina (LSA) desarrollada con React Na
 
 ```
 innovalab-grupo5/
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── features/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   └── types/
+│   ├── assets/
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── tailwind.config.js
+│   └── metro.config.js
 ├── src/
 │   ├── app.js                  # Aplicación Express principal
 │   ├── server.js               # Punto de entrada del servidor
-│   ├── config/
-│   │   ├── db.js               # Configuración de base de datos
-│   │   └── env.js              # Configuración de variables de entorno
 │   ├── controllers/            # Controladores de cada recurso
 │   │   ├── auth.controller.js
 │   │   ├── module.controller.js
@@ -77,16 +88,13 @@ innovalab-grupo5/
 │   ├── routes/                 # Definición de rutas
 │   │   ├── auth.routes.js
 │   │   ├── module.routes.js
-│   │   ├── lesson.routes.js
-│   │   ├── exercise.routes.js
 │   │   ├── progress.routes.js
 │   │   ├── user.routes.js
 │   │   ├── favorite.routes.js
 │   │   └── event-log.routes.js
 │   ├── middlewares/            # Middlewares personalizados
 │   │   ├── auth.middleware.js
-│   │   ├── validate.middleware.js
-│   │   └── error.middleware.js
+│   │   └── validate.middleware.js
 │   ├── services/               # Lógica de negocio
 │   │   ├── auth.service.js
 │   │   ├── user.service.js
@@ -102,7 +110,6 @@ innovalab-grupo5/
 │   ├── validators/
 │   │   └── auth.validator.js
 │   └── utils/
-│       ├── response.js
 │       ├── racha.utils.js
 │       ├── log.utils.js
 │       ├── jws.js
