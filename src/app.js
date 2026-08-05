@@ -7,6 +7,7 @@ import progressRoutes from "./routes/progress.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import favoriteRoutes from "./routes/favorite.routes.js";
 import eventLogRoutes from "./routes/event-log.routes.js";
+import achievementRoutes from "./routes/achievement.routes.js";
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use("/progress", progressRoutes);
 app.use("/user", userRoutes);
 app.use("/favorites", favoriteRoutes);
 app.use("/event-log", eventLogRoutes);
+app.use("/achievements", achievementRoutes);
 
 export default app;

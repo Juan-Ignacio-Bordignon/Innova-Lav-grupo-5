@@ -1,5 +1,6 @@
 import { calcularNuevaRacha } from "../utils/racha.utils.js";
 import { prisma } from "../prisma/prisma.js";
+import { checkAndUnlockAchievements } from "../services/gamification.service.js";
 
 // Función auxiliar para normalizar respuestas (soporta JSON, cadenas, números y arreglos de la DB)
 const normalizarRespuesta = (val) => {
@@ -180,16 +181,18 @@ export const saveProgress = async (req, res) => {
         ? resultadoRacha.ultimaActividad
         : new Date();
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        puntos: { increment: puntosASumar },
-        ultimaActividad: fechaActividad,
-        rachaActual: nuevaRachaValor,
-      },
-    });
+await prisma.user.update({
+       where: { id: userId },
+       data: {
+         puntos: { increment: puntosASumar },
+         ultimaActividad: fechaActividad,
+         rachaActual: nuevaRachaValor,
+       },
+     });
 
-    return res.status(200).json({
+     await checkAndUnlockAchievements(userId);
+
+     return res.status(200).json({
       message: "Progreso de ejercicio procesado correctamente.",
       esCorrecto,
       puntosGanados: puntosASumar,
